@@ -1,15 +1,49 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>Awesome AI App</title>
+    <title>S-KILLING IT | The Orbiting Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#490006", "tertiary": "#ffeaa3", "on-tertiary-container": "#5d4d00",
+              "on-primary-container": "#00575b", "secondary": "#dfb7ff", "secondary-fixed-dim": "#e8c9ff",
+              "surface-tint": "#a1faff", "primary-fixed-dim": "#00e5ee", "error": "#ff716c",
+              "surface-container-lowest": "#000000", "surface-container": "#161a1f", "tertiary-dim": "#eccd52",
+              "surface": "#0c0e12", "outline-variant": "#434850", "tertiary-fixed-dim": "#eccd52",
+              "on-secondary-fixed-variant": "#8800de", "on-primary": "#006165", "tertiary-container": "#fbdb5e",
+              "primary-fixed": "#00f4fe", "error-dim": "#c94947", "on-surface-variant": "#a7abb4",
+              "on-secondary-container": "#c888ff", "surface-dim": "#0c0e12", "on-primary-fixed": "#004346",
+              "inverse-surface": "#f8f9fe", "secondary-fixed": "#f1daff", "primary": "#a1faff",
+              "surface-container-highest": "#21262d", "surface-bright": "#272d34", "secondary-container": "#3c0066",
+              "primary-dim": "#00e5ee", "on-error-container": "#ff9993", "on-secondary": "#6100a1",
+              "background": "#0c0e12", "on-tertiary-fixed-variant": "#685700", "on-tertiary": "#675500",
+              "primary-container": "#00f4fe", "secondary-dim": "#a533ff", "on-secondary-fixed": "#60009f",
+              "surface-container-high": "#1c2026", "tertiary-fixed": "#fbdb5e", "on-primary-fixed-variant": "#006266",
+              "error-container": "#8a1a1e", "on-background": "#e1e6ef", "outline": "#71767e",
+              "on-tertiary-fixed": "#473b00", "on-surface": "#e1e6ef", "inverse-primary": "#006a6e",
+              "surface-variant": "#21262d", "inverse-on-surface": "#535559", "surface-container-low": "#101418"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk", "sans-serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            }
+          }
+        }
+      }
+    </script>
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.86/build/spline-viewer.js"></script>
   </head>
-  <body>
+  <body class="bg-background selection:bg-primary/30 min-h-[max(884px,100dvh)]">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
