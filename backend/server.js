@@ -425,3 +425,5 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`S-KILLING IT Backend running on port ${PORT}`);
 });
+
+module.exports = app;
