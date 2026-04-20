@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const crypto = require('crypto');
+const { connectDB, Student, Progress, Gamification, Quiz, Badge, Project } = require('./db');
 
 dotenv.config();
 
@@ -11,15 +12,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// ─── In-Memory Data Stores ───
-const students = [];
-const progress = [];
-const gamification = [];
-const quizzes = [];
-const badges = [];
-const projects = [];
-
-// ─── Quiz Question Bank (by week) ───
+// ─── Constants ───
 const quizBank = {
   1: [
     { q: "What is the primary function of a Convolutional Layer in a CNN?", options: ["Extract features from input images", "Downsample spatial dimensions", "Classify the final output", "Normalize pixel values"], correct: 0 },
@@ -37,7 +30,6 @@ const quizBank = {
   ]
 };
 
-// ─── Streak Milestones from Config ───
 const STREAK_MILESTONES = [
   { days: 3, xp: 50, badge: "on_fire" },
   { days: 7, xp: 100, badge: "unstoppable" },
@@ -45,440 +37,220 @@ const STREAK_MILESTONES = [
   { days: 76, xp: 1000, badge: "industry_ready_builder" },
 ];
 
-// ─── Leaderboard Weights from Config ───
-const LEADERBOARD_WEIGHTS = {
-  projects_completed: 0.4,
-  quiz_average_score: 0.3,
-  total_xp_points: 0.2,
-  days_streak: 0.1,
-};
+const LEADERBOARD_WEIGHTS = { projects_completed: 0.4, quiz_average_score: 0.3, total_xp_points: 0.2, days_streak: 0.1 };
 
-// ─── Helper: Generate ID ───
 const genId = () => crypto.randomUUID();
 
-// ─── Helper: Get or create gamification record ───
-function getGamification(studentId) {
-  let g = gamification.find(x => x.student_id === studentId);
+const getGamification = async (studentId) => {
+  let g = await Gamification.findOne({ student_id: studentId });
   if (!g) {
-    g = {
-      student_id: studentId,
-      total_xp_points: 0,
-      current_streak_days: 0,
-      longest_streak_days: 0,
-      badges_earned: [],
-      quiz_scores: [],
-      weekly_rankings: [],
-      last_activity_date: null,
-    };
-    gamification.push(g);
+    g = new Gamification({ student_id: studentId, total_xp_points: 0, current_streak_days: 0, longest_streak_days: 0, badges_earned: [], quiz_scores: [], weekly_rankings: [], last_activity_date: null });
+    await g.save();
   }
   return g;
-}
+};
 
-// ════════════════════════════════════
-// STUDENT ROUTES
-// ════════════════════════════════════
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(503).json({ error: 'Database connection failed. Please ensure MONGO_URI is set in .env' });
+  }
+});
 
-app.post('/api/students/register', (req, res) => {
-  const { email, name, cohort_number, domain_interest, timezone, discord_username, github_profile, preferred_learning_time } = req.body;
-  if (!email || !name) return res.status(400).json({ error: 'Email and name are required' });
-
-  const existing = students.find(s => s.email === email);
-  if (existing) return res.json({ student: existing, message: 'Already registered' });
-
-  const student = {
-    student_id: genId(),
-    email, name,
-    cohort_number: cohort_number || 1,
-    domain_interest: domain_interest || 'general',
-    timezone: timezone || 'UTC',
-    discord_username: discord_username || '',
-    enrollment_date: new Date().toISOString(),
-    preferred_learning_time: preferred_learning_time || '6AM',
-    github_profile: github_profile || '',
-  };
-  students.push(student);
-  getGamification(student.student_id);
+// ─── Routes ───
+app.post('/api/students/register', async (req, res) => {
+  const { email, name } = req.body;
+  if (!email || !name) return res.status(400).json({ error: 'Email and name required' });
+  
+  let student = await Student.findOne({ email });
+  if (student) return res.json({ student, message: 'Already registered' });
+  
+  student = new Student({ student_id: genId(), email, name, cohort_number: req.body.cohort_number || 1, domain_interest: req.body.domain_interest || 'general', timezone: req.body.timezone || 'UTC', discord_username: '', enrollment_date: new Date().toISOString(), preferred_learning_time: '6AM', github_profile: '' });
+  await student.save();
+  await getGamification(student.student_id);
   res.status(201).json({ student, message: 'Registered successfully' });
 });
 
-app.get('/api/students/:id', (req, res) => {
-  const student = students.find(s => s.student_id === req.params.id);
+app.get('/api/students/:id', async (req, res) => {
+  const student = await Student.findOne({ student_id: req.params.id });
   if (!student) return res.status(404).json({ error: 'Student not found' });
   res.json({ student });
 });
 
-// ════════════════════════════════════
-// PROGRESS ROUTES
-// ════════════════════════════════════
-
-app.get('/api/students/:id/progress', (req, res) => {
-  const studentProgress = progress.filter(p => p.student_id === req.params.id);
-  const g = getGamification(req.params.id);
-  const daysCompleted = studentProgress.filter(p => p.lesson_completed).length;
-  res.json({
-    days_completed: daysCompleted,
-    total_days: 76,
-    completion_percent: Math.round((daysCompleted / 76) * 100),
-    current_streak: g.current_streak_days,
-    longest_streak: g.longest_streak_days,
-    total_xp: g.total_xp_points,
-    progress_entries: studentProgress,
-  });
+app.get('/api/students/:id/progress', async (req, res) => {
+  const sp = await Progress.find({ student_id: req.params.id });
+  const g = await getGamification(req.params.id);
+  const dc = sp.filter(p => p.lesson_completed).length;
+  res.json({ days_completed: dc, total_days: 76, completion_percent: Math.round((dc / 76) * 100), current_streak: g.current_streak_days, longest_streak: g.longest_streak_days, total_xp: g.total_xp_points, progress_entries: sp });
 });
 
-app.post('/api/progress/complete', (req, res) => {
-  const { student_id, day_number, video_watched_percent, project_submitted, project_url, time_spent_minutes } = req.body;
+app.post('/api/progress/complete', async (req, res) => {
+  const { student_id, day_number, project_submitted, project_url } = req.body;
   if (!student_id || !day_number) return res.status(400).json({ error: 'student_id and day_number required' });
-
-  const existing = progress.find(p => p.student_id === student_id && p.day_number === day_number);
+  
+  const existing = await Progress.findOne({ student_id, day_number });
   if (existing) return res.json({ message: 'Already completed', progress: existing });
-
-  const entry = {
-    student_id, day_number,
-    lesson_completed: true,
-    video_watched_percent: video_watched_percent || 100,
-    project_submitted: project_submitted || false,
-    project_url: project_url || '',
-    completion_date: new Date().toISOString(),
-    time_spent_minutes: time_spent_minutes || 60,
-  };
-  progress.push(entry);
-
-  // Award XP
-  const g = getGamification(student_id);
+  
+  const newProgress = new Progress({ student_id, day_number, lesson_completed: true, video_watched_percent: 100, project_submitted: project_submitted || false, project_url: project_url || '', completion_date: new Date().toISOString(), time_spent_minutes: 60 });
+  await newProgress.save();
+  
+  const g = await getGamification(student_id);
   let baseXp = 50;
   if (project_submitted) baseXp += 100;
   g.total_xp_points += baseXp;
-
-  // Update streak
+  
   const now = new Date();
-  const lastActivity = g.last_activity_date ? new Date(g.last_activity_date) : null;
-  const diffHours = lastActivity ? (now - lastActivity) / (1000 * 60 * 60) : 999;
-
-  if (diffHours <= 48) {
-    g.current_streak_days += 1;
-  } else {
-    g.current_streak_days = 1;
-  }
-  if (g.current_streak_days > g.longest_streak_days) {
-    g.longest_streak_days = g.current_streak_days;
-  }
+  const lastAct = g.last_activity_date ? new Date(g.last_activity_date) : null;
+  const diffH = lastAct ? (now - lastAct) / 36e5 : 999;
+  g.current_streak_days = diffH <= 48 ? g.current_streak_days + 1 : 1;
+  if (g.current_streak_days > g.longest_streak_days) g.longest_streak_days = g.current_streak_days;
   g.last_activity_date = now.toISOString();
-
-  // Check streak milestones
+  
   const newBadges = [];
   for (const m of STREAK_MILESTONES) {
     if (g.current_streak_days >= m.days && !g.badges_earned.includes(m.badge)) {
       g.badges_earned.push(m.badge);
       g.total_xp_points += m.xp;
-      const badge = {
-        badge_id: genId(), student_id,
-        badge_name: m.badge,
-        earned_date: now.toISOString(),
-        rarity: m.days >= 30 ? 'legendary' : m.days >= 7 ? 'epic' : 'rare',
-        description: `Achieved ${m.days}-day streak`,
-      };
-      badges.push(badge);
-      newBadges.push(badge);
+      const b = new Badge({ badge_id: genId(), student_id, badge_name: m.badge, earned_date: now.toISOString(), rarity: m.days >= 30 ? 'legendary' : m.days >= 7 ? 'epic' : 'rare', description: `Achieved ${m.days}-day streak` });
+      await b.save();
+      newBadges.push(b);
     }
   }
-
-  // Check if quiz should unlock (every 7 days)
-  const quizUnlock = day_number % 7 === 0;
-
-  res.json({
-    message: 'Lesson completed!',
-    xp_earned: baseXp,
-    total_xp: g.total_xp_points,
-    current_streak: g.current_streak_days,
-    new_badges: newBadges,
-    quiz_unlocked: quizUnlock,
-    quiz_week: quizUnlock ? Math.floor(day_number / 7) : null,
-  });
+  await g.save();
+  res.json({ message: 'Lesson completed!', xp_earned: baseXp, total_xp: g.total_xp_points, current_streak: g.current_streak_days, new_badges: newBadges, quiz_unlocked: day_number % 7 === 0, quiz_week: day_number % 7 === 0 ? Math.floor(day_number / 7) : null });
 });
-
-// ════════════════════════════════════
-// QUIZ ROUTES
-// ════════════════════════════════════
 
 app.get('/api/quiz/:weekNumber', (req, res) => {
   const week = parseInt(req.params.weekNumber);
-  const questions = quizBank[week] || quizBank[1]; // fallback to week 1
-  // Don't send correct answers to client
-  const safeQuestions = questions.map((q, i) => ({
-    id: i, q: q.q, options: q.options
-  }));
-  res.json({ week, questions: safeQuestions, time_limit_minutes: 45, total_questions: safeQuestions.length });
+  const questions = quizBank[week] || quizBank[1];
+  res.json({ week, questions: questions.map((q, i) => ({ id: i, q: q.q, options: q.options })), time_limit_minutes: 45, total_questions: questions.length });
 });
 
-app.post('/api/quiz/submit', (req, res) => {
+app.post('/api/quiz/submit', async (req, res) => {
   const { student_id, week_number, answers } = req.body;
   if (!student_id || !week_number || !answers) return res.status(400).json({ error: 'Missing fields' });
-
   const questions = quizBank[week_number] || quizBank[1];
-  let correctCount = 0;
-  answers.forEach((ans, i) => {
-    if (questions[i] && ans === questions[i].correct) correctCount++;
-  });
-
-  const scorePercent = Math.round((correctCount / questions.length) * 100);
-  const existingRetries = quizzes.filter(q => q.student_id === student_id && q.week_number === week_number);
-
-  const quizEntry = {
-    quiz_id: genId(), student_id, week_number,
-    questions_answered: answers.length,
-    score_percent: scorePercent,
-    time_taken_minutes: 0,
-    submission_date: new Date().toISOString(),
-    retry_count: existingRetries.length,
-    unlocked_content: null,
-  };
-
-  // Unlock logic from config
-  let unlockAction = '';
-  let xpBonus = 0;
-  if (scorePercent >= 86) {
-    unlockAction = 'unlock_next_week_plus_bonus';
-    quizEntry.unlocked_content = 'next_week + advanced_challenges';
-    xpBonus = scorePercent * 5;
-  } else if (scorePercent >= 71) {
-    unlockAction = 'unlock_next_week_plus_basics';
-    quizEntry.unlocked_content = 'next_week';
-    xpBonus = scorePercent * 3;
-  } else if (scorePercent >= 51) {
-    unlockAction = 'unlock_next_week';
-    quizEntry.unlocked_content = 'next_week';
-    xpBonus = scorePercent * 2;
-  } else {
-    unlockAction = 'retry_in_48h';
-    quizEntry.unlocked_content = 'retry_materials';
-    xpBonus = scorePercent;
-  }
-
-  quizzes.push(quizEntry);
-
-  // Update gamification
-  const g = getGamification(student_id);
-  g.quiz_scores.push(scorePercent);
-  g.total_xp_points += xpBonus;
-
-  // Award quiz badge if passed
-  const newBadges = [];
-  if (scorePercent >= 70 && !g.badges_earned.includes(`quiz_week_${week_number}`)) {
-    g.badges_earned.push(`quiz_week_${week_number}`);
-    const badge = {
-      badge_id: genId(), student_id,
-      badge_name: `quiz_week_${week_number}`,
-      earned_date: new Date().toISOString(),
-      rarity: scorePercent >= 90 ? 'legendary' : 'epic',
-      description: `Passed Week ${week_number} Quiz with ${scorePercent}%`,
-    };
-    badges.push(badge);
-    newBadges.push(badge);
-  }
-
-  res.json({
-    quiz: quizEntry,
-    score: scorePercent,
-    correct: correctCount,
-    total: questions.length,
-    unlock_action: unlockAction,
-    xp_earned: xpBonus,
-    total_xp: g.total_xp_points,
-    new_badges: newBadges,
-    can_retry: scorePercent < 50,
-  });
-});
-
-// ════════════════════════════════════
-// LEADERBOARD
-// ════════════════════════════════════
-
-app.get('/api/leaderboard', (req, res) => {
-  const rankings = students.map(s => {
-    const g = getGamification(s.student_id);
-    const studentProjects = projects.filter(p => p.student_id === s.student_id);
-    const avgQuiz = g.quiz_scores.length > 0
-      ? g.quiz_scores.reduce((a, b) => a + b, 0) / g.quiz_scores.length : 0;
-
-    const score =
-      (studentProjects.length * LEADERBOARD_WEIGHTS.projects_completed * 100) +
-      (avgQuiz * LEADERBOARD_WEIGHTS.quiz_average_score) +
-      (g.total_xp_points * LEADERBOARD_WEIGHTS.total_xp_points * 0.1) +
-      (g.current_streak_days * LEADERBOARD_WEIGHTS.days_streak * 50);
-
-    return {
-      student_id: s.student_id,
-      name: s.name,
-      projects_completed: studentProjects.length,
-      quiz_score: Math.round(avgQuiz),
-      xp_points: g.total_xp_points,
-      streak_days: g.current_streak_days,
-      badges: g.badges_earned,
-      score: Math.round(score),
-    };
-  });
-
-  rankings.sort((a, b) => b.score - a.score);
-  rankings.forEach((r, i) => { r.rank = i + 1; });
-
-  res.json({ leaderboard: rankings.slice(0, 50), total_students: students.length });
-});
-
-// ════════════════════════════════════
-// BADGES
-// ════════════════════════════════════
-
-app.get('/api/badges/:studentId', (req, res) => {
-  const studentBadges = badges.filter(b => b.student_id === req.params.studentId);
-  res.json({ badges: studentBadges, total: studentBadges.length });
-});
-
-// ════════════════════════════════════
-// STREAK
-// ════════════════════════════════════
-
-app.get('/api/streak/:studentId', (req, res) => {
-  const g = getGamification(req.params.studentId);
-  const milestoneProgress = STREAK_MILESTONES.map(m => ({
-    target_days: m.days,
-    reward_xp: m.xp,
-    badge: m.badge,
-    achieved: g.current_streak_days >= m.days,
-    progress_percent: Math.min(100, Math.round((g.current_streak_days / m.days) * 100)),
-  }));
-
-  res.json({
-    current_streak: g.current_streak_days,
-    longest_streak: g.longest_streak_days,
-    last_activity: g.last_activity_date,
-    milestones: milestoneProgress,
-  });
-});
-
-// ════════════════════════════════════
-// WEEKLY ANALYTICS
-// ════════════════════════════════════
-
-app.get('/api/analytics/:studentId/weekly', (req, res) => {
-  const g = getGamification(req.params.studentId);
-  const studentProgress = progress.filter(p => p.student_id === req.params.studentId);
-  const studentQuizzes = quizzes.filter(q => q.student_id === req.params.studentId);
-  const studentBadges = badges.filter(b => b.student_id === req.params.studentId);
-
-  // Last 7 days
-  const now = new Date();
-  const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-  const recentProgress = studentProgress.filter(p => new Date(p.completion_date) >= weekAgo);
-  const recentQuizzes = studentQuizzes.filter(q => new Date(q.submission_date) >= weekAgo);
-  const recentBadges = studentBadges.filter(b => new Date(b.earned_date) >= weekAgo);
-
-  res.json({
-    lessons_completed_this_week: recentProgress.length,
-    projects_deployed_this_week: recentProgress.filter(p => p.project_submitted).length,
-    quiz_scores_this_week: recentQuizzes.map(q => q.score_percent),
-    xp_earned_this_week: recentProgress.length * 50,
-    streak_status: g.current_streak_days,
-    badges_earned_this_week: recentBadges,
-    total_lessons_completed: studentProgress.length,
-    total_xp: g.total_xp_points,
-    ranking: null, // calculated at leaderboard endpoint
-  });
-});
-
-// ════════════════════════════════════
-// PROJECTS
-// ════════════════════════════════════
-
-app.post('/api/projects/submit', (req, res) => {
-  const { student_id, day_assigned, github_url, deployed_url, tags } = req.body;
-  const project = {
-    project_id: genId(), student_id,
-    day_assigned: day_assigned || 1,
-    github_url: github_url || '',
-    deployed_url: deployed_url || '',
-    peer_reviews: [],
-    final_score: null,
-    submission_date: new Date().toISOString(),
-    tags: tags || [],
-  };
-  projects.push(project);
-
-  // Award XP for project submission
-  const g = getGamification(student_id);
-  g.total_xp_points += 150;
-
-  res.status(201).json({ project, xp_earned: 150, total_xp: g.total_xp_points });
-});
-
-app.get('/api/projects/pending-review/:studentId', (req, res) => {
-  // Find projects NOT submitted by this student, and NOT already reviewed by this student
-  const pending = projects.filter(p => 
-    p.student_id !== req.params.studentId && 
-    !p.peer_reviews.some(r => r.reviewer_id === req.params.studentId)
-  );
-  // Return max 3 for review
-  res.json({ projects: pending.slice(0, 3) });
-});
-
-app.post('/api/projects/review', (req, res) => {
-  const { project_id, reviewer_id, code_quality, functionality, creativity, documentation, comments } = req.body;
-  const project = projects.find(p => p.project_id === project_id);
   
+  let cc = 0;
+  answers.forEach((a, i) => { if (questions[i] && a === questions[i].correct) cc++; });
+  const sp = Math.round((cc / questions.length) * 100);
+  
+  const retry_count = await Quiz.countDocuments({ student_id, week_number });
+  const qe = new Quiz({ quiz_id: genId(), student_id, week_number, questions_answered: answers.length, score_percent: sp, submission_date: new Date().toISOString(), retry_count, unlocked_content: null });
+  
+  let ua = '', xb = 0;
+  if (sp >= 86) { ua = 'unlock_next_week_plus_bonus'; qe.unlocked_content = 'next_week + advanced'; xb = sp * 5; }
+  else if (sp >= 71) { ua = 'unlock_next_week_plus_basics'; qe.unlocked_content = 'next_week'; xb = sp * 3; }
+  else if (sp >= 51) { ua = 'unlock_next_week'; qe.unlocked_content = 'next_week'; xb = sp * 2; }
+  else { ua = 'retry_in_48h'; qe.unlocked_content = 'retry_materials'; xb = sp; }
+  await qe.save();
+  
+  const g = await getGamification(student_id);
+  g.quiz_scores.push(sp);
+  g.total_xp_points += xb;
+  const nb = [];
+  if (sp >= 70 && !g.badges_earned.includes(`quiz_week_${week_number}`)) {
+    g.badges_earned.push(`quiz_week_${week_number}`);
+    const b = new Badge({ badge_id: genId(), student_id, badge_name: `quiz_week_${week_number}`, earned_date: new Date().toISOString(), rarity: sp >= 90 ? 'legendary' : 'epic', description: `Passed Week ${week_number} Quiz with ${sp}%` });
+    await b.save();
+    nb.push(b);
+  }
+  await g.save();
+  res.json({ quiz: qe, score: sp, correct: cc, total: questions.length, unlock_action: ua, xp_earned: xb, total_xp: g.total_xp_points, new_badges: nb, can_retry: sp < 50 });
+});
+
+app.get('/api/leaderboard', async (req, res) => {
+  const allStudents = await Student.find();
+  const allGamification = await Gamification.find();
+  const allProjects = await Project.find();
+  
+  const r = allStudents.map(s => {
+    const g = allGamification.find(gam => gam.student_id === s.student_id) || { quiz_scores: [], total_xp_points: 0, current_streak_days: 0, badges_earned: [] };
+    const sp = allProjects.filter(p => p.student_id === s.student_id);
+    const aq = g.quiz_scores.length > 0 ? g.quiz_scores.reduce((a, b) => a + b, 0) / g.quiz_scores.length : 0;
+    const sc = (sp.length * LEADERBOARD_WEIGHTS.projects_completed * 100) + (aq * LEADERBOARD_WEIGHTS.quiz_average_score) + (g.total_xp_points * LEADERBOARD_WEIGHTS.total_xp_points * 0.1) + (g.current_streak_days * LEADERBOARD_WEIGHTS.days_streak * 50);
+    return { student_id: s.student_id, name: s.name, projects_completed: sp.length, quiz_score: Math.round(aq), xp_points: g.total_xp_points, streak_days: g.current_streak_days, badges: g.badges_earned, score: Math.round(sc) };
+  });
+  
+  r.sort((a, b) => b.score - a.score);
+  r.forEach((x, i) => { x.rank = i + 1; });
+  res.json({ leaderboard: r.slice(0, 50), total_students: allStudents.length });
+});
+
+app.get('/api/badges/:studentId', async (req, res) => {
+  const badges = await Badge.find({ student_id: req.params.studentId });
+  res.json({ badges });
+});
+
+app.get('/api/streak/:studentId', async (req, res) => {
+  const g = await getGamification(req.params.studentId);
+  res.json({ current_streak: g.current_streak_days, longest_streak: g.longest_streak_days, last_activity: g.last_activity_date, milestones: STREAK_MILESTONES.map(m => ({ target_days: m.days, reward_xp: m.xp, badge: m.badge, achieved: g.current_streak_days >= m.days, progress_percent: Math.min(100, Math.round((g.current_streak_days / m.days) * 100)) })) });
+});
+
+app.get('/api/analytics/:studentId/weekly', async (req, res) => {
+  const g = await getGamification(req.params.studentId);
+  const sp = await Progress.find({ student_id: req.params.studentId });
+  const now = new Date();
+  const wa = new Date(now - 7 * 864e5);
+  const rp = sp.filter(p => new Date(p.completion_date) >= wa);
+  res.json({ lessons_completed_this_week: rp.length, projects_deployed_this_week: rp.filter(p => p.project_submitted).length, streak_status: g.current_streak_days, total_xp: g.total_xp_points, total_lessons_completed: sp.length });
+});
+
+app.post('/api/projects/submit', async (req, res) => {
+  const { student_id, github_url, deployed_url, tags } = req.body;
+  const p = new Project({ project_id: genId(), student_id, github_url: github_url || '', deployed_url: deployed_url || '', peer_reviews: [], final_score: null, submission_date: new Date().toISOString(), tags: tags || [] });
+  await p.save();
+  const g = await getGamification(student_id);
+  g.total_xp_points += 150;
+  await g.save();
+  res.status(201).json({ project: p, xp_earned: 150, total_xp: g.total_xp_points });
+});
+
+app.get('/api/projects/pending-review/:studentId', async (req, res) => {
+  const pending = await Project.find({ 
+    student_id: { $ne: req.params.studentId },
+    "peer_reviews.reviewer_id": { $ne: req.params.studentId }
+  }).limit(3);
+  res.json({ projects: pending });
+});
+
+app.post('/api/projects/review', async (req, res) => {
+  const { project_id, reviewer_id, code_quality, functionality, creativity, documentation, comments } = req.body;
+  const project = await Project.findOne({ project_id });
   if (!project) return res.status(404).json({ error: 'Project not found' });
   if (project.student_id === reviewer_id) return res.status(400).json({ error: 'Cannot review own project' });
   if (project.peer_reviews.some(r => r.reviewer_id === reviewer_id)) return res.status(400).json({ error: 'Already reviewed' });
 
-  // Calculate average score for this review
   const score = (Number(code_quality) + Number(functionality) + Number(creativity) + Number(documentation)) / 20 * 100;
+  project.peer_reviews.push({ reviewer_id, scores: { code_quality, functionality, creativity, documentation }, comments: comments || '', total_score: Math.round(score), date: new Date().toISOString() });
   
-  const review = {
-    reviewer_id,
-    scores: { code_quality, functionality, creativity, documentation },
-    comments: comments || '',
-    total_score: Math.round(score),
-    date: new Date().toISOString()
-  };
-  
-  project.peer_reviews.push(review);
-  
-  // Calculate final project score if enough reviews
   let finalScoreCalculated = false;
   if (project.peer_reviews.length >= 2) {
     const total = project.peer_reviews.reduce((acc, curr) => acc + curr.total_score, 0);
     project.final_score = Math.round(total / project.peer_reviews.length);
     finalScoreCalculated = true;
-    
-    // Award the original author XP based on their score
-    const authorG = getGamification(project.student_id);
-    authorG.total_xp_points += Math.round(project.final_score * 2); // Up to 200 XP for a perfect score
+    const authorG = await getGamification(project.student_id);
+    authorG.total_xp_points += Math.round(project.final_score * 2);
+    await authorG.save();
   }
+  await project.save();
 
-  // Award reviewer XP for taking the time to review
-  const reviewerG = getGamification(reviewer_id);
+  const reviewerG = await getGamification(reviewer_id);
   reviewerG.total_xp_points += 50;
-
-  res.json({ 
-    message: 'Review submitted', 
-    xp_earned: 50, 
-    total_xp: reviewerG.total_xp_points,
-    project_finalized: finalScoreCalculated
-  });
+  await reviewerG.save();
+  
+  res.json({ message: 'Review submitted', xp_earned: 50, total_xp: reviewerG.total_xp_points, project_finalized: finalScoreCalculated });
 });
 
-// ─── Keep original hello route ───
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from the S-KILLING IT backend!' });
-});
-
-// ─── Health Check ───
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', students: students.length, timestamp: new Date().toISOString() });
+app.get('/api/hello', (req, res) => { res.json({ message: 'Hello from the S-KILLING IT backend!' }); });
+app.get('/api/health', async (req, res) => { 
+  const c = await Student.countDocuments();
+  res.json({ status: 'ok', students: c }); 
 });
 
 app.listen(PORT, () => {
-  console.log(`S-KILLING IT Backend running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
-module.exports = app;
