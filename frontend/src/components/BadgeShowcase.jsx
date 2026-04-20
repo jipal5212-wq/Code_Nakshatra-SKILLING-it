@@ -33,7 +33,8 @@ export default function BadgeShowcase({ badges = [] }) {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {badges.map((badge, i) => {
           const style = BADGE_STYLES[badge.rarity] || BADGE_STYLES.rare;
-          const icon = BADGE_ICONS[badge.badge_name] || 'verified';
+          const badgeName = badge.badge_name || '';
+          const icon = BADGE_ICONS[badgeName] || 'verified';
           return (
             <div
               key={badge.badge_id || i}
@@ -43,7 +44,7 @@ export default function BadgeShowcase({ badges = [] }) {
                 <span className={`material-symbols-outlined text-2xl ${style.text}`}>{icon}</span>
               </div>
               <h4 className={`text-xs font-black uppercase tracking-widest ${style.text} mb-1`}>
-                {badge.badge_name.replace(/_/g, ' ')}
+                {badgeName.replace(/_/g, ' ')}
               </h4>
               <p className="text-[10px] text-on-surface-variant">{badge.description}</p>
               <div className={`mt-2 text-[9px] uppercase tracking-widest font-bold ${style.text} opacity-70`}>
