@@ -5,6 +5,8 @@ import StreakTracker from '../components/StreakTracker';
 import BadgeShowcase from '../components/BadgeShowcase';
 import WeeklyAnalytics from '../components/WeeklyAnalytics';
 import PeerReviewWidget from '../components/PeerReviewWidget';
+import CurriculumEngineWidget from '../components/CurriculumEngineWidget';
+import QuizWidget from '../components/QuizWidget';
 
 const API_BASE = '/api';
 
@@ -20,54 +22,31 @@ export default function Dashboard() {
   const [streakData, setStreakData] = useState({ current_streak: 0, longest_streak: 0, milestones: [] });
   const [badgesData, setBadgesData] = useState([]);
   const [analyticsData, setAnalyticsData] = useState({});
-  const [tasks, setTasks] = useState([
-    { id: 1, text: "Watch CNN Architecture Theory", completed: false, reward: 50 },
-    { id: 2, text: "Build Pre-trained ResNet50", completed: false, reward: 100 },
-    { id: 3, text: "Freeze Parameters & Fine-tune", completed: false, reward: 100 },
-    { id: 4, text: "Run & Validate Output", completed: false, reward: 150 },
-  ]);
 
-  // Fetch data when student is registered
-  useEffect(() => {
+
+  const fetchData = async () => {
     if (!studentId) return;
-    const fetchData = async () => {
-      try {
-        const [lbRes, stRes, bdRes, anRes] = await Promise.all([
-          fetch(`${API_BASE}/leaderboard`).then(r => r.json()),
-          fetch(`${API_BASE}/streak/${studentId}`).then(r => r.json()),
-          fetch(`${API_BASE}/badges/${studentId}`).then(r => r.json()),
-          fetch(`${API_BASE}/analytics/${studentId}/weekly`).then(r => r.json()),
-        ]);
-        setLeaderboard(lbRes.leaderboard || []);
-        setStreakData(stRes);
-        setBadgesData(bdRes.badges || []);
-        setAnalyticsData(anRes);
-      } catch (e) { console.log('API not available, using local state'); }
-    };
+    try {
+      const [lbRes, stRes, bdRes, anRes] = await Promise.all([
+        fetch(`${API_BASE}/leaderboard`).then(r => r.json()),
+        fetch(`${API_BASE}/streak/${studentId}`).then(r => r.json()),
+        fetch(`${API_BASE}/badges/${studentId}`).then(r => r.json()),
+        fetch(`${API_BASE}/analytics/${studentId}/weekly`).then(r => r.json()),
+      ]);
+      setLeaderboard(lbRes.leaderboard || []);
+      setStreakData(stRes);
+      setBadgesData(bdRes.badges || []);
+      setAnalyticsData(anRes);
+      setBalance(anRes.total_xp || 0);
+    } catch (e) { console.log('API not available, using local state'); }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [studentId, balance]);
 
-  const handleToggleTask = (task) => {
-    setTasks(tasks.map(t => t.id === task.id ? { ...t, completed: !task.completed } : t));
-  };
 
-  const [quizScore, setQuizScore] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  
-  const quizQuestions = [
-    { q: "What is the primary function of a Convolutional Layer in a CNN?", options: ["Extract features from input images", "Downsample spatial dimensions", "Classify the final output", "Normalize pixel values"], correct: 0 },
-    { q: "Which pooling technique takes the highest value from a feature map patch?", options: ["Average Pooling", "Max Pooling", "Min Pooling", "Sum Pooling"], correct: 1 },
-    { q: "In PyTorch, what does `param.requires_grad = False` achieve?", options: ["Deletes the parameter", "Freezes the layer during training", "Resets the weights to zero", "Enables gradient descent"], correct: 1 },
-    { q: "Which pre-trained model did we use in the Sprint?", options: ["VGG16", "YOLOv8", "ResNet50", "InceptionV3"], correct: 2 },
-    { q: "What is an epoch in model training?", options: ["A single forward pass", "One complete pass through the entire dataset", "The time taken to train", "A batch of images"], correct: 1 },
-    { q: "What activation function is typically used for multi-class classification output?", options: ["ReLU", "Sigmoid", "Softmax", "Tanh"], correct: 2 },
-    { q: "Which optimization algorithm is an extension of stochastic gradient descent?", options: ["Adam", "Backprop", "Lasso", "Ridge"], correct: 0 },
-    { q: "What is the purpose of a loss function?", options: ["To measure model prediction error", "To increase training speed", "To add non-linearity", "To prevent overfitting"], correct: 0 },
-    { q: "Overfitting occurs when:", options: ["Model learns the training data too well, failing to generalize", "Model struggles to learn the training data", "Learning rate is too high", "Batch size is too small"], correct: 0 },
-    { q: "What technique randomly drops neurons during training to prevent overfitting?", options: ["Data Augmentation", "Early Stopping", "Dropout", "Batch Normalization"], correct: 2 },
-    { q: "What does a stride of 2 do in a convolutional layer?", options: ["Doubles the output size", "Halves the spatial dimensions", "Increases parameter count", "No effect on size"], correct: 1 },
-    { q: "In object detection, what does 'IoU' stand for?", options: ["Input over Unit", "Intersection over Union", "Index of Units", "Image output Utility"], correct: 1 },
-  ];
+
 
   useEffect(() => {
     let timer;
@@ -385,49 +364,12 @@ export default function Dashboard() {
                   ) : null}
 
                   <div className={`w-full h-full relative z-10 transition-all duration-1000 ${phase === 4 ? 'opacity-20 blur-md scale-95' : 'opacity-100 blur-0 scale-100'}`}>
-                    {/* Interactive Task List */}
-                    <div className="h-full flex flex-col">
-                      <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                        <h3 className="text-lg font-headline font-bold text-white">Sprint Tasks</h3>
-                        <span className="text-xs font-mono text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                          {tasks.filter(t => t.completed).length}/{tasks.length} Completed
-                        </span>
-                      </div>
-
-                      <div className="flex-grow space-y-4 overflow-y-auto pr-2 custom-scrollbar">
-                        {tasks.map(task => (
-                           <div
-                             key={task.id}
-                             onClick={() => phase >= 5 && handleToggleTask(task)}
-                             className={`flex items-center p-4 rounded-2xl border transition-all cursor-pointer ${task.completed ? 'bg-primary/10 border-primary/30' : 'bg-surface-container border-outline-variant/30 hover:border-primary/50'}`}
-                           >
-                             <div className="flex items-center gap-4">
-                               <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${task.completed ? 'bg-primary border-primary text-on-primary' : 'border-outline-variant text-transparent'}`}>
-                                 <span className="material-symbols-outlined text-sm" data-icon="check">check</span>
-                               </div>
-                               <span className={`text-sm font-medium transition-colors ${task.completed ? 'text-primary line-through opacity-70' : 'text-white'}`}>
-                                 {task.text}
-                               </span>
-                             </div>
-                           </div>
-                         ))}
-                      </div>
-
-                      <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
-                         {tasks.filter(t => t.completed).length === tasks.length ? (
-                            <button onClick={() => setPhase(8)} className="w-full bg-gradient-to-r from-primary to-secondary hover:shadow-[0_0_20px_rgba(161,250,255,0.4)] text-on-primary px-4 py-3 rounded-xl font-bold font-label tracking-widest transition-all uppercase animate-[pulse_2s_ease-in-out_infinite]">
-                              Initiate Evaluation Quiz
-                            </button>
-                         ) : (
-                            <>
-                              <div className="text-xs text-on-surface-variant font-label uppercase tracking-widest">
-                                Complete all tasks to unlock Quiz
-                              </div>
-                              <span className="material-symbols-outlined text-outline-variant" data-icon="lock">lock</span>
-                            </>
-                         )}
-                      </div>
-                    </div>
+                    <CurriculumEngineWidget 
+                      studentId={studentId} 
+                      analyticsData={analyticsData} 
+                      refreshData={fetchData} 
+                      setPhase={setPhase}
+                    />
                   </div>
                 </div>
               </div>
@@ -755,66 +697,13 @@ export default function Dashboard() {
           <section className="relative min-h-screen flex items-center justify-center p-6 bg-background overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background z-0"></div>
             
-            <div className="relative z-10 w-full max-w-3xl glass-panel p-8 md:p-12 rounded-[2.5rem] border border-primary/30 shadow-[0_0_50px_rgba(161,250,255,0.1)]">
-              {currentQuestion < quizQuestions.length ? (
-                <div className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
-                  <div className="flex justify-between items-center border-b border-white/10 pb-6">
-                    <span className="text-primary font-mono tracking-widest text-sm uppercase">Evaluation Phase</span>
-                    <span className="bg-primary/10 text-primary font-bold px-4 py-1 rounded-full text-xs font-mono">
-                      Question {currentQuestion + 1} / {quizQuestions.length}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-3xl md:text-4xl font-headline font-bold text-white leading-tight">
-                    {quizQuestions[currentQuestion].q}
-                  </h3>
-                  
-                  <div className="grid gap-4 mt-8">
-                    {quizQuestions[currentQuestion].options.map((opt, idx) => (
-                      <button 
-                        key={idx}
-                        onClick={() => {
-                          if (idx === quizQuestions[currentQuestion].correct) setQuizScore(s => s + 1);
-                          setCurrentQuestion(c => c + 1);
-                        }}
-                        className="w-full text-left p-6 rounded-xl bg-surface-container hover:bg-primary/10 border border-outline-variant hover:border-primary transition-all text-on-surface-variant hover:text-white font-body text-lg group flex items-center justify-between"
-                      >
-                        {opt}
-                        <span className="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity text-primary">arrow_forward</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center space-y-8 animate-[fadeIn_0.5s_ease-out] py-8">
-                  <span className="material-symbols-outlined text-[80px] text-tertiary drop-shadow-[0_0_20px_rgba(251,219,94,0.6)]">verified</span>
-                  <h2 className="text-4xl font-headline font-black text-white">Evaluation Complete</h2>
-                  
-                  <div className="flex justify-center gap-12 py-8 border-y border-white/10">
-                    <div>
-                      <span className="block text-xs font-label text-on-surface-variant uppercase tracking-widest mb-2">Final Score</span>
-                      <span className="text-5xl font-mono font-bold text-white">{quizScore}<span className="text-2xl text-slate-500">/{quizQuestions.length}</span></span>
-                    </div>
-                    <div>
-                      <span className="block text-xs font-label text-on-surface-variant uppercase tracking-widest mb-2">Rewards Earned</span>
-                      <span className="text-5xl font-mono font-bold text-primary">+{quizScore * 50}</span>
-                    </div>
-                  </div>
-                  
-                  <button 
-                    onClick={() => {
-                      setBalance(b => b + (quizScore * 50));
-                      setPhase(4);
-                      setCurrentQuestion(0);
-                      setQuizScore(0);
-                      setTasks(tasks.map(t => ({ ...t, completed: false })));
-                    }}
-                    className="w-full py-5 rounded-xl bg-gradient-to-r from-primary to-secondary text-on-primary font-black tracking-widest uppercase hover:shadow-[0_0_30px_rgba(161,250,255,0.4)] transition-all text-lg"
-                  >
-                    Claim S-Coins & Return
-                  </button>
-                </div>
-              )}
+            <div className="relative z-10 w-full max-w-3xl glass-panel p-8 md:p-12 rounded-[2.5rem] border border-primary/30 shadow-[0_0_50px_rgba(161,250,255,0.1)] flex justify-center">
+              <QuizWidget 
+                studentId={studentId} 
+                weekNumber={Math.max(1, Math.floor((analyticsData.total_lessons_completed || 0) / 7))} 
+                setPhase={setPhase}
+                refreshData={fetchData}
+              />
             </div>
           </section>
         )}
