@@ -7,6 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Vercel strips /api from the path before hitting this function.
+// Re-add it so our Express routes still match /api/*
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // ─── Constants ───
 const quizBank = {
   1: [
