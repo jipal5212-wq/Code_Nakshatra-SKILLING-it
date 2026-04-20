@@ -1,18 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import logo from '../assets/logo.png';
+import LeaderboardWidget from '../components/LeaderboardWidget';
+import StreakTracker from '../components/StreakTracker';
+import BadgeShowcase from '../components/BadgeShowcase';
+import WeeklyAnalytics from '../components/WeeklyAnalytics';
+
+const API_BASE = '/api';
 
 export default function Dashboard() {
   const [phase, setPhase] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [countdown, setCountdown] = useState(24 * 60 * 60 - 1); // 23h 59m 59s
+  const [countdown, setCountdown] = useState(24 * 60 * 60 - 1);
   const [isSprintActive, setIsSprintActive] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [studentId, setStudentId] = useState(null);
+  const [studentName, setStudentName] = useState('');
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [streakData, setStreakData] = useState({ current_streak: 0, longest_streak: 0, milestones: [] });
+  const [badgesData, setBadgesData] = useState([]);
+  const [analyticsData, setAnalyticsData] = useState({});
   const [tasks, setTasks] = useState([
     { id: 1, text: "Watch CNN Architecture Theory", completed: false, reward: 50 },
     { id: 2, text: "Build Pre-trained ResNet50", completed: false, reward: 100 },
     { id: 3, text: "Freeze Parameters & Fine-tune", completed: false, reward: 100 },
     { id: 4, text: "Run & Validate Output", completed: false, reward: 150 },
   ]);
+
+  // Fetch data when student is registered
+  useEffect(() => {
+    if (!studentId) return;
+    const fetchData = async () => {
+      try {
+        const [lbRes, stRes, bdRes, anRes] = await Promise.all([
+          fetch(`${API_BASE}/leaderboard`).then(r => r.json()),
+          fetch(`${API_BASE}/streak/${studentId}`).then(r => r.json()),
+          fetch(`${API_BASE}/badges/${studentId}`).then(r => r.json()),
+          fetch(`${API_BASE}/analytics/${studentId}/weekly`).then(r => r.json()),
+        ]);
+        setLeaderboard(lbRes.leaderboard || []);
+        setStreakData(stRes);
+        setBadgesData(bdRes.badges || []);
+        setAnalyticsData(anRes);
+      } catch (e) { console.log('API not available, using local state'); }
+    };
+    fetchData();
+  }, [studentId, balance]);
 
   const handleToggleTask = (task) => {
     setTasks(tasks.map(t => t.id === task.id ? { ...t, completed: !task.completed } : t));
@@ -59,7 +91,23 @@ export default function Dashboard() {
     }, 3000);
   };
 
-  const handleRegister = () => {
+  const handleRegister = async (email, name) => {
+    try {
+      const res = await fetch(`${API_BASE}/students/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      });
+      const data = await res.json();
+      if (data.student) {
+        setStudentId(data.student.student_id);
+        setStudentName(data.student.name);
+      }
+    } catch (e) {
+      console.log('API not available, continuing locally');
+      setStudentId('local-' + Date.now());
+      setStudentName(name || 'Student');
+    }
     setIsModalOpen(false);
     setPhase(3);
     setTimeout(() => {
@@ -98,6 +146,12 @@ export default function Dashboard() {
             </button>
           ) : (
             <div className="flex items-center gap-4">
+              {streakData.current_streak > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded-full">
+                  <span className="material-symbols-outlined text-orange-400 text-lg">local_fire_department</span>
+                  <span className="text-orange-400 font-bold font-mono text-sm">{streakData.current_streak}🔥</span>
+                </div>
+              )}
               <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full shadow-[0_0_15px_rgba(161,250,255,0.2)]">
                 <span className="material-symbols-outlined text-primary text-lg" data-icon="token">token</span>
                 <span className="text-primary font-bold font-mono tracking-widest">{balance} S-Coin</span>
@@ -120,13 +174,13 @@ export default function Dashboard() {
               <h3 className="text-3xl font-headline font-bold text-white tracking-tighter">Join the Orbit</h3>
               <p className="text-on-surface-variant text-sm mt-2 font-body">Ready to do extra?</p>
             </div>
-            <div className="space-y-4 mb-8">
-              <input type="email" placeholder="Enter Gmail" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-5 py-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-primary/50 transition-colors font-body text-sm" />
-              <input type="text" placeholder="Enter First Name" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-5 py-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-primary/50 transition-colors font-body text-sm" />
-            </div>
-            <button onClick={handleRegister} className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary font-black tracking-widest uppercase hover:shadow-[0_0_30px_rgba(161,250,255,0.4)] transition-all">
-              Register
-            </button>
+            <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.target); handleRegister(fd.get('email'), fd.get('name')); }} className="space-y-4 mb-8">
+              <input name="email" type="email" placeholder="Enter Gmail" required className="w-full bg-surface border border-outline-variant/30 rounded-xl px-5 py-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-primary/50 transition-colors font-body text-sm" />
+              <input name="name" type="text" placeholder="Enter First Name" required className="w-full bg-surface border border-outline-variant/30 rounded-xl px-5 py-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-primary/50 transition-colors font-body text-sm" />
+              <button type="submit" className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary font-black tracking-widest uppercase hover:shadow-[0_0_30px_rgba(161,250,255,0.4)] transition-all">
+                Register
+              </button>
+            </form>
           </div>
         </div>
       )}
@@ -617,6 +671,41 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            {/* Weekly Analytics Section */}
+            <section className="py-16 px-6 border-b border-primary/10">
+              <div className="max-w-screen-2xl mx-auto">
+                <WeeklyAnalytics analytics={analyticsData} />
+              </div>
+            </section>
+
+            {/* Streak & Badges Section */}
+            <section className="py-16 px-6 bg-surface-container-lowest border-b border-primary/10">
+              <div className="max-w-screen-2xl mx-auto grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                  <StreakTracker
+                    currentStreak={streakData.current_streak}
+                    longestStreak={streakData.longest_streak}
+                    milestones={streakData.milestones || [
+                      { target_days: 3, reward_xp: 50, badge: 'on_fire', achieved: false, progress_percent: 0 },
+                      { target_days: 7, reward_xp: 100, badge: 'unstoppable', achieved: false, progress_percent: 0 },
+                      { target_days: 30, reward_xp: 500, badge: 'month_master', achieved: false, progress_percent: 0 },
+                      { target_days: 76, reward_xp: 1000, badge: 'industry_ready_builder', achieved: false, progress_percent: 0 },
+                    ]}
+                  />
+                </div>
+                <div className="lg:col-span-2">
+                  <BadgeShowcase badges={badgesData} />
+                </div>
+              </div>
+            </section>
+
+            {/* Leaderboard Section */}
+            <section className="py-16 px-6">
+              <div className="max-w-screen-2xl mx-auto">
+                <LeaderboardWidget leaderboard={leaderboard} currentStudentId={studentId} />
               </div>
             </section>
           </>
