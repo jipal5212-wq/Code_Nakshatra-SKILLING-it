@@ -412,6 +412,61 @@ app.post('/api/projects/submit', (req, res) => {
   res.status(201).json({ project, xp_earned: 150, total_xp: g.total_xp_points });
 });
 
+app.get('/api/projects/pending-review/:studentId', (req, res) => {
+  // Find projects NOT submitted by this student, and NOT already reviewed by this student
+  const pending = projects.filter(p => 
+    p.student_id !== req.params.studentId && 
+    !p.peer_reviews.some(r => r.reviewer_id === req.params.studentId)
+  );
+  // Return max 3 for review
+  res.json({ projects: pending.slice(0, 3) });
+});
+
+app.post('/api/projects/review', (req, res) => {
+  const { project_id, reviewer_id, code_quality, functionality, creativity, documentation, comments } = req.body;
+  const project = projects.find(p => p.project_id === project_id);
+  
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+  if (project.student_id === reviewer_id) return res.status(400).json({ error: 'Cannot review own project' });
+  if (project.peer_reviews.some(r => r.reviewer_id === reviewer_id)) return res.status(400).json({ error: 'Already reviewed' });
+
+  // Calculate average score for this review
+  const score = (Number(code_quality) + Number(functionality) + Number(creativity) + Number(documentation)) / 20 * 100;
+  
+  const review = {
+    reviewer_id,
+    scores: { code_quality, functionality, creativity, documentation },
+    comments: comments || '',
+    total_score: Math.round(score),
+    date: new Date().toISOString()
+  };
+  
+  project.peer_reviews.push(review);
+  
+  // Calculate final project score if enough reviews
+  let finalScoreCalculated = false;
+  if (project.peer_reviews.length >= 2) {
+    const total = project.peer_reviews.reduce((acc, curr) => acc + curr.total_score, 0);
+    project.final_score = Math.round(total / project.peer_reviews.length);
+    finalScoreCalculated = true;
+    
+    // Award the original author XP based on their score
+    const authorG = getGamification(project.student_id);
+    authorG.total_xp_points += Math.round(project.final_score * 2); // Up to 200 XP for a perfect score
+  }
+
+  // Award reviewer XP for taking the time to review
+  const reviewerG = getGamification(reviewer_id);
+  reviewerG.total_xp_points += 50;
+
+  res.json({ 
+    message: 'Review submitted', 
+    xp_earned: 50, 
+    total_xp: reviewerG.total_xp_points,
+    project_finalized: finalScoreCalculated
+  });
+});
+
 // ─── Keep original hello route ───
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from the S-KILLING IT backend!' });

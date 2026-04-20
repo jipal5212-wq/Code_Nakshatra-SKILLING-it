@@ -4,6 +4,7 @@ import LeaderboardWidget from '../components/LeaderboardWidget';
 import StreakTracker from '../components/StreakTracker';
 import BadgeShowcase from '../components/BadgeShowcase';
 import WeeklyAnalytics from '../components/WeeklyAnalytics';
+import PeerReviewWidget from '../components/PeerReviewWidget';
 
 const API_BASE = '/api';
 
@@ -604,6 +605,13 @@ export default function Dashboard() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            {/* Peer Review Section */}
+            <section className="py-16 px-6 relative z-10">
+              <div className="max-w-5xl mx-auto">
+                <PeerReviewWidget studentId={studentId} balance={balance} setBalance={setBalance} />
               </div>
             </section>
 
