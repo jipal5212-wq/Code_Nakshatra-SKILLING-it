@@ -1,4 +1,4 @@
-# Awesome AI App
+
 
 This is a fullstack project setup with a Vite + React frontend and an Express backend. 
 
