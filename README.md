@@ -1,4 +1,4 @@
-# 🚀 S-KILLING IT
+#  S-KILLING it
 
 ### Build Daily. Or Fall Behind.
 
