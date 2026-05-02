@@ -1776,62 +1776,10 @@
       transform: none;
     }
   
-    /* --- GSAP Smooth Scroll & Animations --- */
-    #smooth-wrapper {
-      overflow: hidden;
-      position: fixed;
-      z-index: 1;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    }
-    #smooth-content {
-      overflow: visible;
-      width: 100%;
-    }
-    .box {
-      width: 100px;
-      height: 100px;
-      position: absolute;
-      z-index: 100;
-      line-height: 100px;
-      text-align: center;
-      font-weight: 800;
-      border-radius: 12px;
-      color: white;
-      will-change: transform;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      font-family: var(--body-font);
-    }
-    .box-a {
-      top: 15%;
-      left: 5%;
-    }
-    .box-b {
-      top: 50%;
-      right: 5%;
-    }
-    .shape {
-      position: absolute;
-      font-size: 80px;
-      top: 30%;
-      right: 15%;
-      will-change: transform;
-      z-index: 10;
-      filter: drop-shadow(0 0 20px rgba(230,0,0,0.8));
-    }
-    .gradient-red {
-      background: linear-gradient(135deg, var(--red), var(--red-dark));
-    }
-    .gradient-charcoal {
-      background: linear-gradient(135deg, #444, var(--charcoal));
-      border: 1px solid rgba(255,255,255,0.1);
-    }
 </style>
 </head>
 
-<body><div id="smooth-wrapper"><div id="smooth-content"><nav class="nav" id="navbar">
+<body><nav class="nav" id="navbar">
     <a href="#" class="nav-logo">
       <div class="nav-logo-mark">SI</div>
       <span class="nav-logo-text">S-KILLING<span> it</span></span>
@@ -1885,10 +1833,6 @@
         </div>
       </div>
     
-    <div class="box box-a gradient-red" data-speed="clamp(0.5)">AI</div>
-    <div class="box box-b gradient-charcoal" data-speed="clamp(0.8)">Robotics</div>
-    <div class="shape" data-speed="1.5">⚡</div>
-</div>
     <!-- Ticker -->
     <div class="ticker-strip">
       <div class="ticker-inner" id="ticker">
@@ -2243,7 +2187,7 @@
         </div>
       </div>
     </div>
-  </footer></div></div>
+  </footer>
 
   <!-- NAVBAR -->
   
@@ -2832,37 +2776,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  <!-- GSAP & ScrollSmoother -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://assets.codepen.io/16327/ScrollSmoother.min.js"></script>
-  <script>
-    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
-    
-    // create the smooth scroller FIRST!
-    let smoother = ScrollSmoother.create({
-      wrapper: '#smooth-wrapper',
-      content: '#smooth-content',
-      smooth: 2,
-      effects: true,
-      normalizeScroll: true
-    });
-
-    // Animate boxes if they exist
-    gsap.to(".box-a", {
-      scrollTrigger: {
-        trigger: ".box-a",
-        scrub: true,
-      },
-      y: -200
-    });
-    
-    gsap.to(".box-b", {
-      scrollTrigger: {
-        trigger: ".box-b",
-        scrub: true,
-      },
-      y: -300
-    });
-  </script>
 </body></html>
