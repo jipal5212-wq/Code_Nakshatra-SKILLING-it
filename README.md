@@ -1,4 +1,4 @@
-# SKILLING IT — Daily Execution Platform
+# S-KILLING it — Daily Execution Platform
 
 > Not a course. Not a tutorial. A 24-hour execution loop that forces you to learn, build, and submit — every single day.
 
