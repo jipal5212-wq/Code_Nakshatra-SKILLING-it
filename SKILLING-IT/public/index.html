@@ -1404,6 +1404,21 @@ footer {
 .mobile-nav a:last-child { border: none; padding-bottom: 0; }
 .mobile-nav a:hover { color: var(--red); }
 
+/* ─── VIDEO POOL SECTION ─── */
+#videoPool {
+  background: var(--charcoal);
+  padding: 80px 48px;
+}
+.video-pool-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+#videoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
 /* ─── SCROLL ANIMATIONS ─── */
 .reveal {
   opacity: 0;
@@ -1431,7 +1446,7 @@ footer {
     <li><a href="#awareness">Awareness</a></li>
     <li><a href="#submit">Submit</a></li>
   </ul>
-  <a href="#" class="nav-cta" onclick="openModal(); return false;">Start Today →</a>
+  <a href="/login.html" class="nav-cta">Login →</a>
   <div class="hamburger" id="hamburger" onclick="toggleMobileNav()">
     <span></span><span></span><span></span>
   </div>
@@ -1443,7 +1458,7 @@ footer {
   <a href="#streaks" onclick="toggleMobileNav()">Streaks</a>
   <a href="#awareness" onclick="toggleMobileNav()">Awareness</a>
   <a href="#submit" onclick="toggleMobileNav()">Submit</a>
-  <a href="#" onclick="openModal(); toggleMobileNav();">Start Today →</a>
+  <a href="/login.html" onclick="toggleMobileNav()">Login →</a>
 </div>
 
 <!-- HERO -->
@@ -1462,7 +1477,7 @@ footer {
       Not a course. Not a tutorial. A 24-hour execution loop that forces you to learn, build, and submit — every single day.
     </p>
     <div class="hero-actions">
-      <a href="#" class="btn-pill" onclick="openModal(); return false;">Start Your Loop →</a>
+      <a href="/login.html" class="btn-pill">Login to Start →</a>
       <a href="#how" class="btn-ghost">See How It Works</a>
     </div>
     <div class="hero-stats">
@@ -1500,6 +1515,34 @@ footer {
     </div>
   </div>
 </section>
+
+
+<!-- VIDEO POOL -->
+<section id="videoPool">
+  <div class="video-pool-inner">
+    <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text" style="color:var(--red)">Learn By Watching</span></div>
+    <h2 class="section-title reveal" style="color:var(--white)">YOUTUBE<br><em>VIDEO POOL</em></h2>
+    <p style="font-family:var(--body-font);font-size:16px;color:rgba(255,255,255,0.45);font-weight:300;max-width:520px;line-height:1.6;margin-bottom:16px;">Curated video tutorials matched to your selected task. Watch the recommended segment, then build.</p>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;">
+      <button class="btn-ai" id="loadVideosBtn" onclick="loadVideoPool()">🎬 Load Video Pool</button>
+      <span id="videoPoolStatus" style="font-family:var(--body-font);font-size:13px;color:rgba(255,255,255,0.35);"></span>
+    </div>
+    <div class="video-grid" id="videoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:20px;">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">🎬</div>
+        <div style="font-family:var(--display-font);font-weight:700;font-size:18px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;">Select a task first, then load videos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO EMBED MODAL -->
+<div class="video-modal-overlay" id="videoModalOverlay" onclick="if(event.target===this)closeVideoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;align-items:center;justify-content:center;">
+  <div class="video-modal-content" style="width:90%;max-width:900px;background:#000;border-radius:12px;overflow:hidden;position:relative;">
+    <button onclick="closeVideoModal()" style="position:absolute;top:10px;right:10px;background:var(--red);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;z-index:10;">✕</button>
+    <iframe id="videoIframe" style="width:100%;aspect-ratio:16/9;border:none;" src="" allowfullscreen allow="autoplay"></iframe>
+  </div>
+</div>
 
 <!-- RED BAND -->
 <div class="red-band">
@@ -1588,53 +1631,62 @@ footer {
 
 <!-- STREAKS & REWARDS -->
 <section id="streaks">
-  <div class="section">
-    <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">Accountability</span></div>
-    <h2 class="section-title reveal">STREAKS &<br><em>REWARDS</em></h2>
-    <p class="section-intro reveal">Consistency is the metric. Every day you complete and submit, the chain grows. Break it and start over.</p>
-    <div class="streaks-layout">
-      <div class="streak-calendar reveal">
-        <div class="streak-calendar-header">
-          <span class="streak-month">April 2026</span>
-          <span class="streak-count-pill" id="streakPill">🔥 12 Days</span>
+  <div class="streak-inner">
+    <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">Personal Momentum</span></div>
+    <h2 class="section-title reveal">DAILY<br><em>STREAKS</em></h2>
+    
+    <div id="streakGuestView" style="text-align:center;padding:40px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px dashed rgba(255,255,255,0.1);margin-top:24px;">
+      <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+      <h3 style="font-family:var(--display-font);color:var(--white);font-size:24px;text-transform:uppercase;margin-bottom:8px;">Streaks are Locked</h3>
+      <p style="font-family:var(--body-font);color:rgba(255,255,255,0.5);max-width:400px;margin:0 auto;line-height:1.6;">Log in to start your 24-hour execution loop and track your consistency.</p>
+      <a href="/login.html" class="btn-pill" style="display:inline-block;margin-top:20px;text-decoration:none;">Login to Start →</a>
+    </div>
+
+    <div id="streakDashboard" style="display:none;">
+      <div class="streak-grid">
+        <div class="streak-calendar reveal">
+          <div class="streak-calendar-header">
+            <span class="streak-month">April 2026</span>
+            <span class="streak-count-pill" id="streakPill">🔥 12 Days</span>
+          </div>
+          <div class="cal-days-header">
+            <span class="cal-day-name">S</span><span class="cal-day-name">M</span>
+            <span class="cal-day-name">T</span><span class="cal-day-name">W</span>
+            <span class="cal-day-name">T</span><span class="cal-day-name">F</span>
+            <span class="cal-day-name">S</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
         </div>
-        <div class="cal-days-header">
-          <span class="cal-day-name">S</span><span class="cal-day-name">M</span>
-          <span class="cal-day-name">T</span><span class="cal-day-name">W</span>
-          <span class="cal-day-name">T</span><span class="cal-day-name">F</span>
-          <span class="cal-day-name">S</span>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-      </div>
-      <div class="reveal">
-        <div style="font-family:var(--display-font);font-weight:700;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:20px;">Unlock With Points</div>
-        <div class="rewards-list">
-          <div class="reward-item">
-            <div class="reward-pts">50<br><sub>pts</sub></div>
-            <div>
-              <div class="reward-info-title">Advanced Challenges</div>
-              <div class="reward-info-body">Unlock harder, real-world problem sets beyond your current level.</div>
+        <div class="reveal">
+          <div style="font-family:var(--display-font);font-weight:700;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:20px;">Unlock With Points</div>
+          <div class="rewards-list">
+            <div class="reward-item">
+              <div class="reward-pts">50<br><sub>pts</sub></div>
+              <div>
+                <div class="reward-info-title">Advanced Challenges</div>
+                <div class="reward-info-body">Unlock harder, real-world problem sets beyond your current level.</div>
+              </div>
             </div>
-          </div>
-          <div class="reward-item">
-            <div class="reward-pts">150<br><sub>pts</sub></div>
-            <div>
-              <div class="reward-info-title">Internship-Style Tasks</div>
-              <div class="reward-info-body">Work on actual project briefs designed like real internship assignments.</div>
+            <div class="reward-item">
+              <div class="reward-pts">150<br><sub>pts</sub></div>
+              <div>
+                <div class="reward-info-title">Internship-Style Tasks</div>
+                <div class="reward-info-body">Work on actual project briefs designed like real internship assignments.</div>
+              </div>
             </div>
-          </div>
-          <div class="reward-item">
-            <div class="reward-pts">300<br><sub>pts</sub></div>
-            <div>
-              <div class="reward-info-title">Direct Team Access</div>
-              <div class="reward-info-body">Opportunity to interact with the SKILLING IT team and join our core group.</div>
+            <div class="reward-item">
+              <div class="reward-pts">300<br><sub>pts</sub></div>
+              <div>
+                <div class="reward-info-title">Direct Team Access</div>
+                <div class="reward-info-body">Opportunity to interact with the SKILLING IT team and join our core group.</div>
+              </div>
             </div>
-          </div>
-          <div class="reward-item">
-            <div class="reward-pts">500<br><sub>pts</sub></div>
-            <div>
-              <div class="reward-info-title">Join The Team</div>
-              <div class="reward-info-body">Top performers get the opportunity to become part of the SKILLING IT team.</div>
+            <div class="reward-item">
+              <div class="reward-pts">500<br><sub>pts</sub></div>
+              <div>
+                <div class="reward-info-title">Join The Team</div>
+                <div class="reward-info-body">Top performers get the opportunity to become part of the SKILLING IT team.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1668,60 +1720,69 @@ footer {
 <!-- SUBMISSION -->
 <section id="submit">
   <div class="submit-inner">
-    <div>
-      <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text" style="color:var(--red)">Proof of Work</span></div>
-      <h2 class="section-title reveal" style="color:var(--white)">SUBMIT YOUR<br><em>OUTPUT</em></h2>
-      <p style="font-family:var(--body-font);font-size:16px;color:rgba(255,255,255,0.45);font-weight:300;line-height:1.7;max-width:420px;margin-bottom:8px;">Watching is not enough. You must prove you built something. Submit before your 24 hours are up.</p>
-      <div class="submit-types">
-        <div class="submit-type">
-          <div class="submit-type-icon">💻</div>
-          <div>
-            <div class="submit-type-label">Code File</div>
-            <div class="submit-type-desc">Upload .py, .html, .js, .ipynb or any source file</div>
-          </div>
-        </div>
-        <div class="submit-type">
-          <div class="submit-type-icon">🖼️</div>
-          <div>
-            <div class="submit-type-label">Screenshot / Image</div>
-            <div class="submit-type-desc">Show your working output, terminal, or result</div>
-          </div>
-        </div>
-        <div class="submit-type">
-          <div class="submit-type-icon">🎬</div>
-          <div>
-            <div class="submit-type-label">Demo Video</div>
-            <div class="submit-type-desc">Screen recording of your working project in action</div>
-          </div>
-        </div>
-        <div class="submit-type">
-          <div class="submit-type-icon">🔗</div>
-          <div>
-            <div class="submit-type-label">GitHub Link</div>
-            <div class="submit-type-desc">Public repo or gist with your complete code</div>
-          </div>
-        </div>
-      </div>
+    <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">Proof of Work</span></div>
+    <h2 class="section-title reveal">ACCOUNTABILITY<br><em>LOOP</em></h2>
+    
+    <div id="submitGuestView" style="text-align:center;padding:40px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px dashed rgba(255,255,255,0.1);margin-top:24px;">
+      <div style="font-size:48px;margin-bottom:16px;">📑</div>
+      <h3 style="font-family:var(--display-font);color:var(--white);font-size:24px;text-transform:uppercase;margin-bottom:8px;">Submit Your Work</h3>
+      <p style="font-family:var(--body-font);color:rgba(255,255,255,0.5);max-width:400px;margin:0 auto;line-height:1.6;">Once you finish your daily task, submit it here for verification and points.</p>
+      <a href="/login.html" class="btn-pill" style="display:inline-block;margin-top:20px;text-decoration:none;">Login to Submit →</a>
     </div>
 
-    <div>
-      <div class="upload-area" onclick="triggerUpload()" id="uploadZone">
-        <span class="upload-icon">📁</span>
-        <div class="upload-label">Drop Your Files Here</div>
-        <div class="upload-sublabel">PNG, JPG, MP4, PY, HTML, IPYNB — max 100MB</div>
-        <button class="btn-rect" style="display:inline-block">Browse Files</button>
-        <input type="file" id="fileInput" style="display:none" onchange="handleFile(event)">
-      </div>
-      <div style="margin-top:16px;">
-        <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">Or paste GitHub link</div>
-        <div class="github-input-wrap">
-          <input class="github-input" type="text" placeholder="https://github.com/username/repo" id="githubInput"/>
-          <button class="github-btn" onclick="submitGithub()">Submit →</button>
+    <div id="submitDashboard" style="display:none;">
+      <div class="submit-card">
+        <p style="font-family:var(--body-font);font-size:16px;color:rgba(255,255,255,0.45);font-weight:300;line-height:1.7;max-width:420px;margin-bottom:8px;">Watching is not enough. You must prove you built something. Submit before your 24 hours are up.</p>
+        <div class="submit-types">
+          <div class="submit-type">
+            <div class="submit-type-icon">💻</div>
+            <div>
+              <div class="submit-type-label">Code File</div>
+              <div class="submit-type-desc">Upload .py, .html, .js, .ipynb or any source file</div>
+            </div>
+          </div>
+          <div class="submit-type">
+            <div class="submit-type-icon">🖼️</div>
+            <div>
+              <div class="submit-type-label">Screenshot / Image</div>
+              <div class="submit-type-desc">Show your working output, terminal, or result</div>
+            </div>
+          </div>
+          <div class="submit-type">
+            <div class="submit-type-icon">🎬</div>
+            <div>
+              <div class="submit-type-label">Demo Video</div>
+              <div class="submit-type-desc">Screen recording of your working project in action</div>
+            </div>
+          </div>
+          <div class="submit-type">
+            <div class="submit-type-icon">🔗</div>
+            <div>
+              <div class="submit-type-label">GitHub Link</div>
+              <div class="submit-type-desc">Public repo or gist with your complete code</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="submissionStatus" style="display:none; margin-top:24px; padding:20px; background:rgba(230,0,0,0.12); border:1px solid var(--red); border-radius:6px;">
-        <div style="font-family:var(--display-font);font-weight:700;font-size:16px;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Submission Received ✓</div>
-        <div style="font-family:var(--body-font);font-size:14px;color:rgba(255,255,255,0.5);">Your work is under admin review. Results typically within 2–4 hours. Keep building.</div>
+      <div>
+        <div class="upload-area" onclick="triggerUpload()" id="uploadZone">
+          <span class="upload-icon">📁</span>
+          <div class="upload-label">Drop Your Files Here</div>
+          <div class="upload-sublabel">PNG, JPG, MP4, PY, HTML, IPYNB — max 100MB</div>
+          <button class="btn-rect" style="display:inline-block">Browse Files</button>
+          <input type="file" id="fileInput" style="display:none" onchange="handleFile(event)">
+        </div>
+        <div style="margin-top:16px;">
+          <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">Or paste GitHub link</div>
+          <div class="github-input-wrap">
+            <input class="github-input" type="text" placeholder="https://github.com/username/repo" id="githubInput"/>
+            <button class="github-btn" onclick="submitGithub()">Submit →</button>
+          </div>
+        </div>
+        <div id="submissionStatus" style="display:none; margin-top:24px; padding:20px; background:rgba(230,0,0,0.12); border:1px solid var(--red); border-radius:6px;">
+          <div style="font-family:var(--display-font);font-weight:700;font-size:16px;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Submission Received ✓</div>
+          <div style="font-family:var(--body-font);font-size:14px;color:rgba(255,255,255,0.5);">Your work is under admin review. Results typically within 2–4 hours. Keep building.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1738,28 +1799,8 @@ footer {
     <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">Let's Be Relevant</span></div>
     <h2 class="section-title reveal">TECH<br><em>AWARENESS</em></h2>
     <p class="section-intro reveal">Explore the latest across AI, Robotics, Cybersecurity, and Data Science. Optional reading — but top performers always stay current.</p>
-    <div class="awareness-grid">
-      <div class="awareness-card reveal">
-        <span class="awareness-card-tag">AI</span>
-        <div class="awareness-card-date">24 Apr 2026</div>
-        <div class="awareness-card-title">Gemini 2.0 Flash<br>Now Free for Devs</div>
-        <div class="awareness-card-body">Google opens Gemini 2.0 Flash API to all developers without cost. Multimodal reasoning at scale just became accessible. What can you build with it?</div>
-        <button class="awareness-convert">Convert to Task →</button>
-      </div>
-      <div class="awareness-card reveal">
-        <span class="awareness-card-tag">Robotics</span>
-        <div class="awareness-card-date">22 Apr 2026</div>
-        <div class="awareness-card-title">ROS 2 Iron Irwini<br>Released</div>
-        <div class="awareness-card-body">The latest ROS 2 distribution ships with improved DDS middleware and better real-time scheduling. Robotics developers upgrade their stack today.</div>
-        <button class="awareness-convert">Convert to Task →</button>
-      </div>
-      <div class="awareness-card reveal">
-        <span class="awareness-card-tag">Cybersec</span>
-        <div class="awareness-card-date">20 Apr 2026</div>
-        <div class="awareness-card-title">OWASP Top 10<br>2026 Draft Out</div>
-        <div class="awareness-card-body">OWASP drops the draft for its updated 2026 vulnerability list. Prompt Injection enters the top 5 for the first time — every dev needs to read this.</div>
-        <button class="awareness-convert">Convert to Task →</button>
-      </div>
+    <div class="awareness-grid" id="newsGrid">
+      <div style="color:var(--grey-dis);font-family:var(--body-font);">Loading latest news...</div>
     </div>
   </div>
 </section>
@@ -1768,7 +1809,7 @@ footer {
 <div class="cta-section">
   <h2 class="cta-section-title">START<br>EXECUTING.</h2>
   <p class="cta-section-sub">Every day you don't build is a day someone else gets ahead. The loop starts now.</p>
-  <a href="#" class="btn-white-pill" onclick="openModal(); return false;">Join SKILLING IT →</a>
+  <a href="/login.html" class="btn-white-pill">Join SKILLING IT →</a>
 </div>
 
 <!-- FOOTER -->
@@ -1868,66 +1909,160 @@ footer {
 </div>
 
 <!-- JAVASCRIPT -->
-<script>
-// ─── TASK DATA ───
-const tasks = [
-  {
-    domain: "AI / ML",
-    level: "Beginner",
-    title: "Build a Text Classifier",
-    desc: "Using Scikit-learn, train a Naive Bayes classifier on a sample dataset. Print confusion matrix.",
-    effort: "~1 hr",
-    color: "#e60000"
-  },
-  {
-    domain: "Web Dev",
-    level: "Intermediate",
-    title: "REST API with Node.js",
-    desc: "Create a CRUD REST API for a todo list using Express. No framework shortcuts.",
-    effort: "~1.5 hrs",
-    color: "#e60000"
-  },
-  {
-    domain: "Robotics",
-    level: "Beginner",
-    title: "Arduino Line Follower",
-    desc: "Write the control logic for a 2-sensor line follower. Simulate in Tinkercad if no hardware.",
-    effort: "~1 hr",
-    color: "#e60000"
-  },
-  {
-    domain: "Cybersec",
-    level: "Intermediate",
-    title: "Scan & Report Vulns",
-    desc: "Use Nmap to scan a local VM. Document 3 findings and propose mitigations in a short report.",
-    effort: "~1 hr",
-    color: "#e60000"
-  },
-  {
-    domain: "Data Science",
-    level: "Beginner",
-    title: "EDA on Titanic Dataset",
-    desc: "Load the Titanic CSV in Pandas. Answer: survival rate by class, average age, missing values.",
-    effort: "~45 min",
-    color: "#e60000"
-  },
-  {
-    domain: "AI / ML",
-    level: "Advanced",
-    title: "Fine-tune a GPT-2 Model",
-    desc: "Using HuggingFace, fine-tune GPT-2 on a custom text dataset for 3 epochs. Log loss curve.",
-    effort: "~2 hrs",
-    color: "#e60000"
-  }
-];
 
+<script>
+let session = JSON.parse(localStorage.getItem('skillingit_session') || 'null');
+let tasks = [];
 let selectedTask = null;
 let timerInterval = null;
-let selectionSeconds = 6442; // 1h 47m 22s
+let selectionSeconds = 86400; // 24 hours
 
-// ─── RENDER TASKS ───
+function showToast(msg) { alert(msg); } // Simple toast fallback
+
+
+function toggleAiChat() {
+  const win = document.getElementById('aiChatWindow');
+  win.style.display = win.style.display === 'none' ? 'flex' : 'none';
+  if(win.style.display === 'flex') document.getElementById('aiChatInput').focus();
+}
+
+async function sendAiMessage() {
+  const input = document.getElementById('aiChatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  
+  const msgsDiv = document.getElementById('aiChatMessages');
+  
+  // Add user message
+  msgsDiv.innerHTML += `
+    <div style="background:var(--red);padding:12px 16px;border-radius:12px;border-bottom-right-radius:2px;color:#fff;font-size:14px;max-width:85%;align-self:flex-end;line-height:1.5;">
+      ${msg.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+    </div>
+  `;
+  input.value = '';
+  msgsDiv.scrollTop = msgsDiv.scrollHeight;
+  
+  // Add loading indicator
+  const loadingId = 'loading-' + Date.now();
+  msgsDiv.innerHTML += `
+    <div id="${loadingId}" style="background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:rgba(255,255,255,0.5);font-size:14px;max-width:85%;align-self:flex-start;">
+      Thinking...
+    </div>
+  `;
+  msgsDiv.scrollTop = msgsDiv.scrollHeight;
+  
+  let taskContext = '';
+  if (selectedTask !== null && tasks[selectedTask]) {
+    taskContext = tasks[selectedTask].title;
+  }
+  
+  try {
+    const res = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, taskContext })
+    });
+    const data = await res.json();
+    document.getElementById(loadingId).remove();
+    
+    if (data.success) {
+      msgsDiv.innerHTML += `
+        <div style="background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:rgba(255,255,255,0.85);font-size:14px;max-width:85%;align-self:flex-start;line-height:1.5;">
+          ${data.reply.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}
+        </div>
+      `;
+    } else {
+      msgsDiv.innerHTML += `
+        <div style="background:rgba(230,0,0,0.1);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:#ff4444;font-size:14px;max-width:85%;align-self:flex-start;border:1px solid rgba(230,0,0,0.3);">
+          ⚠ API Error: ${data.error || 'Gemini API not configured.'}
+        </div>
+      `;
+    }
+  } catch(e) {
+    document.getElementById(loadingId).remove();
+    msgsDiv.innerHTML += `
+      <div style="background:rgba(230,0,0,0.1);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:#ff4444;font-size:14px;max-width:85%;align-self:flex-start;border:1px solid rgba(230,0,0,0.3);">
+        ⚠ Connection failed.
+      </div>
+    `;
+  }
+  msgsDiv.scrollTop = msgsDiv.scrollHeight;
+}
+
+function enforceAuth() {
+  if (!session) {
+    // Hide all protected sections
+    ['dashboard','streaks','submit','videoPool','aiChatWidget'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+    // Hide protected nav links
+    document.querySelectorAll('.nav-links a[href="#dashboard"], .nav-links a[href="#streaks"], .nav-links a[href="#submit"], .nav-links a[href="#videoPool"]')
+      .forEach(el => el.parentElement.style.display = 'none');
+    document.querySelectorAll('.mobile-nav a[href="#dashboard"], .mobile-nav a[href="#streaks"], .mobile-nav a[href="#submit"], .mobile-nav a[href="#videoPool"]')
+      .forEach(el => el.style.display = 'none');
+    // Change CTA and hero button to Login
+    document.querySelectorAll('.nav-cta, .mobile-nav a:last-child').forEach(cta => {
+      cta.textContent = 'Login →';
+      cta.onclick = () => { window.location.href = '/login.html'; return false; };
+    });
+    const heroCta = document.querySelector('.hero-actions .btn-pill');
+    if (heroCta) {
+      heroCta.textContent = 'Login to Start →';
+      heroCta.onclick = () => { window.location.href = '/login.html'; return false; };
+    }
+  } else {
+    // Show all protected sections
+    ['dashboard','streaks','submit','videoPool','aiChatWidget'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'block';
+    });
+    
+    // Hide guest placeholders, show dashboards
+    if(document.getElementById('streakGuestView')) document.getElementById('streakGuestView').style.display = 'none';
+    if(document.getElementById('streakDashboard')) document.getElementById('streakDashboard').style.display = 'block';
+    if(document.getElementById('submitGuestView')) document.getElementById('submitGuestView').style.display = 'none';
+    if(document.getElementById('submitDashboard')) document.getElementById('submitDashboard').style.display = 'block';
+
+    // Show protected nav links
+    document.querySelectorAll('.nav-links li').forEach(li => li.style.display = 'block');
+    document.querySelectorAll('.mobile-nav a').forEach(a => a.style.display = 'block');
+
+    if(document.getElementById('aiChatWidget')) document.getElementById('aiChatWidget').style.display = 'block';
+    
+    // Show user name + logout in nav
+    document.querySelectorAll('.nav-cta').forEach(cta => {
+      cta.textContent = '👤 ' + session.name + ' · Logout';
+      cta.onclick = () => { localStorage.removeItem('skillingit_session'); window.location.reload(); return false; };
+    });
+    
+    // Update mobile nav last link
+    const mobileLinks = document.querySelectorAll('.mobile-nav a');
+    const lastMobileLink = mobileLinks[mobileLinks.length - 1];
+    if (lastMobileLink) {
+      lastMobileLink.textContent = 'Logout (' + session.name + ')';
+      lastMobileLink.onclick = () => { localStorage.removeItem('skillingit_session'); window.location.reload(); return false; };
+    }
+
+    fetchTasks();
+    // Auto-load 6 personalised videos for logged-in users
+    loadVideoPool();
+  }
+  fetchNews();
+}
+
+async function fetchTasks() {
+  try {
+    const res = await fetch('/api/tasks');
+    const data = await res.json();
+    tasks = data.tasks;
+    renderTasks();
+  } catch (e) { console.error('Failed to fetch tasks', e); }
+}
+
 function renderTasks() {
   const grid = document.getElementById('taskGrid');
+  if(!grid) return;
   grid.innerHTML = tasks.map((t, i) => `
     <div class="task-card" id="task${i}" onclick="selectTask(${i})">
       <div class="task-card-domain">
@@ -1945,7 +2080,6 @@ function renderTasks() {
 }
 
 function selectTask(i) {
-  // deselect all
   tasks.forEach((_, j) => {
     document.getElementById('task' + j)?.classList.remove('selected');
     const ch = document.getElementById('check' + j);
@@ -1954,177 +2088,295 @@ function selectTask(i) {
   selectedTask = i;
   document.getElementById('task' + i).classList.add('selected');
   document.getElementById('check' + i).innerHTML = '✓';
-  document.getElementById('selectionNote').textContent = `"${tasks[i].title}" selected`;
+  if(document.getElementById('selectionNote')) document.getElementById('selectionNote').textContent = `"${tasks[i].title}" selected`;
 }
 
-function randomTask() {
-  const r = Math.floor(Math.random() * tasks.length);
-  selectTask(r);
-}
-
-function confirmTask() {
+async function confirmTask() {
   if (selectedTask === null) {
-    document.getElementById('selectionNote').textContent = '⚠ Please select a task first.';
+    if(document.getElementById('selectionNote')) document.getElementById('selectionNote').textContent = '⚠ Please select a task first.';
     return;
   }
   const t = tasks[selectedTask];
-  alert(`✅ Task locked: "${t.title}"\n\nYour execution window has begun. Good luck. Submit before your 24 hours are up.`);
-  document.getElementById('selectionNote').textContent = `✓ Task confirmed: "${t.title}"`;
+  try {
+    const res = await fetch('/api/tasks/confirm', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: session.id, taskId: t.id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Task locked: "${t.title}"\n\nYour 24-hour execution window has begun.`);
+      if(document.getElementById('selectionNote')) document.getElementById('selectionNote').textContent = `✓ Task confirmed: "${t.title}"`;
+      startTimer();
+      loadVideoPool();
+    }
+  } catch(e) { console.error(e); }
 }
 
-// ─── TIMER ───
 function startTimer() {
+  if(timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     if (selectionSeconds <= 0) {
       clearInterval(timerInterval);
-      randomTask();
-      document.getElementById('selectionNote').textContent = 'Time expired — task auto-assigned.';
       return;
     }
     selectionSeconds--;
     const h = Math.floor(selectionSeconds / 3600);
     const m = Math.floor((selectionSeconds % 3600) / 60);
     const s = selectionSeconds % 60;
-    document.getElementById('selectionTimer').textContent =
-      `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const el = document.getElementById('selectionTimer');
+    if(el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }, 1000);
 }
 
-// ─── CALENDAR ───
-function renderCalendar() {
-  const grid = document.getElementById('calGrid');
-  // April 2026 starts on Wednesday (index 3)
-  const startDay = 3;
-  const daysInMonth = 30;
-  const today = 24;
-  const doneDays = [1,2,3,4,5,8,9,10,11,12,15,16,17,18,19,22,23];
+// ─── STREAKS CALENDAR ───
+async function renderCalendar() {
+  const calGrid = document.getElementById('calGrid');
+  if (!calGrid || !session) return;
+  
+  try {
+    const res = await fetch('/api/streaks/' + session.id);
+    const data = await res.json();
+    const streak = data.streak || { current: 0, history: [] };
+    
+    if (document.getElementById('streakPill')) {
+      document.getElementById('streakPill').textContent = `🔥 ${streak.current} Days`;
+    }
 
-  let cells = '';
-  // Empty cells before start
-  for (let i = 0; i < startDay; i++) {
-    cells += '<div class="cal-cell empty"></div>';
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    let cls = 'cal-cell';
-    if (d === today) cls += ' today';
-    else if (doneDays.includes(d)) cls += ' done';
-    cells += `<div class="${cls}">${d}</div>`;
-  }
-  grid.innerHTML = cells;
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const startDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+    
+    let html = '';
+    // Empty days before start
+    for (let i = 0; i < startDay; i++) html += '<div class="cal-day empty"></div>';
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isToday = day === now.getDate();
+      const isCompleted = streak.history.includes(dateStr);
+      
+      html += `
+        <div class="cal-day ${isToday ? 'today' : ''} ${isCompleted ? 'active' : ''}">
+          ${day}
+        </div>
+      `;
+    }
+    calGrid.innerHTML = html;
+  } catch (e) { console.error('Streak fetch error:', e); }
 }
 
-// ─── MODAL ───
-let currentStep = 1;
-const totalSteps = 2;
+// ─── YOUTUBE VIDEO POOL (personalised, login-only) ───
+async function loadVideoPool() {
+  const grid = document.getElementById('videoGrid');
+  if (!grid || !session) return;
+  const status = document.getElementById('videoPoolStatus');
 
-function openModal() {
-  document.getElementById('modalOverlay').classList.add('open');
-  currentStep = 1;
-  showStep(1);
-}
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-function nextStep() {
-  if (currentStep < totalSteps) {
-    currentStep++;
-    showStep(currentStep);
+  // Build search query: prefer selected task's ytQuery, else user's domain from server
+  let query = '';
+  if (selectedTask !== null && tasks[selectedTask]) {
+    const t = tasks[selectedTask];
+    query = t.ytQuery || (t.title + ' tutorial');
   } else {
-    showStep(3);
-    document.getElementById('nextBtn').style.display = 'none';
-    document.getElementById('stepCounter').textContent = 'Ready!';
+    // Fetch user profile to get their interest/domain
+    try {
+      const profRes = await fetch('/api/users/' + session.id);
+      const profData = await profRes.json();
+      const domain = profData.user?.domain || '';
+      const level  = profData.user?.level  || '';
+      query = domain ? (domain + ' ' + level + ' tutorial beginner project') : 'programming project tutorial 2024';
+    } catch { query = 'programming tutorial beginner project 2024'; }
+  }
+
+  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--display-font);color:rgba(255,255,255,0.5);">
+    ⏳ Loading 6 personalised videos for you...
+  </div>`;
+  if (status) status.textContent = '';
+
+  try {
+    const res = await fetch('/api/youtube/search?q=' + encodeURIComponent(query) + '&maxResults=6');
+    const data = await res.json();
+    const videos = (data.videos || []).slice(0, 6);
+    if (data.success && videos.length > 0) {
+      grid.innerHTML = videos.map(v => `
+        <div onclick="openVideoModal('${v.embedUrl}')" style="cursor:pointer;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="position:relative;">
+            <img src="${v.thumbnail}" alt="${v.title}" style="width:100%;height:165px;object-fit:cover;display:block;" onerror="this.src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);opacity:0;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+              <div style="width:52px;height:52px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;">▶</div>
+            </div>
+          </div>
+          <div style="padding:12px 14px;">
+            <div style="font-family:var(--display-font);font-weight:700;font-size:15px;color:var(--white);line-height:1.3;margin-bottom:4px;">${v.title.length>60?v.title.slice(0,60)+'...':v.title}</div>
+            <div style="font-family:var(--body-font);font-size:12px;color:rgba(255,255,255,0.45);">${v.channel || 'YouTube'}</div>
+          </div>
+        </div>
+      `).join('');
+      if (status) status.textContent = `✔ ${videos.length} videos matched to your interest: "${query.split(' ').slice(0,3).join(' ')}"...`;
+    } else {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.4);">No videos found for your interest. Try selecting a task first.</div>`;
+    }
+  } catch (e) {
+    console.error('Video load error:', e);
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Could not load videos. Server may be offline.</div>`;
   }
 }
-function showStep(n) {
-  document.querySelectorAll('.modal-step').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('step' + n);
-  if (el) el.classList.add('active');
-  if (n <= totalSteps) {
-    document.getElementById('stepCounter').textContent = `Step ${n} of ${totalSteps}`;
+
+function openVideoModal(url) {
+  const modal = document.getElementById('videoModalOverlay');
+  const iframe = document.getElementById('videoIframe');
+  if(modal && iframe) {
+    iframe.src = url + '?autoplay=1';
+    modal.style.display = 'flex';
+  }
+}
+function closeVideoModal() {
+  const modal = document.getElementById('videoModalOverlay');
+  const iframe = document.getElementById('videoIframe');
+  if(modal && iframe) {
+    iframe.src = '';
+    modal.style.display = 'none';
   }
 }
 
-function selectChip(el, group) {
-  el.closest('.chip-group').querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
+// ─── TECH NEWS ───
+async function fetchNews() {
+  try {
+    const res = await fetch('/api/news');
+    const data = await res.json();
+    const grid = document.getElementById('newsGrid');
+    if (!grid) return;
+    
+    if (!data.news || data.news.length === 0) {
+      grid.innerHTML = '<div style="color:var(--grey-dis);font-family:var(--body-font);">No news available at the moment.</div>';
+      return;
+    }
+    
+    grid.innerHTML = data.news.map(n => {
+      const dateStr = new Date(n.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const imgHtml = n.imageUrl ? \`<img src="\${n.imageUrl}" style="width:100%;height:150px;object-fit:cover;border-radius:4px;margin-bottom:10px;">\` : '';
+      return \`
+      <div class="awareness-card reveal">
+        <span class="awareness-card-tag">Tech News</span>
+        <div class="awareness-card-date">\${dateStr}</div>
+        \${imgHtml}
+        <div class="awareness-card-title">\${n.title}</div>
+        <div class="awareness-card-body">\${n.details}</div>
+        \${n.relatedTasks ? \`<div style="font-size:12px;color:var(--red);margin-top:5px;font-weight:bold;">Related: \${n.relatedTasks}</div>\` : ''}
+        <button class="awareness-convert" onclick="window.location.href='/login.html'">Convert to Task →</button>
+      </div>\`;
+    }).join('');
+  } catch(e) { console.error('News fetch error:', e); }
 }
 
-// ─── MOBILE NAV ───
-function toggleMobileNav() {
-  document.getElementById('mobileNav').classList.toggle('open');
-}
-
-// ─── UPLOAD ───
-function triggerUpload() {
-  document.getElementById('fileInput').click();
-}
-function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const zone = document.getElementById('uploadZone');
-  zone.innerHTML = `
-    <span class="upload-icon">✅</span>
-    <div class="upload-label">${file.name}</div>
-    <div class="upload-sublabel">${(file.size/1024).toFixed(1)} KB · Ready to submit</div>
-    <button class="btn-rect" onclick="showSubmissionStatus()">Submit Now →</button>
-  `;
-}
-function submitGithub() {
-  const val = document.getElementById('githubInput').value.trim();
+// ─── SUBMISSIONS ───
+async function submitGithub() {
+  const val = document.getElementById('githubInput')?.value.trim();
   if (!val || !val.startsWith('http')) {
     alert('Please enter a valid GitHub URL.');
     return;
   }
-  showSubmissionStatus();
-}
-function showSubmissionStatus() {
-  document.getElementById('submissionStatus').style.display = 'block';
-  document.getElementById('submissionStatus').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  try {
+    const res = await fetch('/api/submissions/github', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: session.id, taskId: selectedTask !== null ? tasks[selectedTask].id : 'unknown', githubUrl: val })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('GitHub link submitted successfully! Under review.');
+      document.getElementById('githubInput').value = '';
+    }
+  } catch (e) { console.error(e); }
 }
 
-// ─── SCROLL REVEAL ───
+// ─── FILE UPLOAD ───
+let selectedFile = null;
+function triggerUpload() { document.getElementById('fileInput').click(); }
+function handleFile(e) {
+  selectedFile = e.target.files[0];
+  if (!selectedFile) return;
+  const zone = document.getElementById('uploadZone');
+  if(zone) {
+    zone.innerHTML = `
+      <span class="upload-icon">✅</span>
+      <div class="upload-label">${selectedFile.name}</div>
+      <button class="btn-rect" onclick="submitFileUpload()" style="margin-top:10px;">Submit File →</button>
+    `;
+  }
+}
+async function submitFileUpload() {
+  if (!selectedFile) return;
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+  formData.append('userId', session.id);
+  formData.append('taskId', selectedTask !== null ? tasks[selectedTask].id : 'unknown');
+  try {
+    const res = await fetch('/api/submissions/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+      alert('File uploaded successfully!');
+      selectedFile = null;
+      document.getElementById('uploadZone').innerHTML = '<span class="upload-icon">📁</span><div class="upload-label">Upload your zipped project</div>';
+    }
+  } catch (e) { console.error(e); }
+}
+
+// Utils
 function initReveal() {
   const els = document.querySelectorAll('.reveal');
   const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        obs.unobserve(e.target);
-      }
-    });
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.12 });
   els.forEach(el => obs.observe(el));
 }
+function initNavHighlight() { /* Placeholder */ }
+function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
 
-// ─── NAV ACTIVE STATE ───
-function initNavHighlight() {
-  const sections = document.querySelectorAll('section[id]');
-  const links = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(sec => {
-      if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
-    });
-    links.forEach(a => {
-      a.classList.remove('active');
-      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
-    });
-  });
-}
-
-// ─── INIT ───
 document.addEventListener('DOMContentLoaded', () => {
-  renderTasks();
-  renderCalendar();
-  startTimer();
+  enforceAuth();
+  if (session) {
+    renderCalendar();
+  }
   initReveal();
-  initNavHighlight();
-
-  // Close modal on overlay click
-  document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-  });
 });
+
+  // Escape key closes video modal
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoModal(); });
 </script>
+
+<!-- AI MENTOR CHAT WIDGET -->
+<div id="aiChatWidget" style="position:fixed;bottom:24px;right:24px;z-index:9999;font-family:var(--body-font);display:none;">
+  <!-- Chat Button -->
+  <button id="aiChatBtn" onclick="toggleAiChat()" style="width:60px;height:60px;border-radius:50%;background:var(--red);color:#fff;border:none;box-shadow:0 8px 24px rgba(230,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;">
+    🤖
+  </button>
+
+  <!-- Chat Window -->
+  <div id="aiChatWindow" style="display:none;position:absolute;bottom:80px;right:0;width:340px;height:460px;background:#1a1c1e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.5);flex-direction:column;overflow:hidden;">
+    <!-- Header -->
+    <div style="background:var(--charcoal);padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:10px;height:10px;background:#00ff88;border-radius:50%;box-shadow:0 0 10px #00ff88;"></div>
+        <div style="font-family:var(--display-font);font-weight:700;color:#fff;letter-spacing:1px;font-size:16px;">AI MENTOR</div>
+      </div>
+      <button onclick="toggleAiChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    
+    <!-- Messages Area -->
+    <div id="aiChatMessages" style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:rgba(255,255,255,0.85);font-size:14px;max-width:85%;align-self:flex-start;line-height:1.5;">
+        Initialization complete. I am your AI Mentor. Ask me anything about your current task or concepts you are struggling with.
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div style="padding:16px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:8px;">
+      <input type="text" id="aiChatInput" placeholder="Ask AI Mentor..." style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:10px 16px;color:#fff;font-family:var(--body-font);font-size:14px;outline:none;" onkeypress="if(event.key==='Enter') sendAiMessage()">
+      <button onclick="sendAiMessage()" style="background:var(--red);border:none;border-radius:50%;width:40px;height:40px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        ➤
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

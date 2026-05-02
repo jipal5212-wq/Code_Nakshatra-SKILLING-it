@@ -1,0 +1,154 @@
+{
+  "accounts": [
+    [
+      "ashish21@gmail.com",
+      {
+        "id": "admin-001",
+        "email": "ashish21@gmail.com",
+        "password": "killingit",
+        "role": "admin",
+        "name": "Ashish"
+      }
+    ],
+    [
+      "jipal5212@gmail.com",
+      {
+        "id": "4f463a51-3f19-4e22-b2b2-b2af71aeaf05",
+        "email": "jipal5212@gmail.com",
+        "password": "2121",
+        "role": "user",
+        "name": "ashsih"
+      }
+    ],
+    [
+      "qw2345367",
+      {
+        "id": "00011c9b-e276-478a-9bab-8e13e7c49384",
+        "email": "qw2345367",
+        "password": "12345",
+        "role": "user",
+        "name": "ashish"
+      }
+    ]
+  ],
+  "users": [
+    [
+      "4f463a51-3f19-4e22-b2b2-b2af71aeaf05",
+      {
+        "id": "4f463a51-3f19-4e22-b2b2-b2af71aeaf05",
+        "name": "ashsih",
+        "email": "jipal5212@gmail.com",
+        "domain": "",
+        "level": "",
+        "points": 0,
+        "streak": 0,
+        "joinedAt": "2026-04-24T11:04:31.589Z",
+        "completedTasks": []
+      }
+    ],
+    [
+      "00011c9b-e276-478a-9bab-8e13e7c49384",
+      {
+        "id": "00011c9b-e276-478a-9bab-8e13e7c49384",
+        "name": "ashish",
+        "email": "qw2345367",
+        "domain": "",
+        "level": "",
+        "points": 0,
+        "streak": 0,
+        "joinedAt": "2026-04-24T11:18:47.072Z",
+        "completedTasks": []
+      }
+    ]
+  ],
+  "streaks": [
+    [
+      "4f463a51-3f19-4e22-b2b2-b2af71aeaf05",
+      {
+        "current": 0,
+        "best": 0,
+        "history": []
+      }
+    ],
+    [
+      "00011c9b-e276-478a-9bab-8e13e7c49384",
+      {
+        "current": 0,
+        "best": 0,
+        "history": []
+      }
+    ]
+  ],
+  "submissions": [],
+  "tasks": [
+    {
+      "id": "task-1",
+      "domain": "AI / ML",
+      "level": "Beginner",
+      "title": "Build a Text Classifier",
+      "desc": "Using Scikit-learn, train a Naive Bayes classifier on a sample dataset.",
+      "effort": "~1 hr",
+      "ytQuery": "scikit learn text classification tutorial",
+      "assignedBy": "system",
+      "videos": []
+    },
+    {
+      "id": "task-2",
+      "domain": "Web Dev",
+      "level": "Intermediate",
+      "title": "REST API with Node.js",
+      "desc": "Create a CRUD REST API for a todo list using Express.",
+      "effort": "~1.5 hrs",
+      "ytQuery": "nodejs express REST API tutorial",
+      "assignedBy": "system",
+      "videos": []
+    },
+    {
+      "id": "task-3",
+      "domain": "Robotics",
+      "level": "Beginner",
+      "title": "Arduino Line Follower",
+      "desc": "Write the control logic for a 2-sensor line follower.",
+      "effort": "~1 hr",
+      "ytQuery": "arduino line follower robot tutorial",
+      "assignedBy": "system",
+      "videos": []
+    },
+    {
+      "id": "task-4",
+      "domain": "Cybersec",
+      "level": "Intermediate",
+      "title": "Scan & Report Vulns",
+      "desc": "Use Nmap to scan a local VM. Document 3 findings.",
+      "effort": "~1 hr",
+      "ytQuery": "nmap vulnerability scanning tutorial",
+      "assignedBy": "system",
+      "videos": []
+    },
+    {
+      "id": "task-5",
+      "domain": "Data Science",
+      "level": "Beginner",
+      "title": "EDA on Titanic Dataset",
+      "desc": "Load the Titanic CSV in Pandas. Answer key questions.",
+      "effort": "~45 min",
+      "ytQuery": "pandas EDA titanic dataset tutorial",
+      "assignedBy": "system",
+      "videos": []
+    },
+    {
+      "id": "task-6",
+      "domain": "AI / ML",
+      "level": "Advanced",
+      "title": "Fine-tune a GPT-2 Model",
+      "desc": "Using HuggingFace, fine-tune GPT-2 on custom data.",
+      "effort": "~2 hrs",
+      "ytQuery": "huggingface GPT2 fine tune tutorial",
+      "assignedBy": "system",
+      "videos": []
+    }
+  ],
+  "videoPool": [],
+  "taskAssignments": [],
+  "news": []
+}

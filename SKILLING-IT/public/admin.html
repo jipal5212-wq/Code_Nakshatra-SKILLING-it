@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SKILLING IT – Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e60000;--charcoal:#25282b;--white:#fff;--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
+body{font-family:var(--body);background:var(--charcoal);color:var(--white);margin:0;padding:20px;}
+.nav{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);}
+.btn{background:var(--red);color:var(--white);padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--display);text-transform:uppercase;}
+.section{margin:30px 0;}
+h2{font-family:var(--display);font-size:24px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.card{background:rgba(255,255,255,0.05);padding:20px;border-radius:8px;margin-bottom:10px;}
+.input{width:100%;padding:10px;margin-bottom:10px;background:rgba(255,255,255,0.1);color:var(--white);border:none;}
+.flex{display:flex;gap:10px;}
+</style>
+</head>
+<body>
+  <div class="nav">
+    <h2>Skilling It - Admin Panel</h2>
+    <button class="btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="section">
+    <h2>Add YT Video to Pool</h2>
+    <div class="flex">
+      <input type="text" id="videoUrl" class="input" placeholder="YouTube Video URL">
+      <input type="text" id="videoTitle" class="input" placeholder="Video Title">
+      <button class="btn" onclick="addVideo()">Add</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Assign Tasks to Users</h2>
+    <div class="flex">
+      <select id="userSelect" class="input"></select>
+      <select id="taskSelect" class="input"></select>
+      <button class="btn" onclick="assignTask()">Assign</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Post Tech News & Tasks</h2>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+      <input type="text" id="newsTitle" class="input" placeholder="News Title (e.g. AI Advances)">
+      <textarea id="newsDetails" class="input" placeholder="News Details..." rows="4"></textarea>
+      <input type="text" id="newsTasks" class="input" placeholder="Related Task Keywords (e.g. AI, Web)">
+      <label>News Image:</label>
+      <input type="file" id="newsImage" class="input" accept="image/*">
+      <button class="btn" onclick="postNews()">Post News</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Submissions (Review & Award Points)</h2>
+    <div id="subsGrid" class="grid"></div>
+  </div>
+
+<script>
+let session = JSON.parse(localStorage.getItem('skillingit_session') || 'null');
+if(!session || session.role !== 'admin') window.location.href = '/';
+
+async function init() {
+  await loadUsers();
+  await loadTasks();
+  await loadSubmissions();
+}
+
+async function loadUsers() {
+  let res = await fetch('/api/admin/users');
+  let data = await res.json();
+  document.getElementById('userSelect').innerHTML = data.users.map(u => `<option value="${u.id}">${u.name} (${u.email})</option>`).join('');
+}
+
+async function loadTasks() {
+  let res = await fetch('/api/tasks');
+  let data = await res.json();
+  document.getElementById('taskSelect').innerHTML = data.tasks.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+}
+
+async function loadSubmissions() {
+  let res = await fetch('/api/submissions');
+  let data = await res.json();
+  let html = data.submissions.filter(s => s.status === 'pending-review').map(s => `
+    <div class="card">
+      <h3>User: ${s.userId} | Task: ${s.taskId}</h3>
+      <p>Link: <a href="${s.githubUrl || s.path}" target="_blank" style="color:var(--red)">View Submission</a></p>
+      <input type="number" id="pts-${s.id}" class="input" placeholder="Points to award">
+      <button class="btn" onclick="reviewSub('${s.id}')">Approve</button>
+    </div>
+  `).join('');
+  document.getElementById('subsGrid').innerHTML = html || '<p>No pending submissions.</p>';
+}
+
+async function addVideo() {
+  let url = document.getElementById('videoUrl').value;
+  let title = document.getElementById('videoTitle').value;
+  if(url) {
+    await fetch('/api/admin/videos', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url, title, adminId:session.id})});
+    alert('Video added!');
+    document.getElementById('videoUrl').value = ''; document.getElementById('videoTitle').value = '';
+  }
+}
+
+async function assignTask() {
+  let userId = document.getElementById('userSelect').value;
+  let taskId = document.getElementById('taskSelect').value;
+  await fetch('/api/admin/assign-task', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId, taskId, adminId:session.id})});
+  alert('Assigned!');
+}
+
+async function reviewSub(id) {
+  let pts = parseInt(document.getElementById('pts-'+id).value) || 0;
+  await fetch('/api/admin/review-submission', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({submissionId:id, points:pts, status:'approved', adminId:session.id})});
+  alert('Approved and awarded points!');
+  loadSubmissions();
+}
+
+async function postNews() {
+  const title = document.getElementById('newsTitle').value;
+  const details = document.getElementById('newsDetails').value;
+  const relatedTasks = document.getElementById('newsTasks').value;
+  const imageFile = document.getElementById('newsImage').files[0];
+
+  if (!title || !details) return alert('Title and details are required!');
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('details', details);
+  formData.append('relatedTasks', relatedTasks);
+  if (imageFile) formData.append('image', imageFile);
+
+  try {
+    const res = await fetch('/api/news', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('News posted successfully!');
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsDetails').value = '';
+      document.getElementById('newsTasks').value = '';
+      document.getElementById('newsImage').value = '';
+    } else {
+      alert('Failed to post news: ' + data.error);
+    }
+  } catch (e) { console.error(e); alert('Error posting news.'); }
+}
+
+function logout() {
+  localStorage.removeItem('skillingit_session');
+  window.location.href = '/';
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SKILLING IT – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e60000;--charcoal:#25282b;--white:#fff;--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
+body{font-family:var(--body);background:var(--charcoal);color:var(--white);margin:0;padding:20px;}
+.nav{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);}
+.btn{background:var(--red);color:var(--white);padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--display);text-transform:uppercase;}
+.section{margin:30px 0;}
+h2{font-family:var(--display);font-size:24px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.card{background:rgba(255,255,255,0.05);padding:20px;border-radius:8px;}
+.input{width:100%;padding:10px;margin-bottom:10px;background:rgba(255,255,255,0.1);color:var(--white);border:none;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+  <div class="nav">
+    <h2>Skilling It - Dashboard</h2>
+    <div>
+      <span id="userInfo"></span> | <span id="userPoints"></span> points
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div id="setupProfile" class="section hidden">
+    <h2>Setup Profile</h2>
+    <input type="text" id="domain" class="input" placeholder="Your Domain (e.g., Web Dev)">
+    <input type="text" id="level" class="input" placeholder="Your Level (e.g., Beginner)">
+    <button class="btn" onclick="saveProfile()">Save Profile</button>
+  </div>
+
+  <div id="mainDashboard" class="section hidden">
+    <h2>My Tasks</h2>
+    <div id="taskGrid" class="grid"></div>
+
+    <h2>Suggested Videos</h2>
+    <div id="videoGrid" class="grid"></div>
+
+    <h2>Submit Work</h2>
+    <div class="card">
+      <input type="url" id="githubUrl" class="input" placeholder="GitHub URL">
+      <button class="btn" onclick="submitWork()">Submit</button>
+    </div>
+  </div>
+
+<script>
+let session = JSON.parse(localStorage.getItem('skillingit_session') || 'null');
+if(!session || session.role !== 'user') window.location.href = '/';
+
+async function init() {
+  document.getElementById('userInfo').textContent = session.name;
+  try {
+    let res = await fetch('/api/users/' + session.id);
+    let data = await res.json();
+    document.getElementById('userPoints').textContent = data.user.points;
+    if(!data.user.domain) {
+      document.getElementById('setupProfile').classList.remove('hidden');
+    } else {
+      document.getElementById('mainDashboard').classList.remove('hidden');
+      loadTasks();
+      loadVideos();
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function saveProfile() {
+  const domain = document.getElementById('domain').value;
+  const level = document.getElementById('level').value;
+  await fetch('/api/users/setup-profile', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:session.id, domain, level})});
+  window.location.reload();
+}
+
+async function loadTasks() {
+  const res = await fetch('/api/tasks');
+  const data = await res.json();
+  document.getElementById('taskGrid').innerHTML = data.tasks.map(t => `<div class="card"><h3>${t.title}</h3><p>${t.desc}</p></div>`).join('');
+}
+
+async function loadVideos() {
+  const res = await fetch('/api/admin/videos');
+  const data = await res.json();
+  document.getElementById('videoGrid').innerHTML = data.videos.map(v => `<div class="card"><img src="${v.thumbnail}" width="100%"><h4>${v.title}</h4></div>`).join('');
+}
+
+async function submitWork() {
+  const url = document.getElementById('githubUrl').value;
+  if(url) {
+    await fetch('/api/submissions/github', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:session.id, githubUrl:url})});
+    alert('Submitted!');
+    document.getElementById('githubUrl').value = '';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('skillingit_session');
+  window.location.href = '/';
+}
+init();
+</script>
+</body>
+</html>

@@ -1,3 +1,0 @@
-# 
-
-{"message":"Hello from the S-KILLING IT backend!"}
