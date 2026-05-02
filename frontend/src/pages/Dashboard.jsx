@@ -111,7 +111,7 @@ export default function Dashboard() {
                 S-KILLING it
               </span>
               <span className="absolute top-1/2 left-0 w-[91%] -translate-y-1/2 scale-y-0 group-hover:scale-y-100 transition-transform duration-500 text-slate-950 bg-cyan-400 text-[0.25em] font-bold tracking-[0.5em] md:tracking-[0.7em] text-center ml-1 py-0.5 rounded-[1px] z-10">
-                DO EXTRA
+                LEARN EXTRA
               </span>
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function Dashboard() {
             <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-on-surface-variant hover:text-white material-symbols-outlined transition-colors">close</button>
             <div className="mb-8">
               <h3 className="text-3xl font-headline font-bold text-white tracking-tighter">Join the Orbit</h3>
-              <p className="text-on-surface-variant text-sm mt-2 font-body">Ready to do extra?</p>
+              <p className="text-on-surface-variant text-sm mt-2 font-body">Ready to learn extra?</p>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.target); handleRegister(fd.get('email'), fd.get('name')); }} className="space-y-4 mb-8">
               <input name="email" type="email" placeholder="Enter Gmail" required className="w-full bg-surface border border-outline-variant/30 rounded-xl px-5 py-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-primary/50 transition-colors font-body text-sm" />
@@ -247,7 +247,7 @@ export default function Dashboard() {
               <div className="max-w-screen-xl px-6 text-center z-10">
                 <div className="bg-background/20 backdrop-blur-[2px] rounded-3xl p-4 md:p-8 inline-block relative mt-16">
                   <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-headline font-black tracking-tighter text-on-background mb-10 leading-none relative z-20">
-                    Skilling It... <br /> <span className="text-gradient-primary">Let's Do Extra.</span>
+                    Skilling It... <br /> <span className="text-gradient-primary">Let's Learn Extra.</span>
                   </h1>
 
                   <div className="flex justify-center items-center mt-12">
