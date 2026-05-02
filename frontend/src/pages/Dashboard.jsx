@@ -159,7 +159,7 @@ export default function Dashboard() {
               className="flex-grow flex flex-col justify-center items-center text-center max-w-3xl mx-auto"
             >
               <div className="inline-block px-3 py-1 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-xs font-bold uppercase tracking-widest rounded-full mb-8">
-                Execution > Consumption
+                Execution &gt; Consumption
               </div>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
                 Don't just watch tutorials. <br/>
