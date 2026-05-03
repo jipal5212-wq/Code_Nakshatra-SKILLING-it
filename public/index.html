@@ -22,6 +22,15 @@
       --body-font: 'Barlow', sans-serif;
     }
 
+    @keyframes toastFadeIn {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    @keyframes toastFadeOut {
+      from { opacity: 1; transform: translate(-50%, 0); }
+      to { opacity: 0; transform: translate(-50%, 20px); }
+    }
+
     *,
     *::before,
     *::after {
@@ -1456,6 +1465,7 @@
     }
 
     .modal-overlay.open {
+      display: flex !important;
       opacity: 1;
       pointer-events: all;
     }
@@ -1567,7 +1577,7 @@
       border-color: var(--charcoal);
     }
 
-    .chip.selected {
+    .chip.active {
       border-color: var(--red);
       background: var(--red);
       color: var(--white);
@@ -1775,6 +1785,266 @@
       opacity: 1;
       transform: none;
     }
+
+    .streak-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 96px 48px;
+    }
+
+    .streak-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    .btn-ai {
+      background: var(--red);
+      color: var(--white);
+      font-family: var(--display-font);
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 14px 24px;
+      border-radius: 2px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-ai:hover {
+      background: #cc0000;
+    }
+
+    /* Guest preview pool (before login) — PRD §3 */
+    #guestPreview {
+      background: var(--white);
+      padding: 0;
+    }
+
+    .guest-preview-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 88px 48px 96px;
+    }
+
+    .guest-preview-cta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 40px;
+    }
+
+    .guest-preview-lock-note {
+      font-family: var(--display-font);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--grey-body);
+      max-width: 280px;
+      line-height: 1.5;
+      border-left: 3px solid var(--red);
+      padding-left: 16px;
+    }
+
+    .preview-pool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .preview-task-strip {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      min-height: 160px;
+    }
+
+    .preview-task-inner {
+      background: var(--grey-light);
+      padding: 22px 20px 54px;
+      height: 100%;
+    }
+
+    .preview-task-dim {
+      position: absolute;
+      inset: 0;
+      background: rgba(37, 40, 43, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      padding: 12px;
+    }
+
+    .preview-task-dim span {
+      font-family: var(--display-font);
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.6);
+      text-align: center;
+    }
+
+    .task-card-objective {
+      font-family: var(--body-font);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .task-card-mini {
+      font-family: var(--body-font);
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      line-height: 1.45;
+      text-transform: none;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .task-card-mini em {
+      color: rgba(230, 0, 0, 0.85);
+      font-style: normal;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* Dual timers — 2h pick + 24h cycle — PRD §7–§8 */
+    .dashboard-timers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+
+    .dashboard-timer-block.wide {
+      min-width: 200px;
+    }
+
+    .dashboard-timer-sub {
+      font-family: var(--body-font);
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 8px;
+      line-height: 1.35;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .dashboard-timer-block.invert {
+      background: var(--charcoal);
+      border: 2px solid rgba(255, 255, 255, 0.28);
+    }
+
+    /* Proof checklist — PRD §10 */
+    .proof-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 20px 0 8px;
+    }
+
+    .proof-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-family: var(--body-font);
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.35;
+    }
+
+    .proof-item input {
+      margin-top: 3px;
+      accent-color: var(--red);
+    }
+
+    #loopStrip {
+      background: linear-gradient(90deg, var(--charcoal) 0%, #1a1c1f 50%, var(--charcoal) 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 48px;
+    }
+
+    .loop-strip-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .loop-phase {
+      font-family: var(--display-font);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.95);
+      padding: 14px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .loop-phase em {
+      color: var(--red);
+      font-style: normal;
+    }
+
+    .loop-arrow {
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .preview-pool-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .loop-strip-inner {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .streak-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .proof-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .guest-preview-inner {
+        padding: 64px 24px;
+      }
+
+      .preview-pool-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .loop-strip-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .streak-inner {
+        padding: 64px 24px;
+      }
+    }
   
 </style>
 </head>
@@ -1785,6 +2055,8 @@
       <span class="nav-logo-text">S-KILLING<span> it</span></span>
     </a>
     <ul class="nav-links">
+      <li id="navPreviewLi"><a href="#guestPreview" id="navPreviewPool">Preview pool</a></li>
+      <li id="navVideosGuestLi"><a href="#videoPool">Best videos</a></li>
       <li><a href="#how" class="active">How It Works</a></li>
       <li><a href="#dashboard">Dashboard</a></li>
       <li><a href="#streaks">Streaks</a></li>
@@ -1807,8 +2079,8 @@
         <em>DAILY.</em>
       </h1>
       <p class="hero-sub">
-        Not a course. Not a tutorial. A 24-hour execution loop that forces you to learn, build, and submit — every
-        single day.
+        Not a course platform — a <strong style="font-weight:600;color:rgba(255,255,255,0.92);">daily execution system</strong>.
+        Structured tasks from free tutorials, enforced proof, admin review: <strong style="font-weight:600;color:rgba(255,255,255,0.92);">Choose → Build → Submit → Review → Repeat</strong>.
       </p>
       <div class="hero-actions">
         <a href="/login.html" class="btn-pill">Login to Start →</a>
@@ -1848,7 +2120,54 @@
         <span class="ticker-item"><b>DATA ·</b> Pandas EDA in one session</span>
       </div>
     </div>
-  </section><section id="videoPool">
+  </section>
+
+  <!-- PRD §3 Entry: preview 6–7 tasks before signup -->
+  <section id="guestPreview" style="display:none;">
+    <div class="guest-preview-inner">
+      <div class="section-tag">
+        <div class="section-tag-bar"></div><span class="section-tag-text">Before you join</span>
+      </div>
+      <div class="guest-preview-cta-bar">
+        <div style="flex:1;min-width:240px;">
+          <h2 class="section-title reveal">Preview today's<br><em>task pool</em></h2>
+          <p class="section-intro reveal" style="margin-bottom:0;">Pick interest and level. You'll see sample tasks matching the daily pool shape (6–7 options). Execution stays locked until you start the loop with an account.</p>
+        </div>
+        <p class="guest-preview-lock-note reveal">Tasks are mandatory. Proof is verified. Watching video is optional support — shipping output is required.</p>
+      </div>
+      <label class="form-label" style="margin-bottom:12px;display:block;">Interest</label>
+      <div class="chip-group" id="guestDomainChips" style="margin-bottom:20px;">
+        <span class="chip guest-chip active" data-domain="AI">AI / ML</span>
+        <span class="chip guest-chip" data-domain="Web">Web Dev</span>
+        <span class="chip guest-chip" data-domain="Robotics">Robotics</span>
+        <span class="chip guest-chip" data-domain="Cybersec">Cybersecurity</span>
+        <span class="chip guest-chip" data-domain="IoT">IoT</span>
+        <span class="chip guest-chip" data-domain="Data">Data Science</span>
+      </div>
+      <label class="form-label" style="margin-bottom:12px;display:block;">Level</label>
+      <div class="chip-group" id="guestLevelChips" style="margin-bottom:28px;">
+        <span class="chip guest-chip-lvl active" data-level="Beginner">Beginner</span>
+        <span class="chip guest-chip-lvl" data-level="Intermediate">Intermediate</span>
+        <span class="chip guest-chip-lvl" data-level="Advanced">Advanced</span>
+      </div>
+      <div class="preview-pool-grid" id="guestPreviewGrid"></div>
+      <div style="text-align:center;margin-top:28px;">
+        <a href="/login.html" class="btn-pill" style="text-decoration:none;">Start the Loop → Login</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="loopStrip" aria-label="Execution loop phases">
+    <div class="loop-strip-inner reveal">
+      <div class="loop-phase"><em>1</em> · Choose · 2h cap</div>
+      <div class="loop-phase"><em>2</em> · Build · ~1h goal</div>
+      <div class="loop-phase"><em>3</em> · Submit proof</div>
+      <div class="loop-phase"><em>4</em> · Admin verdict</div>
+      <div class="loop-phase"><em>5</em> · Streak + points · next cycle</div>
+    </div>
+  </section>
+
+  <section id="videoPool">
     <div class="video-pool-inner">
       <div class="section-tag">
         <div class="section-tag-bar"></div><span class="section-tag-text" style="color:var(--red)">Learn By
@@ -1858,7 +2177,7 @@
       <p style="font-family:var(--body-font);font-size:16px;color:rgba(255,255,255,0.45);font-weight:300;max-width:520px;line-height:1.6;margin-bottom:16px;">
         Curated video tutorials matched to your selected task. Watch the recommended segment, then build.</p>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;">
-        <button class="btn-ai" id="loadVideosBtn" onclick="loadVideoPool()">🎬 Load Video Pool</button>
+        <button type="button" class="btn-ai" id="giveBestContent">✨ Give me best content</button>
         <span id="videoPoolStatus" style="font-family:var(--body-font);font-size:13px;color:rgba(255,255,255,0.35);"></span>
       </div>
       <div class="video-grid" id="videoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:20px;">
@@ -1897,7 +2216,7 @@
           <div class="how-card-title">Execution</div>
           <div class="how-card-body">Watch only the recommended video segment. Then build. No aimless scrolling. The
             task is small, practical, and action-oriented. Target: ~1 hour of deep work.</div>
-          <span class="how-card-time">2 – 20 hrs</span>
+          <span class="how-card-time">Rest of 24h cycle</span>
         </div>
         <div class="how-card reveal">
           <div class="how-card-phase">Phase 03</div>
@@ -1934,9 +2253,17 @@
           <p style="font-family:var(--body-font); font-size:16px; color:rgba(255,255,255,0.45); font-weight:300; max-width:420px; line-height:1.6;">
             Select one task to execute today. You have 2 hours before one is auto-assigned.</p>
         </div>
-        <div class="dashboard-timer-block">
-          <div class="dashboard-timer-label">Time Remaining</div>
-          <div class="dashboard-timer-value" id="selectionTimer">01:47:22</div>
+        <div class="dashboard-timers">
+          <div class="dashboard-timer-block wide" id="chooseTimerBlock">
+            <div class="dashboard-timer-label" id="chooseTimerTitle">Pick a task · 2-hour window</div>
+            <div class="dashboard-timer-value" id="selectionWindowTimer">02:00:00</div>
+            <div class="dashboard-timer-sub" id="selectionWindowHint">Choosing early gives you more time to build inside the same 24-hour cycle.</div>
+          </div>
+          <div class="dashboard-timer-block invert wide">
+            <div class="dashboard-timer-label">24-hour cycle ends</div>
+            <div class="dashboard-timer-value" id="cycleTimerEl">23:59:59</div>
+            <div class="dashboard-timer-sub" id="cycleTimerHint">Submit proof before this hits zero.</div>
+          </div>
         </div>
       </div>
 
@@ -1960,11 +2287,11 @@
       </div>
       <h2 class="section-title reveal">DAILY<br><em>STREAKS</em></h2>
 
-      <div id="streakGuestView" style="text-align:center;padding:40px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px dashed rgba(255,255,255,0.1);margin-top:24px;">
+      <div id="streakGuestView" style="text-align:center;padding:44px;background:var(--grey-light);border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin-top:24px;">
         <div style="font-size:48px;margin-bottom:16px;">🔒</div>
-        <h3 style="font-family:var(--display-font);color:var(--white);font-size:24px;text-transform:uppercase;margin-bottom:8px;">
+        <h3 style="font-family:var(--display-font);color:var(--charcoal);font-size:24px;text-transform:uppercase;margin-bottom:8px;">
           Streaks are Locked</h3>
-        <p style="font-family:var(--body-font);color:rgba(255,255,255,0.5);max-width:400px;margin:0 auto;line-height:1.6;">
+        <p style="font-family:var(--body-font);color:var(--grey-body);max-width:400px;margin:0 auto;line-height:1.6;">
           Log in to start your 24-hour execution loop and track your consistency.</p>
         <a href="/login.html" class="btn-pill" style="display:inline-block;margin-top:20px;text-decoration:none;">Login
           to Start →</a>
@@ -1988,6 +2315,7 @@
           <div class="reveal">
             <div style="font-family:var(--display-font);font-weight:700;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:20px;">
               Unlock With Points</div>
+            <div id="rewardsDeck" style="margin-bottom:28px;"></div>
             <div class="rewards-list">
               <div class="reward-item">
                 <div class="reward-pts">50<br><sub>pts</sub></div>
@@ -2051,12 +2379,12 @@
       </div>
       <h2 class="section-title reveal">ACCOUNTABILITY<br><em>LOOP</em></h2>
 
-      <div id="submitGuestView" style="text-align:center;padding:40px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px dashed rgba(255,255,255,0.1);margin-top:24px;">
+      <div id="submitGuestView" style="text-align:center;padding:44px;background:rgba(255,255,255,0.06);border-radius:8px;border:1px solid rgba(255,255,255,0.1);margin-top:24px;">
         <div style="font-size:48px;margin-bottom:16px;">📑</div>
         <h3 style="font-family:var(--display-font);color:var(--white);font-size:24px;text-transform:uppercase;margin-bottom:8px;">
           Submit Your Work</h3>
-        <p style="font-family:var(--body-font);color:rgba(255,255,255,0.5);max-width:400px;margin:0 auto;line-height:1.6;">
-          Once you finish your daily task, submit it here for verification and points.</p>
+        <p style="font-family:var(--body-font);color:rgba(255,255,255,0.5);max-width:440px;margin:0 auto;line-height:1.6;">
+          PRD-ready proof bundle: repo, live demo, screenshot/video. No submission = no completion · admin verifies before streak + points.</p>
         <a href="/login.html" class="btn-pill" style="display:inline-block;margin-top:20px;text-decoration:none;">Login
           to Submit →</a>
       </div>
@@ -2065,33 +2393,40 @@
         <div class="submit-card">
           <p style="font-family:var(--body-font);font-size:16px;color:rgba(255,255,255,0.45);font-weight:300;line-height:1.7;max-width:420px;margin-bottom:8px;">
             Watching is not enough. You must prove you built something. Submit before your 24 hours are up.</p>
+          <div class="proof-grid" aria-label="Proof checklist">
+            <label class="proof-item"><input type="checkbox" checked disabled aria-readonly="true"> <span><strong style="color:rgba(255,255,255,0.82);">GitHub repo</strong> — source for review.</span></label>
+            <label class="proof-item"><input type="checkbox" checked disabled aria-readonly="true"> <span><strong style="color:rgba(255,255,255,0.82);">Live link</strong> — deployed/demo URL when applicable.</span></label>
+            <label class="proof-item"><input type="checkbox" checked disabled aria-readonly="true"> <span><strong style="color:rgba(255,255,255,0.82);">Screenshot</strong> — output or IDE capture.</span></label>
+            <label class="proof-item"><input type="checkbox" checked disabled aria-readonly="true"> <span><strong style="color:rgba(255,255,255,0.82);">Video</strong> — short screen capture / walkthrough.</span></label>
+          </div>
+          <p style="font-family:var(--body-font);font-size:12px;color:rgba(255,255,255,0.35);margin:0 0 12px;line-height:1.45;">Combine file upload + URLs so admins can judge task fit, visible effort, and expected output alignment.</p>
           <div class="submit-types">
             <div class="submit-type">
               <div class="submit-type-icon">💻</div>
               <div>
-                <div class="submit-type-label">Code File</div>
-                <div class="submit-type-desc">Upload .py, .html, .js, .ipynb or any source file</div>
+                <div class="submit-type-label">Code / archive</div>
+                <div class="submit-type-desc">.py, .html, zip, notebook — shows real build artefacts</div>
               </div>
             </div>
             <div class="submit-type">
               <div class="submit-type-icon">🖼️</div>
               <div>
                 <div class="submit-type-label">Screenshot / Image</div>
-                <div class="submit-type-desc">Show your working output, terminal, or result</div>
+                <div class="submit-type-desc">Output, dashboard, terminal, hardware — static proof</div>
               </div>
             </div>
             <div class="submit-type">
               <div class="submit-type-icon">🎬</div>
               <div>
                 <div class="submit-type-label">Demo Video</div>
-                <div class="submit-type-desc">Screen recording of your working project in action</div>
+                <div class="submit-type-desc">Screen recording proving behaviour end-to-end</div>
               </div>
             </div>
             <div class="submit-type">
               <div class="submit-type-icon">🔗</div>
               <div>
-                <div class="submit-type-label">GitHub Link</div>
-                <div class="submit-type-desc">Public repo or gist with your complete code</div>
+                <div class="submit-type-label">GitHub + Live URL</div>
+                <div class="submit-type-desc">Paste repo and hosting link below · both tracked</div>
               </div>
             </div>
           </div>
@@ -2101,15 +2436,41 @@
             <span class="upload-icon">📁</span>
             <div class="upload-label">Drop Your Files Here</div>
             <div class="upload-sublabel">PNG, JPG, MP4, PY, HTML, IPYNB — max 100MB</div>
-            <button class="btn-rect" style="display:inline-block">Browse Files</button>
-            <input type="file" id="fileInput" style="display:none" onchange="handleFile(event)">
+            <button type="button" class="btn-rect" style="display:inline-block">Browse Files</button>
           </div>
-          <div style="margin-top:16px;">
-            <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">
-              Or paste GitHub link</div>
-            <div class="github-input-wrap">
-              <input class="github-input" type="text" placeholder="https://github.com/username/repo" id="githubInput">
-              <button class="github-btn" onclick="submitGithub()">Submit →</button>
+          <input type="file" id="fileInput" style="display:none" onchange="handleFile(event)" title="Choose file">
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">
+                GitHub repository</div>
+              <div class="github-input-wrap">
+                <input class="github-input" type="url" placeholder="https://github.com/you/project" id="githubInput" autocomplete="url">
+                <button type="button" class="github-btn" onclick="submitGithub()">Send →</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">
+                Live / demo URL</div>
+              <div class="github-input-wrap">
+                <input class="github-input" type="url" placeholder="https://your-demo.vercel.app" id="liveUrlInput" autocomplete="url">
+                <button type="button" class="github-btn" onclick="submitLiveUrl()">Send →</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">
+                Demo video (URL)</div>
+              <div class="github-input-wrap">
+                <input class="github-input" type="url" placeholder="YouTube unlisted/Loom/Google Drive …" id="demoVideoInput" autocomplete="off">
+                <button type="button" class="github-btn" onclick="submitDemoVideo()">Send →</button>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--display-font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:10px;">
+                Screenshot / image URLs</div>
+              <div class="github-input-wrap">
+                <input class="github-input" type="text" placeholder="https://…  (comma-separate multiples)" id="screenshotUrlsInput" autocomplete="off">
+                <button type="button" class="github-btn" onclick="submitScreenshotUrls()">Send →</button>
+              </div>
             </div>
           </div>
           <div id="submissionStatus" style="display:none; margin-top:24px; padding:20px; background:rgba(230,0,0,0.12); border:1px solid var(--red); border-radius:6px;">
@@ -2118,6 +2479,7 @@
             <div style="font-family:var(--body-font);font-size:14px;color:rgba(255,255,255,0.5);">Your work is under
               admin review. Results typically within 2–4 hours. Keep building.</div>
           </div>
+          <div id="submissionVerdictBanner" style="display:none; margin-top:16px;padding:18px;background:rgba(255,255,255,.06);border-radius:8px;border:1px solid rgba(255,255,255,.12);"></div>
         </div>
       </div>
     </div>
@@ -2127,11 +2489,10 @@
   </div><section id="awareness">
     <div class="section">
       <div class="section-tag">
-        <div class="section-tag-bar"></div><span class="section-tag-text">Let's Be Relevant</span>
+        <div class="section-tag-bar"></div><span class="section-tag-text">Be relevant · admin curated</span>
       </div>
       <h2 class="section-title reveal">TECH<br><em>AWARENESS</em></h2>
-      <p class="section-intro reveal">Explore the latest across AI, Robotics, Cybersecurity, and Data Science. Optional
-        reading — but top performers always stay current.</p>
+      <p class="section-intro reveal">Admin-curated industry awareness (PRD §14). Optional — connects what you build with what's happening in AI, robotics, security, data, startups, R&amp;D. Read-only; stay relevant.</p>
       <div class="awareness-grid" id="newsGrid">
         <div style="color:var(--grey-dis);font-family:var(--body-font);">Loading latest news...</div>
       </div>
@@ -2171,14 +2532,14 @@
           <div class="footer-col-title">About</div>
           <ul class="footer-links">
             <li><a href="#">Our Mission</a></li>
-            <li><a href="#">Admin Panel</a></li>
+            <li><a href="/admin.html" style="opacity:.45;font-size:.9em;">Site admin</a></li>
             <li><a href="#">Join the Team</a></li>
             <li><a href="#">Contact</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <span class="footer-copy">© 2026 SKILLING IT · Built to close the skill gap · All rights reserved</span>
+        <span class="footer-copy">© 2026 SKILLING IT · Built to close the skill gap · All rights reserved · <a href="/admin.html" style="color:rgba(255,255,255,0.18);text-decoration:none;">Site admin</a></span>
         <div class="footer-social">
           <a href="#" title="GitHub">GH</a>
           <a href="#" title="LinkedIn">LI</a>
@@ -2193,12 +2554,14 @@
   
 
   <div class="mobile-nav" id="mobileNav">
+    <a href="#guestPreview" id="mobileNavPreview" onclick="toggleMobileNav()">Preview pool</a>
+    <a href="#videoPool" id="mobileNavVideosGuest" onclick="toggleMobileNav()">Best videos</a>
     <a href="#how" onclick="toggleMobileNav()">How It Works</a>
     <a href="#dashboard" onclick="toggleMobileNav()">Dashboard</a>
     <a href="#streaks" onclick="toggleMobileNav()">Streaks</a>
     <a href="#awareness" onclick="toggleMobileNav()">Awareness</a>
     <a href="#submit" onclick="toggleMobileNav()">Submit</a>
-    <a href="/login.html" onclick="toggleMobileNav()">Login →</a>
+    <a href="/login.html" id="mobileNavAccount" onclick="toggleMobileNav()">Login →</a>
   </div>
 
   <!-- HERO -->
@@ -2303,15 +2666,226 @@
 
   <!-- JAVASCRIPT -->
 
+  <script src="/js/skilling-auth.js"></script>
   <script>
-    let session = JSON.parse(localStorage.getItem('skillingit_session') || 'null');
+    SkillingAuth.migrateFromLegacy();
+    const SEL_MS = 2 * 60 * 60 * 1000;
+    const CYCLE_MS = 24 * 60 * 60 * 1000;
+
+    let session = SkillingAuth.toLegacy(SkillingAuth.read());
+    let cachedProfile = null;
+    let lastCyclePayload = null;
+    let lastCycleFetchedAt = 0;
     let tasks = [];
+    let previewTasksFull = [];
+    let guestDomain = 'AI';
+    let guestLevel = 'Beginner';
     let selectedTask = null;
-    let timerInterval = null;
-    let selectionSeconds = 86400; // 24 hours
+    let cycleTicker = null;
 
-    function showToast(msg) { alert(msg); } // Simple toast fallback
+    function showToast(msg, type = 'info') {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'error' ? '#ff4444' : 'var(--red)'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        z-index: 10000;
+        font-family: var(--display-font);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        animation: toastFadeIn 0.3s ease both;
+      `;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'toastFadeOut 0.3s ease both';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
 
+
+    function escHtml(str) {
+      if (str == null) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function taskMeta(t) {
+      const objective = t.objective || ('Ship working output aligned with: "' + String(t.title || '') + '".');
+      const watchSeg = t.watchSegment || 'Match a short YouTube segment (≈ first 15–20 min suggested). Watching is optional; building is required.';
+      const expected = (t.expectedOutput || t.desc || '').trim();
+      return { objective, watchSeg, expected };
+    }
+
+    function formatClock(sec) {
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    async function pollCycleFromServer() {
+      if (!session?.access_token) return;
+      try {
+        const res = await fetch('/api/me/cycle', {
+          headers: SkillingAuth.bearerHeaders()
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return;
+        lastCyclePayload = data;
+        cachedProfile = data.profile || cachedProfile;
+        lastCycleFetchedAt = Date.now();
+        applyLockedTaskHighlight(data.cycle?.lockedTaskId || null);
+      } catch (_) {}
+    }
+
+    function applyLockedTaskHighlight(lockedId) {
+      if (!lockedId || !tasks?.length) return;
+      const idx = tasks.findIndex((t) => t.id === lockedId);
+      if (idx >= 0) selectTask(idx);
+    }
+
+    function tickCycleTimers() {
+      const chooseEl = document.getElementById('selectionWindowTimer');
+      const cycleEl = document.getElementById('cycleTimerEl');
+      const chooseBlk = document.getElementById('chooseTimerBlock');
+      const chooseTitle = document.getElementById('chooseTimerTitle');
+      const selHint = document.getElementById('selectionWindowHint');
+      const cycleHint = document.getElementById('cycleTimerHint');
+      if (!chooseEl || !cycleEl) return;
+      if (!session) return;
+
+      if (!lastCyclePayload?.cycle && !chooseEl.dataset.stale)
+        chooseEl.dataset.stale = '1';
+
+      const c = lastCyclePayload?.cycle;
+      if (!c) {
+        chooseEl.textContent = '--:--:--';
+        cycleEl.textContent = '--:--:--';
+        return;
+      }
+
+      const drift = Math.max(0, Date.now() - lastCycleFetchedAt);
+      const selLeftMs = Math.max(0, (c.selectionDeadlineMs || 0) - drift);
+      const cycleLeftMs = Math.max(0, (c.cycleEndsMs || 0) - drift);
+      const locked = !!c.lockedTaskId;
+
+      cycleEl.textContent = formatClock(Math.floor(cycleLeftMs / 1000));
+      const tzLab = (c.bounds && c.bounds.timezone) || '';
+      if (cycleHint) cycleHint.textContent = 'Ends next 06:00 in ' + tzLab + '. Submit proof before then.';
+
+      if (locked) {
+        chooseTitle.textContent = 'Task locked · keep building';
+        chooseEl.textContent = '●';
+        chooseEl.style.fontSize = '28px';
+        if (chooseBlk) chooseBlk.style.opacity = '0.85';
+        if (selHint) selHint.textContent = 'You’re executing until cycle end.';
+        return;
+      }
+      chooseEl.style.fontSize = '';
+      chooseEl.textContent = formatClock(Math.floor(selLeftMs / 1000));
+      chooseTitle.textContent = 'Pick a task · first 2h of cycle';
+      if (chooseBlk) chooseBlk.style.opacity = '1';
+      if (selHint)
+        selHint.textContent =
+          'Past the window · server auto-assigns if you skip (included in same 24h cycle). Refresh if this looks stuck.';
+    }
+
+    async function randomTaskAuto() {
+      randomTaskInner(true);
+    }
+
+    function randomTask() {
+      randomTaskInner(false);
+    }
+
+    async function randomTaskInner(silentToast) {
+      if (!tasks.length || !session) return;
+      const idx = Math.floor(Math.random() * tasks.length);
+      selectTask(idx);
+      if (!silentToast) showToast('✨ Auto-assigning · locking task…');
+      await confirmTask();
+    }
+
+    function startCycleTicker() {
+      if (cycleTicker) clearInterval(cycleTicker);
+      if (cyclePollTimer) clearInterval(cyclePollTimer);
+      pollCycleFromServer().then(() => {
+        tickCycleTimers();
+      });
+      tickCycleTimers();
+      cycleTicker = setInterval(tickCycleTimers, 1000);
+      cyclePollTimer = setInterval(() => {
+        pollCycleFromServer().then(tickCycleTimers);
+      }, 30000);
+    }
+
+    function initGuestPreviewChips() {
+      document.querySelectorAll('.guest-chip').forEach(chip => {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.guest-chip').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          guestDomain = this.getAttribute('data-domain') || 'AI';
+          renderGuestPreview();
+        });
+      });
+      document.querySelectorAll('.guest-chip-lvl').forEach(chip => {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.guest-chip-lvl').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          guestLevel = this.getAttribute('data-level') || 'Beginner';
+          renderGuestPreview();
+        });
+      });
+    }
+
+    function previewDomainMatch(taskDomain, key) {
+      const d = (taskDomain || '').toLowerCase();
+      if (key === 'AI') return d.includes('ai');
+      if (key === 'Web') return d.includes('web');
+      if (key === 'Robotics') return d.includes('robot');
+      if (key === 'Cybersec') return d.includes('cyber') || d.includes('sec');
+      if (key === 'IoT') return d.includes('iot');
+      if (key === 'Data') return d.includes('data');
+      return true;
+    }
+
+    function guestDomainToSkillApi(key) {
+      const m = { AI: 'aiml', Web: 'webdev', Robotics: 'robotics', Cybersec: 'cybersec', Data: 'datascience', IoT: 'iot' };
+      return m[key] || 'aiml';
+    }
+
+    async function fetchGuestTasks() {
+      try {
+        const res = await fetch('/api/tasks');
+        const data = await res.json();
+        previewTasksFull = data.tasks || [];
+        renderGuestPreview();
+      } catch (e) { console.warn('guest tasks', e); }
+    }
+
+    function renderGuestPreview() {
+      const grid = document.getElementById('guestPreviewGrid');
+      if (!grid) return;
+      const pool = previewTasksFull.filter(t => previewDomainMatch(t.domain, guestDomain) && (t.level || '') === guestLevel).slice(0, 7);
+      const filler = previewTasksFull.filter(t => !pool.includes(t)).slice(0, Math.max(0, 7 - pool.length));
+      const show = [...pool, ...filler].slice(0, 7);
+      if (!show.length) {
+        grid.innerHTML = '<p style="grid-column:1/-1;color:var(--grey-body);font-family:var(--body-font);">Unable to load task pool preview.</p>';
+        return;
+      }
+      grid.innerHTML = show.map(t => {
+        const m = taskMeta(t);
+        var expSnippet = escHtml(String(m.expected).substring(0, 160)) + (m.expected.length > 160 ? '…' : '');
+        return '<div class="preview-task-strip reveal"><div class="preview-task-inner"><span class="task-domain-tag">' + escHtml(t.domain) + '</span><div style="font-family:var(--display-font);font-weight:700;font-size:17px;color:var(--charcoal);text-transform:uppercase;margin:10px 0 8px;line-height:1.2">' + escHtml(t.title) + '</div><p style="font-family:var(--body-font);font-size:13px;color:var(--grey-body);line-height:1.5;margin-bottom:6px">' + escHtml(m.watchSeg) + '</p><p style="font-family:var(--body-font);font-size:13px;color:var(--charcoal);font-weight:500">' + expSnippet + '</p><span class="task-effort" style="display:inline-block;margin-top:12px;color:var(--grey-body)">' + escHtml(t.effort || '~1 hr') + '</span></div><div class="preview-task-dim"><span>Start the Loop → Login to execute</span></div></div>';
+      }).join('');
+    }
 
     function toggleAiChat() {
       const win = document.getElementById('aiChatWindow');
@@ -2382,94 +2956,207 @@
       msgsDiv.scrollTop = msgsDiv.scrollHeight;
     }
 
+    function logoutAndReload() {
+      SkillingAuth.clear();
+      window.location.reload();
+    }
+
+    async function refreshSubmissionBanner() {
+      const st = document.getElementById('submissionStatus');
+      const extra = document.getElementById('submissionVerdictBanner');
+      if (!session?.access_token) return;
+      try {
+        const res = await fetch('/api/me/summary', {
+          headers: SkillingAuth.bearerHeaders()
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) return;
+        const rs = String(d.reviewerStatus || 'none').trim();
+        const rq = rs === 'pending_review';
+        const acc = rs === 'accepted';
+        const rej = rs === 'rejected';
+        if (rq && st) st.style.display = 'block';
+        if (!rq && st) st.style.display = 'none';
+        if (extra) {
+          if (acc || rej) {
+            extra.style.display = 'block';
+            extra.innerHTML =
+              '<div style="font-family:var(--display-font);font-weight:700;color:' +
+              (acc ? '#0a6' : '#f44') +
+              ';text-transform:uppercase;margin-bottom:6px">' +
+              (acc ? 'Accepted' : 'Needs work') +
+              '</div><div style="font-size:14px;color:rgba(255,255,255,.72)">' +
+              escHtml(d.reviewerNote || (acc ? 'Great job.' : 'See admin feedback.')) +
+              '</div>';
+          } else extra.style.display = 'none';
+        }
+      } catch (_) {}
+    }
+
     function enforceAuth() {
+      const guestPrev = document.getElementById('guestPreview');
+      const navPv = document.getElementById('navPreviewLi');
+      const mobPv = document.getElementById('mobileNavPreview');
+      const navVid = document.getElementById('navVideosGuestLi');
+      const mobVid = document.getElementById('mobileNavVideosGuest');
+
       if (!session) {
-        // Hide all protected sections
-        ['dashboard', 'streaks', 'submit', 'videoPool', 'aiChatWidget'].forEach(id => {
+        if (guestPrev) guestPrev.style.display = 'block';
+        if (navPv) navPv.style.display = 'block';
+        if (mobPv) mobPv.style.display = 'block';
+        if (navVid) navVid.style.display = 'block';
+        if (mobVid) mobVid.style.display = 'block';
+        fetchGuestTasks();
+
+        ['dashboard', 'streaks', 'submit', 'aiChatWidget'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'none';
         });
-        // Hide protected nav links
-        document.querySelectorAll('.nav-links a[href="#dashboard"], .nav-links a[href="#streaks"], .nav-links a[href="#submit"], .nav-links a[href="#videoPool"]')
-          .forEach(el => el.parentElement.style.display = 'none');
-        document.querySelectorAll('.mobile-nav a[href="#dashboard"], .mobile-nav a[href="#streaks"], .mobile-nav a[href="#submit"], .mobile-nav a[href="#videoPool"]')
-          .forEach(el => el.style.display = 'none');
-        // Change CTA and hero button to Login
-        document.querySelectorAll('.nav-cta, .mobile-nav a:last-child').forEach(cta => {
+        const vidSec = document.getElementById('videoPool');
+        if (vidSec) vidSec.style.display = 'block';
+
+        document
+          .querySelectorAll('.nav-links a[href="#dashboard"], .nav-links a[href="#streaks"], .nav-links a[href="#submit"]')
+          .forEach(el => {
+            if (el.closest('li')) el.closest('li').style.display = 'none';
+          });
+        document
+          .querySelectorAll('.mobile-nav a[href="#dashboard"], .mobile-nav a[href="#streaks"], .mobile-nav a[href="#submit"]')
+          .forEach(el => {
+            el.style.display = 'none';
+          });
+
+        document.querySelectorAll('.nav-cta').forEach(cta => {
           cta.textContent = 'Login →';
-          cta.onclick = () => { window.location.href = '/login.html'; return false; };
+          cta.href = '/login.html';
+          cta.onclick = null;
         });
+
+        const mobileAcct = document.getElementById('mobileNavAccount');
+        if (mobileAcct) {
+          mobileAcct.style.display = 'block';
+          mobileAcct.textContent = 'Login →';
+          mobileAcct.href = '/login.html';
+          mobileAcct.onclick = null;
+        }
+
         const heroCta = document.querySelector('.hero-actions .btn-pill');
         if (heroCta) {
-          heroCta.textContent = 'Login to Start →';
-          heroCta.onclick = () => { window.location.href = '/login.html'; return false; };
+          heroCta.textContent = 'Preview pool →';
+          heroCta.href = '#guestPreview';
         }
       } else {
-        // Show all protected sections
+        if (guestPrev) guestPrev.style.display = 'none';
+        if (navPv) navPv.style.display = 'none';
+        if (mobPv) mobPv.style.display = 'none';
+
         ['dashboard', 'streaks', 'submit', 'videoPool', 'aiChatWidget'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'block';
         });
+        if (navVid) navVid.style.display = 'none';
+        if (mobVid) mobVid.style.display = 'none';
 
-        // Hide guest placeholders, show dashboards
         if (document.getElementById('streakGuestView')) document.getElementById('streakGuestView').style.display = 'none';
         if (document.getElementById('streakDashboard')) document.getElementById('streakDashboard').style.display = 'block';
         if (document.getElementById('submitGuestView')) document.getElementById('submitGuestView').style.display = 'none';
-        if (document.getElementById('submitDashboard')) document.getElementById('submitDashboard').style.display = 'block';
+        if (document.getElementById('submitDashboard')) document.getElementById('submitDashboard').style.display = 'contents';
 
-        // Show protected nav links
-        document.querySelectorAll('.nav-links li').forEach(li => li.style.display = 'block');
-        document.querySelectorAll('.mobile-nav a').forEach(a => a.style.display = 'block');
+        document.querySelectorAll('.nav-links li').forEach(li => {
+          li.style.display = 'block';
+        });
+        document.querySelectorAll('.mobile-nav a').forEach(a => {
+          a.style.display = 'block';
+        });
 
         if (document.getElementById('aiChatWidget')) document.getElementById('aiChatWidget').style.display = 'block';
 
-        // Show user name + logout in nav
         document.querySelectorAll('.nav-cta').forEach(cta => {
+          cta.removeAttribute('href');
           cta.textContent = '👤 ' + session.name + ' · Logout';
-          cta.onclick = () => { localStorage.removeItem('skillingit_session'); window.location.reload(); return false; };
+          cta.onclick = logoutAndReload;
         });
 
-        // Update mobile nav last link
-        const mobileLinks = document.querySelectorAll('.mobile-nav a');
-        const lastMobileLink = mobileLinks[mobileLinks.length - 1];
-        if (lastMobileLink) {
-          lastMobileLink.textContent = 'Logout (' + session.name + ')';
-          lastMobileLink.onclick = () => { localStorage.removeItem('skillingit_session'); window.location.reload(); return false; };
+        const mobileAcctLogged = document.getElementById('mobileNavAccount');
+        if (mobileAcctLogged) {
+          mobileAcctLogged.textContent = 'Logout (' + session.name + ')';
+          mobileAcctLogged.href = '#';
+          mobileAcctLogged.onclick = logoutAndReload;
         }
 
+        const heroCta2 = document.querySelector('.hero-actions .btn-pill');
+        if (heroCta2) {
+          heroCta2.textContent = 'Open dashboard →';
+          heroCta2.href = '#dashboard';
+          heroCta2.onclick = null;
+        }
+
+        startCycleTicker();
         fetchTasks();
-        // Auto-load 6 personalised videos for logged-in users
-        loadVideoPool();
+        pollCycleFromServer().then(() => {
+          refreshSubmissionBanner();
+          renderRewardsDeck();
+        });
       }
       fetchNews();
+    }
+
+    function taskMatchesSkillKey(t, skillKey, levelStr) {
+      if (!t) return false;
+      if (levelStr && (t.level || '') !== levelStr) return false;
+      if (!skillKey) return true;
+      const d = String(t.domain || '').toLowerCase();
+      const sk = String(skillKey).toLowerCase();
+      switch (sk) {
+        case 'aiml':
+          return d.includes('ai') || d.includes('ml');
+        case 'datascience':
+          return d.includes('data');
+        case 'robotics':
+          return d.includes('robot');
+        case 'iot':
+          return d.includes('iot');
+        case 'cybersec':
+          return d.includes('cyber') || d.includes('sec') || d.includes('security');
+        case 'webdev':
+          return d.includes('web');
+        default:
+          return true;
+      }
     }
 
     async function fetchTasks() {
       try {
         const res = await fetch('/api/tasks');
         const data = await res.json();
-        tasks = data.tasks;
+        let pool = (data.tasks || []).slice();
+
+        if (session) {
+          const sk = cachedProfile?.skill_domain || session.skill_domain || 'aiml';
+          const lvl = cachedProfile?.level || session.level || 'Beginner';
+          const matched = pool.filter(function (x) {
+            return taskMatchesSkillKey(x, sk, lvl);
+          });
+          const rest = pool.filter(function (x) {
+            return matched.indexOf(x) < 0;
+          });
+          pool = matched.concat(rest);
+        }
+
+        tasks = pool.slice(0, 7);
         renderTasks();
-      } catch (e) { console.error('Failed to fetch tasks', e); }
+      } catch (e) {
+        console.error('Failed to fetch tasks', e);
+      }
     }
 
     function renderTasks() {
       const grid = document.getElementById('taskGrid');
       if (!grid) return;
-      grid.innerHTML = tasks.map((t, i) => `
-    <div class="task-card" id="task${i}" onclick="selectTask(${i})">
-      <div class="task-card-domain">
-        <span class="task-domain-tag">${t.domain}</span>
-        <span class="task-level-badge">${t.level}</span>
-      </div>
-      <div class="task-card-title">${t.title}</div>
-      <div class="task-card-body">${t.desc}</div>
-      <div class="task-card-meta">
-        <span class="task-effort">⏱ ${t.effort}</span>
-        <div class="task-check" id="check${i}"></div>
-      </div>
-    </div>
-  `).join('');
+      grid.innerHTML = tasks.map((t, i) => {
+        var m = taskMeta(t);
+        return '\n    <div class="task-card" id="task' + i + '" onclick="selectTask(' + i + ')">\n      <div class="task-card-domain">\n        <span class="task-domain-tag">' + escHtml(t.domain) + '</span>\n        <span class="task-level-badge">' + escHtml(t.level) + '</span>\n      </div>\n      <div class="task-card-title">' + escHtml(t.title) + '</div>\n      <p class="task-card-objective">' + escHtml(m.objective) + '</p>\n      <div class="task-card-body">' + escHtml(t.desc) + '</div>\n      <p class="task-card-mini"><em>Watch</em> · ' + escHtml(m.watchSeg) + '</p>\n      <p class="task-card-mini"><em>Expected output</em> · ' + escHtml(m.expected) + '</p>\n      <div class="task-card-meta">\n        <span class="task-effort">⏱ ' + escHtml(t.effort || '~1 hr') + '</span>\n        <div class="task-check" id="check' + i + '"></div>\n      </div>\n    </div>\n';
+      }).join('');
     }
 
     function selectTask(i) {
@@ -2482,143 +3169,357 @@
       document.getElementById('task' + i).classList.add('selected');
       document.getElementById('check' + i).innerHTML = '✓';
       if (document.getElementById('selectionNote')) document.getElementById('selectionNote').textContent = `"${tasks[i].title}" selected`;
+      loadYoutubeForSelectedTask();
+    }
+
+    async function confirmTaskById(taskId, titleHint) {
+      if (!session?.access_token) return;
+      try {
+        const res = await fetch('/api/me/confirm-task', {
+          method: 'POST',
+          headers: SkillingAuth.bearerHeaders(),
+          body: JSON.stringify({ taskId })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showToast(data.error || 'Could not confirm task.', 'error');
+          return false;
+        }
+        const nt = data.task;
+        if (nt && Array.isArray(tasks)) {
+          const ix = tasks.findIndex(function (x) {
+            return x.id === nt.id;
+          });
+          if (ix >= 0) selectTask(ix);
+          else {
+            tasks = [nt].concat(tasks.filter(function (x) {
+              return x.id !== nt.id;
+            }));
+            tasks = tasks.slice(0, 7);
+            renderTasks();
+            selectTask(0);
+          }
+        }
+        await pollCycleFromServer();
+        tickCycleTimers();
+        const ttl = titleHint || (tasks[selectedTask] && tasks[selectedTask].title) || '';
+        showToast(ttl ? '✅ Locked: "' + ttl + '"' : '✅ Task locked');
+        const sn = document.getElementById('selectionNote');
+        if (sn) sn.textContent = '✓ Locked for this cycle — submit proof before next 06:00.';
+        return true;
+      } catch (e) {
+        console.error(e);
+        showToast('Network error confirming task.', 'error');
+        return false;
+      }
     }
 
     async function confirmTask() {
+      if (!session) return;
       if (selectedTask === null) {
-        if (document.getElementById('selectionNote')) document.getElementById('selectionNote').textContent = '⚠ Please select a task first.';
+        const sn = document.getElementById('selectionNote');
+        if (sn) sn.textContent = '⚠ Select a task or use Auto-Assign.';
         return;
       }
-      const t = tasks[selectedTask];
-      try {
-        const res = await fetch('/api/tasks/confirm', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: session.id, taskId: t.id })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(`✅ Task locked: "${t.title}"\n\nYour 24-hour execution window has begun.`);
-          if (document.getElementById('selectionNote')) document.getElementById('selectionNote').textContent = `✓ Task confirmed: "${t.title}"`;
-          startTimer();
-          loadVideoPool();
-        }
-      } catch (e) { console.error(e); }
+      await confirmTaskById(tasks[selectedTask].id, tasks[selectedTask].title);
     }
 
-    function startTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (selectionSeconds <= 0) {
-          clearInterval(timerInterval);
-          return;
-        }
-        selectionSeconds--;
-        const h = Math.floor(selectionSeconds / 3600);
-        const m = Math.floor((selectionSeconds % 3600) / 60);
-        const s = selectionSeconds % 60;
-        const el = document.getElementById('selectionTimer');
-        if (el) el.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-      }, 1000);
-    }
-
-    // ─── STREAKS CALENDAR ───
+    // ─── STREAKS CALENDAR (approximate · built from submission history) ───
     async function renderCalendar() {
       const calGrid = document.getElementById('calGrid');
-      if (!calGrid || !session) return;
+      if (!calGrid || !session?.access_token) return;
 
       try {
-        const res = await fetch('/api/streaks/' + session.id);
-        const data = await res.json();
-        const streak = data.streak || { current: 0, history: [] };
-
-        if (document.getElementById('streakPill')) {
-          document.getElementById('streakPill').textContent = `🔥 ${streak.current} Days`;
+        const res = await fetch('/api/me/submission-history', {
+          headers: SkillingAuth.bearerHeaders()
+        });
+        const sj = await res.json().catch(() => ({}));
+        const bundles = sj.bundles || [];
+        const doneDays = new Set();
+        for (const b of bundles) {
+          if (String(b.status) !== 'accepted' || !b.reviewed_at) continue;
+          const d = new Date(b.reviewed_at);
+          const ds =
+            d.getFullYear() +
+            '-' +
+            String(d.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(d.getDate()).padStart(2, '0');
+          doneDays.add(ds);
         }
+        let streak = 0;
+        for (let i = 0; i < 45; i++) {
+          const d = new Date();
+          d.setHours(0, 0, 0, 0);
+          d.setDate(d.getDate() - i);
+          const ds =
+            d.getFullYear() +
+            '-' +
+            String(d.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(d.getDate()).padStart(2, '0');
+          if (doneDays.has(ds)) streak++;
+          else if (i > 0) break;
+        }
+        if (document.getElementById('streakPill')) document.getElementById('streakPill').textContent = `🔥 ${streak} days (approved builds)`;
 
         const now = new Date();
+        const monthLabel = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        document.querySelectorAll('.streak-month').forEach(function (el) {
+          el.textContent = monthLabel;
+        });
         const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
         const startDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
 
         let html = '';
-        // Empty days before start
-        for (let i = 0; i < startDay; i++) html += '<div class="cal-day empty"></div>';
+        for (let i = 0; i < startDay; i++) html += '<div class="cal-cell empty"></div>';
 
         for (let day = 1; day <= daysInMonth; day++) {
-          const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const dateStr =
+            `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const isToday = day === now.getDate();
-          const isCompleted = streak.history.includes(dateStr);
-
-          html += `
-        <div class="cal-day ${isToday ? 'today' : ''} ${isCompleted ? 'active' : ''}">
-          ${day}
-        </div>
-      `;
+          const isCompleted = doneDays.has(dateStr);
+          html += '<div class="cal-cell' + (isToday ? ' today' : '') + (isCompleted ? ' done' : '') + '">' + day + '</div>';
         }
         calGrid.innerHTML = html;
-      } catch (e) { console.error('Streak fetch error:', e); }
+      } catch (e) {
+        console.error('Streak compose error:', e);
+      }
     }
 
-    // ─── YOUTUBE VIDEO POOL (personalised, login-only) ───
-    async function loadVideoPool() {
+    async function renderRewardsDeck() {
+      const deck = document.getElementById('rewardsDeck');
+      if (!deck || !session?.access_token) return;
+      try {
+        const res = await fetch('/api/me/submission-history', {
+          headers: SkillingAuth.bearerHeaders()
+        });
+        const data = await res.json().catch(() => ({}));
+        const bundles = data.bundles || [];
+        if (!bundles.length) {
+          deck.innerHTML =
+            '<p style="font-size:13px;color:var(--grey-body);font-family:var(--body-font)">Finish cycles to see approvals, rejections & points tiles here.</p>';
+          return;
+        }
+        deck.innerHTML =
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;font-family:var(--body-font)">' +
+          bundles
+            .slice(0, 24)
+            .map(function (b) {
+              const stRaw = String(b.status || '').replace(/_/g, ' ');
+              const pts = typeof b.points_awarded === 'number' ? b.points_awarded : 0;
+              const fb = (b.admin_feedback || '').trim();
+              return (
+                '<div style="aspect-ratio:1;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;background:#fafafa">' +
+                '<div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--grey-body);">' +
+                escHtml((b.cycle_start_iso || '').slice(0, 10)) +
+                '</div>' +
+                '<div style="font-family:var(--display-font);font-weight:800;font-size:13px;line-height:1.15;color:var(--charcoal);">' +
+                escHtml(stRaw) +
+                '</div>' +
+                '<div style="font-size:12px;color:var(--red);font-weight:700">+' +
+                escHtml(String(pts)) +
+                ' pts</div>' +
+                (fb
+                  ? '<div style="font-size:10px;color:#555;line-height:1.25;margin-top:4px;overflow:hidden;max-height:3.75em">' +
+                    escHtml(fb) +
+                    '</div>'
+                  : '') +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function taskSnippetHtml(t, suggestId) {
+      if (!t) return '';
+      const m = taskMeta(t);
+      let lockBtn = '';
+      if (session?.access_token && suggestId)
+        lockBtn =
+          '<button type="button" class="btn-rect-outline sk-lock-task" style="margin-top:10px;font-size:12px;padding:8px 12px" data-task-id="' +
+          escHtml(String(suggestId)) +
+          '" data-task-title="' +
+          escHtml(String(t.title || '')) +
+          '">Lock this task for my cycle →</button>';
+      return (
+        '<div style="margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.1);text-align:left">' +
+        '<div style="font-size:11px;opacity:.55;text-transform:uppercase;margin-bottom:6px">Task · complete before next 06:00</div>' +
+        '<div style="font-family:var(--display-font);font-weight:800;font-size:13px;line-height:1.3">' +
+        escHtml(t.title || '') +
+        '</div>' +
+        '<div style="font-size:11px;line-height:1.45;color:rgba(255,255,255,.78);margin-top:6px">' +
+        escHtml((m.expected || '').slice(0, 220)) +
+        '</div>' +
+        lockBtn +
+        '</div>'
+      );
+    }
+
+    document.addEventListener('click', function (ev) {
+      const lb = ev.target.closest('.sk-lock-task');
+      if (!lb || !lb.getAttribute('data-task-id')) return;
+      ev.preventDefault();
+      const tid = lb.getAttribute('data-task-id');
+      const ttl = lb.getAttribute('data-task-title') || '';
+      if (tid) confirmTaskById(tid, ttl);
+    });
+
+    /** Full pack: paired YouTube clips + rotated tasks · guests + learners */
+    async function loadGiveBestContent() {
       const grid = document.getElementById('videoGrid');
-      if (!grid || !session) return;
+      if (!grid) return;
       const status = document.getElementById('videoPoolStatus');
 
-      // Build search query: prefer selected task's ytQuery, else user's domain from server
-      let query = '';
-      if (selectedTask !== null && tasks[selectedTask]) {
-        const t = tasks[selectedTask];
-        query = t.ytQuery || (t.title + ' tutorial');
+      let skill = 'aiml';
+      let level = guestLevel || 'Beginner';
+      if (session) {
+        skill = cachedProfile?.skill_domain || session.skill_domain || 'aiml';
+        level = cachedProfile?.level || session.level || 'Beginner';
       } else {
-        // Fetch user profile to get their interest/domain
-        try {
-          const profRes = await fetch('/api/users/' + session.id);
-          const profData = await profRes.json();
-          const domain = profData.user?.domain || '';
-          const level = profData.user?.level || '';
-          query = domain ? (domain + ' ' + level + ' tutorial beginner project') : 'programming project tutorial 2024';
-        } catch { query = 'programming tutorial beginner project 2024'; }
+        skill = guestDomainToSkillApi(guestDomain);
+        level = guestLevel;
       }
 
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--display-font);color:rgba(255,255,255,0.5);">
-    ⏳ Loading 6 personalised videos for you...
-  </div>`;
+      grid.innerHTML =
+        '<div style="grid-column:1/-1;text-align:center;padding:44px;font-family:var(--display-font);color:rgba(255,255,255,.5)">⏳ Curating clips + paired tasks…</div>';
       if (status) status.textContent = '';
 
       try {
-        const res = await fetch('/api/youtube/search?q=' + encodeURIComponent(query) + '&maxResults=6');
-        const data = await res.json();
-        const videos = (data.videos || []).slice(0, 6);
-        if (data.success && videos.length > 0) {
-          grid.innerHTML = videos.map(v => `
-        <div onclick="openVideoModal('${v.embedUrl}')" style="cursor:pointer;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="position:relative;">
-            <img src="${v.thumbnail}" alt="${v.title}" style="width:100%;height:165px;object-fit:cover;display:block;" onerror="this.src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'">
-            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);opacity:0;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
-              <div style="width:52px;height:52px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;">▶</div>
-            </div>
-          </div>
-          <div style="padding:12px 14px;">
-            <div style="font-family:var(--display-font);font-weight:700;font-size:15px;color:var(--white);line-height:1.3;margin-bottom:4px;">${v.title.length > 60 ? v.title.slice(0, 60) + '...' : v.title}</div>
-            <div style="font-family:var(--body-font);font-size:12px;color:rgba(255,255,255,0.45);">${v.channel || 'YouTube'}</div>
-          </div>
-        </div>
-      `).join('');
-          if (status) status.textContent = `✔ ${videos.length} videos matched to your interest: "${query.split(' ').slice(0, 3).join(' ')}"...`;
-        } else {
-          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.4);">No videos found for your interest. Try selecting a task first.</div>`;
+        const res = await fetch(
+          '/api/public/content-pack?skill=' + encodeURIComponent(skill) + '&level=' + encodeURIComponent(level)
+        );
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Pack error');
+        const items = data.items || [];
+        if (!items.length)
+          grid.innerHTML =
+            '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.45)">No pack results.</div>';
+        else {
+          grid.innerHTML = items
+            .map(function (pair) {
+              const v = pair.video;
+              const t = pair.task;
+              const sug = pair.suggestedTaskId;
+              const ttl = escHtml(String(v.title || '').slice(0, 76));
+              const chan = escHtml(v.channel || 'YouTube');
+              const enc = encodeURIComponent(JSON.stringify({ u: v.embedUrl }));
+              return (
+                '<div class="pack-card-wrap" style="background:rgba(255,255,255,.06);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08)">' +
+                '<button type="button" data-vm="' +
+                escHtml(enc) +
+                '" class="sk-open-video" style="cursor:pointer;display:block;width:100%;padding:0;border:none;background:none;color:inherit;text-align:left">' +
+                '<div style="position:relative">' +
+                '<img src="' +
+                escHtml(v.thumbnail || '') +
+                '" alt="" style="width:100%;height:165px;object-fit:cover;display:block;background:#222"' +
+                ' onerror="this.src=\'https://img.youtube.com/vi/' +
+                escHtml(v.id || '') +
+                '/mqdefault.jpg\'">' +
+                '<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center">▶</div>' +
+                '</div>' +
+                '<div style="padding:12px 14px">' +
+                '<div style="font-family:var(--display-font);font-weight:700;font-size:14px;line-height:1.25;color:#fff">' +
+                ttl +
+                '</div>' +
+                '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">' +
+                chan +
+                '</div>' +
+                '</div>' +
+                '</button>' +
+                taskSnippetHtml(t, sug) +
+                '</div>'
+              );
+            })
+            .join('');
         }
+        const srcNote = items.length ? ' · ' + (data.source === 'youtube-api' ? 'YouTube API' : 'offline fallback') : '';
+        if (status) status.textContent = '✔ ' + (items.length ? items.length + ' pairs' + srcNote : 'Empty');
       } catch (e) {
-        console.error('Video load error:', e);
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Could not load videos. Server may be offline.</div>`;
+        console.error(e);
+        grid.innerHTML =
+          '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.45)">' +
+          escHtml(e.message || 'Could not load pack') +
+          '</div>';
       }
+    }
+
+    document.addEventListener('click', function (ev) {
+      const b = ev.target.closest('.sk-open-video');
+      if (!b || !b.getAttribute('data-vm')) return;
+      ev.preventDefault();
+      const raw = decodeURIComponent(b.getAttribute('data-vm'));
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.u) openVideoModal(parsed.u);
+      } catch {
+        console.warn('Bad encoded video payload');
+      }
+    });
+
+    /** After picking a dashboard task: fetch focused clips without breaking pair semantics */
+    async function loadYoutubeForSelectedTask() {
+      if (!session || selectedTask === null || !tasks[selectedTask]) {
+        loadGiveBestContent();
+        return;
+      }
+      const grid = document.getElementById('videoGrid');
+      const status = document.getElementById('videoPoolStatus');
+      if (!grid) return;
+      const t = tasks[selectedTask];
+      const query = (t.ytQuery || t.title + ' tutorial beginner').trim();
+      grid.innerHTML =
+        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.5);font-family:var(--display-font)">⏳ Loading clips for "' +
+        escHtml(t.title.slice(0, 40)) +
+        '"…</div>';
+      if (status) status.textContent = '';
+      try {
+        const res = await fetch('/api/youtube/search?q=' + encodeURIComponent(query) + '&maxResults=7');
+        const data = await res.json().catch(() => ({}));
+        const videos = (data.videos || []).slice(0, 7);
+        grid.innerHTML = videos
+          .map(function (v) {
+            const ttl = escHtml(String(v.title || '').slice(0, 72));
+            const chan = escHtml(v.channel || 'YouTube');
+            const enc = encodeURIComponent(JSON.stringify({ u: v.embedUrl }));
+            return (
+              '<div style="border-radius:10px;overflow:hidden;background:rgba(255,255,255,.06)">' +
+              '<button type="button" data-vm="' +
+              escHtml(enc) +
+              '" class="sk-open-video" style="width:100%;border:none;background:none;padding:0;cursor:pointer;text-align:left;color:inherit">' +
+              '<img src="' +
+              escHtml(v.thumbnail) +
+              '" style="width:100%;height:160px;object-fit:cover"><div style="padding:12px"><div style="font-weight:800;font-size:13px;line-height:1.25;color:#fff">' +
+              ttl +
+              '</div><div style="font-size:11px;color:rgba(255,255,255,.35)">' +
+              chan +
+              '</div></div></button>' +
+              taskSnippetHtml(t, t.id) +
+              '</div>'
+            );
+          })
+          .join('');
+        if (status) status.textContent = clipsNote(videos.length, query);
+      } catch (e) {
+        console.error(e);
+        loadGiveBestContent();
+      }
+    }
+
+    function clipsNote(len, query) {
+      return '✔ ' + len + ' clips aligned to dashboard task (“' + query.split(' ').slice(0, 6).join(' ') + '…”).';
     }
 
     function openVideoModal(url) {
       const modal = document.getElementById('videoModalOverlay');
       const iframe = document.getElementById('videoIframe');
-      if (modal && iframe) {
-        iframe.src = url + '?autoplay=1';
+      if (modal && iframe && url) {
+        const sep = String(url).indexOf('?') >= 0 ? '&' : '?';
+        iframe.src = url + sep + 'autoplay=1';
         modal.style.display = 'flex';
       }
     }
@@ -2644,44 +3545,115 @@
           return;
         }
 
-        grid.innerHTML = data.news.map(n => {
-          const dateStr = new Date(n.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-          const imgHtml = n.imageUrl ?\`<img src="\${n.imageUrl}" style="width:100%;height:150px;object-fit:cover;border-radius:4px;margin-bottom:10px;">\` : '';
-      return \`
-      <div class="awareness-card reveal">
-        <span class="awareness-card-tag">Tech News</span>
-        <div class="awareness-card-date">\${dateStr}</div>
-        \${imgHtml}
-        <div class="awareness-card-title">\${n.title}</div>
-        <div class="awareness-card-body">\${n.details}</div>
-        \${n.relatedTasks ? \`<div style="font-size:12px;color:var(--red);margin-top:5px;font-weight:bold;">Related: \${n.relatedTasks}</div>\` : ''}
-        <button class="awareness-convert" onclick="window.location.href='/login.html'">Convert to Task →</button>
-      </div>\`;
-    }).join('');
+        grid.innerHTML = data.news.map(function (n) {
+          var dateStr = new Date(n.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          var imgHtml = '';
+          if (n.imageUrl) {
+            imgHtml = '<img src="' + escHtml(n.imageUrl) + '" alt="" style="width:100%;height:150px;object-fit:cover;border-radius:4px;margin-bottom:10px;">';
+          }
+          var rel = '';
+          if (n.relatedTasks) {
+            rel = '<div style="font-size:12px;color:var(--red);margin-top:5px;font-weight:bold;">Related: ' + escHtml(n.relatedTasks) + '</div>';
+          }
+          return '<div class="awareness-card reveal">\n          <span class="awareness-card-tag">Industry pulse</span>\n          <div class="awareness-card-date">' + escHtml(dateStr) + '</div>\n          ' + imgHtml + '\n          <div class="awareness-card-title">' + escHtml(n.title) + '</div>\n          <div class="awareness-card-body">' + escHtml(n.details) + '</div>\n          ' + rel + '\n          <button type="button" class="awareness-convert" onclick="window.location.href=\'/login.html\'">Connect to my build →</button>\n        </div>';
+        }).join('');
   } catch(e) { console.error('News fetch error:', e); }
 }
 
-// ─── SUBMISSIONS ───
-async function submitGithub() {
-  const val = document.getElementById('githubInput')?.value.trim();
-  if (!val || !val.startsWith('http')) {
-    alert('Please enter a valid GitHub URL.');
-    return;
-  }
-  try {
-    const res = await fetch('/api/submissions/github', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: session.id, taskId: selectedTask !== null ? tasks[selectedTask].id : 'unknown', githubUrl: val })
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert('GitHub link submitted successfully! Under review.');
-      document.getElementById('githubInput').value = '';
+// ─── SUBMISSIONS (Supabase bundle /api/me/submission) ───
+    function authHeaderOnlyBearer() {
+      const t = SkillingAuth.read()?.access_token;
+      const h = {};
+      if (t) h.Authorization = 'Bearer ' + t;
+      return h;
     }
-  } catch (e) { console.error(e); }
-}
 
-// ─── FILE UPLOAD ───
+    function currentTaskIdForSubmission() {
+      if (selectedTask !== null && tasks && tasks[selectedTask]) return tasks[selectedTask].id;
+      const lid = lastCyclePayload && lastCyclePayload.cycle && lastCyclePayload.cycle.lockedTaskId;
+      return lid || null;
+    }
+
+    async function patchMySubmission(patch) {
+      if (!session?.access_token) {
+        alert('Sign in to submit proof.');
+        return null;
+      }
+      const tid = currentTaskIdForSubmission();
+      const body = Object.assign({}, patch);
+      if (tid) body.taskId = tid;
+      const res = await fetch('/api/me/submission', {
+        method: 'PATCH',
+        headers: SkillingAuth.bearerHeaders(),
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || 'Could not save submission.');
+        return null;
+      }
+      await pollCycleFromServer();
+      refreshSubmissionBanner();
+      renderRewardsDeck();
+      showToast('Proof saved ✓');
+      var stEl = document.getElementById('submissionStatus');
+      if (stEl) stEl.style.display = 'block';
+      return data;
+    }
+
+    async function submitGithub() {
+      const val = document.getElementById('githubInput')?.value.trim();
+      if (!val || !/^https?:\/\//i.test(val)) {
+        alert('Enter a valid GitHub URL.');
+        return;
+      }
+      const ok = await patchMySubmission({ github_url: val });
+      if (ok) document.getElementById('githubInput').value = '';
+    }
+
+    async function submitLiveUrl() {
+      const val = document.getElementById('liveUrlInput')?.value.trim();
+      if (!val || !/^https?:\/\//i.test(val)) {
+        alert('Enter a valid live / demo URL (http or https).');
+        return;
+      }
+      const ok = await patchMySubmission({ live_url: val });
+      if (ok) document.getElementById('liveUrlInput').value = '';
+    }
+
+    async function submitDemoVideo() {
+      const val = document.getElementById('demoVideoInput')?.value.trim();
+      if (!val || !/^https?:\/\//i.test(val)) {
+        alert('Paste a reachable URL (YouTube unlisted / Loom / Drive…).');
+        return;
+      }
+      const ok = await patchMySubmission({ demo_video_url: val });
+      if (ok) document.getElementById('demoVideoInput').value = '';
+    }
+
+    async function submitScreenshotUrls() {
+      const raw = document.getElementById('screenshotUrlsInput')?.value.trim();
+      if (!raw) {
+        alert('Enter at least one image URL.');
+        return;
+      }
+      const shots = raw
+        .split(',')
+        .map(function (s) {
+          return s.trim();
+        })
+        .filter(function (s) {
+          return /^https?:\/\//i.test(s);
+        });
+      if (!shots.length) {
+        alert('URLs must start with http:// or https://');
+        return;
+      }
+      const ok = await patchMySubmission({ screenshot_urls: shots });
+      if (ok) document.getElementById('screenshotUrlsInput').value = '';
+    }
+
+    // ─── FILE UPLOAD ───
 let selectedFile = null;
 function triggerUpload() { document.getElementById('fileInput').click(); }
 function handleFile(e) {
@@ -2689,27 +3661,30 @@ function handleFile(e) {
   if (!selectedFile) return;
   const zone = document.getElementById('uploadZone');
   if(zone) {
-    zone.innerHTML = `
-            < span class="upload-icon" >✅</span >
-      <div class="upload-label">${selectedFile.name}</div>
-      <button class="btn-rect" onclick="submitFileUpload()" style="margin-top:10px;">Submit File →</button>
-    `;
+      zone.innerHTML = '<span class="upload-icon">✅</span><div class="upload-label">' + escHtml(selectedFile.name) + '</div><button type="button" class="btn-rect" onclick="submitFileUpload()" style="margin-top:10px;">Submit File →</button>';
   }
 }
 async function submitFileUpload() {
-  if (!selectedFile) return;
+  if (!selectedFile || !session?.access_token) return;
   const formData = new FormData();
   formData.append('file', selectedFile);
-  formData.append('userId', session.id);
-  formData.append('taskId', selectedTask !== null ? tasks[selectedTask].id : 'unknown');
   try {
-    const res = await fetch('/api/submissions/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (data.success) {
-      alert('File uploaded successfully!');
-      selectedFile = null;
-      document.getElementById('uploadZone').innerHTML = '<span class="upload-icon">📁</span><div class="upload-label">Upload your zipped project</div>';
+    const res = await fetch('/api/me/submission/file', {
+      method: 'POST',
+      headers: authHeaderOnlyBearer(),
+      body: formData
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(data.error || 'Upload failed.');
+      return;
     }
+    showToast('File attached to your proof bundle!');
+    selectedFile = null;
+    refreshSubmissionBanner();
+    var stEl = document.getElementById('submissionStatus');
+    if (stEl) stEl.style.display = 'block';
+    document.getElementById('uploadZone').innerHTML = '<span class="upload-icon">📁</span><div class="upload-label">Drop Your Files Here</div><div class="upload-sublabel">PNG, JPG, MP4, PY, HTML, IPYNB — max 100MB</div><button type="button" class="btn-rect" style="display:inline-block">Browse Files</button>';
   } catch (e) { console.error(e); }
 }
 
@@ -2721,15 +3696,103 @@ function initReveal() {
   }, { threshold: 0.12 });
   els.forEach(el => obs.observe(el));
 }
-function initNavHighlight() { /* Placeholder */ }
-function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+function initNavHighlight() {
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      const top = s.offsetTop;
+      if (pageYOffset >= top - 100) current = s.getAttribute('id');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+}
+
+// ─── ONBOARDING MODAL LOGIC ───
+let currentStep = 1;
+const onboardData = { domain: '', level: '' };
+
+function selectChip(el, type) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  onboardData[type] = el.textContent;
+}
+
+function nextStep() {
+  if (currentStep === 1 && !onboardData.domain) return showToast('Please select a domain', 'error');
+  if (currentStep === 2 && !onboardData.level) return showToast('Please select your level', 'error');
+
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep++;
+  const nextEl = document.getElementById(`step${currentStep}`);
+  if (nextEl) {
+    nextEl.classList.add('active');
+    document.getElementById('stepCounter').textContent = `Step ${currentStep} of 2`;
+    if (currentStep === 3) {
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('stepCounter').style.display = 'none';
+      saveOnboarding();
+    }
+  }
+}
+
+async function saveOnboarding() {
+  if (!session?.access_token) return;
+  try {
+    const res = await fetch('/api/me/profile', {
+      method: 'PATCH',
+      headers: SkillingAuth.bearerHeaders(),
+      body: JSON.stringify({
+        skillDomain: onboardData.domain,
+        level: onboardData.level
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      cachedProfile = data.profile || cachedProfile;
+      showToast('Profile updated!');
+      fetchTasks();
+      pollCycleFromServer();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function toggleMobileNav() { 
+  const nav = document.getElementById('mobileNav');
+  if (nav) nav.classList.toggle('open'); 
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+  session = SkillingAuth.toLegacy(SkillingAuth.read());
+  initGuestPreviewChips();
+  const gbc = document.getElementById('giveBestContent');
+  if (gbc) gbc.addEventListener('click', loadGiveBestContent);
   enforceAuth();
-  if (session) {
-    renderCalendar();
+  if (session?.access_token) {
+    fetch('/api/me/summary', { headers: SkillingAuth.bearerHeaders() })
+      .then((r) => r.json())
+      .then(function (sum) {
+        cachedProfile = sum.profile || cachedProfile;
+        refreshSubmissionBanner();
+        renderRewardsDeck();
+        renderCalendar();
+      })
+      .catch(function () {});
   }
   initReveal();
+  initNavHighlight();
 });
 
   // Escape key closes video modal
@@ -2749,8 +3812,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="background:var(--charcoal);padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:10px;height:10px;background:#00ff88;border-radius:50%;box-shadow:0 0 10px #00ff88;"></div>
-          <div style="font-family:var(--display-font);font-weight:700;color:#fff;letter-spacing:1px;font-size:16px;">AI
-            MENTOR</div>
+          <div><div style="font-family:var(--display-font);font-weight:700;color:#fff;letter-spacing:1px;font-size:16px;">AI MENTOR</div><div style="font-size:10px;color:rgba(255,255,255,0.42);margin-top:4px;letter-spacing:0.04em;">Suggested tasks curated by admins (PRD §15)</div></div>
         </div>
         <button onclick="toggleAiChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;">✕</button>
       </div>

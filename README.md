@@ -146,9 +146,11 @@ S-KILLING IT is built to convert:
 
 ## Tech Stack (MVP)
 
-* Frontend: React / Next.js with Tailwind CSS
-* Backend: Node.js / Express
-* Database: MongoDB / Firebase
+* Frontend: HTML + Tailwind CSS
+* Backend: Express.js
+* Database: JSON file (database.json)
+* AI: Google Gemini API
+* Hosting: Vercel
 
 ---
 

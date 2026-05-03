@@ -3,159 +3,270 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SKILLING IT – Admin Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>SKILLING IT – Site admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--red:#e60000;--charcoal:#25282b;--white:#fff;--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
-body{font-family:var(--body);background:var(--charcoal);color:var(--white);margin:0;padding:20px;}
-.nav{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.1);}
-.btn{background:var(--red);color:var(--white);padding:10px 20px;border:none;border-radius:4px;cursor:pointer;font-family:var(--display);text-transform:uppercase;}
-.section{margin:30px 0;}
-h2{font-family:var(--display);font-size:24px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
-.card{background:rgba(255,255,255,0.05);padding:20px;border-radius:8px;margin-bottom:10px;}
-.input{width:100%;padding:10px;margin-bottom:10px;background:rgba(255,255,255,0.1);color:var(--white);border:none;}
-.flex{display:flex;gap:10px;}
+:root{--red:#e60000;--bg:#181a1d;--card:#22252a;--line:rgba(255,255,255,.08);--text:#f2f3f5;--muted:rgba(242,243,245,.55);--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
+*{box-sizing:border-box}
+body{font-family:var(--body);background:var(--bg);color:var(--text);margin:0;padding:28px;line-height:1.45;font-size:15px;}
+h1{font-family:var(--display);font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:1.55rem;margin:0 0 16px;}
+h2{font-family:var(--display);font-size:1.15rem;text-transform:uppercase;letter-spacing:1px;margin:32px 0 14px;border-bottom:1px solid var(--line);padding-bottom:8px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:14px;}
+label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:10px;}
+input[type=text],input[type=password],textarea{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#121316;color:var(--text);font:inherit;}
+textarea{min-height:100px;resize:vertical;}
+.btn{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--red);border:none;color:#fff;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:.85rem;}
+.btn.secondary{background:rgba(255,255,255,.08);border:1px solid var(--line);}
+.btn.small{padding:8px 12px;font-size:.76rem;margin-right:8px;margin-top:8px;}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px;}
+.err{color:#ffb4b4;font-size:.9rem;margin:8px 0;display:none;}
+.err.show{display:block;}
+.auth-wrap{max-width:420px;margin:48px auto}
+.user-block{margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid var(--line);}
+.user-head{font-family:var(--display);font-weight:700;font-size:1.05rem;text-transform:uppercase;margin-bottom:10px;color:var(--red);}
+.meta{font-size:.86rem;color:var(--muted);margin-bottom:12px;font-family:var(--body);}
+.badge{font-size:.72rem;padding:4px 8px;border-radius:4px;background:rgba(255,255,255,.08);}
+.badge.pending{background:rgba(230,176,0,.15);color:#ffb44c;}
+.sub-card{border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;background:#17191c;}
+.thumb{width:120px;height:76px;border-radius:6px;object-fit:cover;display:block;margin-bottom:8px;background:#333;}
+.links a{color:#7ec8ff;word-break:break-all;font-size:.88rem;display:block;margin:4px 0;}
+.mini{font-size:.8rem;color:var(--muted);margin-top:6px;line-height:1.4;}
 </style>
 </head>
 <body>
-  <div class="nav">
-    <h2>S-KILLING it - Admin Panel</h2>
-    <button class="btn" onclick="logout()">Logout</button>
+<div id="loginGate" class="auth-wrap">
+  <h1>Site admin login</h1>
+  <p style="color:var(--muted);font-size:.9rem;">Shared site password — not tied to learner accounts.</p>
+  <div id="loginErr" class="err"></div>
+  <label for="admPass">Password</label>
+  <input id="admPass" type="password" autocomplete="current-password"/>
+  <div class="row">
+    <button type="button" class="btn" id="admLoginBtn">Unlock panel</button>
+    <button type="button" class="btn secondary" onclick="location.href='/'">Home</button>
   </div>
+</div>
 
-  <div class="section">
-    <h2>Add YT Video to Pool</h2>
-    <div class="flex">
-      <input type="text" id="videoUrl" class="input" placeholder="YouTube Video URL">
-      <input type="text" id="videoTitle" class="input" placeholder="Video Title">
-      <button class="btn" onclick="addVideo()">Add</button>
+<div id="panel" style="display:none;max-width:1100px;margin:0 auto;">
+  <div class="row" style="justify-content:space-between;width:100%;margin-bottom:8px;">
+    <h1>Admin console</h1>
+    <div>
+      <button type="button" class="btn secondary" id="refreshBtn">Refresh queue</button>
+      <button type="button" class="btn secondary" id="logoutBtn">Logout</button>
     </div>
   </div>
 
-  <div class="section">
-    <h2>Assign Tasks to Users</h2>
-    <div class="flex">
-      <select id="userSelect" class="input"></select>
-      <select id="taskSelect" class="input"></select>
-      <button class="btn" onclick="assignTask()">Assign</button>
+  <div class="card">
+    <h2 style="margin-top:0;border:none;padding:0;">Be relevant · new post</h2>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:.9rem;">Image + rich text surfaced to learners in “Tech Awareness”.</p>
+    <div id="newsErr" class="err"></div>
+    <label for="brTitle">Title</label>
+    <input id="brTitle" type="text"/>
+    <label for="brDetails">Body</label>
+    <textarea id="brDetails"></textarea>
+    <label for="brRelated">Tags / related tasks (comma text)</label>
+    <input id="brRelated" type="text" placeholder="e.g. AIML · robotics"/>
+    <label for="brImg">Image</label>
+    <input id="brImg" type="file" accept="image/*"/>
+    <div class="row">
+      <button type="button" class="btn" id="btnPostNews">Publish</button>
     </div>
   </div>
 
-  <div class="section">
-    <h2>Post Tech News & Tasks</h2>
-    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
-      <input type="text" id="newsTitle" class="input" placeholder="News Title (e.g. AI Advances)">
-      <textarea id="newsDetails" class="input" placeholder="News Details..." rows="4"></textarea>
-      <input type="text" id="newsTasks" class="input" placeholder="Related Task Keywords (e.g. AI, Web)">
-      <label>News Image:</label>
-      <input type="file" id="newsImage" class="input" accept="image/*">
-      <button class="btn" onclick="postNews()">Post News</button>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>Submissions (Review & Award Points)</h2>
-    <div id="subsGrid" class="grid"></div>
-  </div>
+  <h2>Submissions · grouped by learner</h2>
+  <p style="color:var(--muted);font-size:.9rem;">Review proof bundles · accept or reject feedback + points reaches their rewards dashboard.</p>
+  <div id="queueErr" class="err"></div>
+  <div id="queueMount"></div>
+</div>
 
 <script>
-let session = JSON.parse(localStorage.getItem('skillingit_session') || 'null');
-if(!session || session.role !== 'admin') window.location.href = '/';
+const $ = (id) => document.getElementById(id);
 
-async function init() {
-  await loadUsers();
-  await loadTasks();
-  await loadSubmissions();
+async function admFetch(path, opts = {}) {
+  const o = opts || {};
+  o.credentials = 'include';
+  if (!o.headers) o.headers = {};
+  const res = await fetch(path, o);
+  return res;
 }
 
-async function loadUsers() {
-  let res = await fetch('/api/admin/users');
-  let data = await res.json();
-  document.getElementById('userSelect').innerHTML = data.users.map(u => `<option value="${u.id}">${u.name} (${u.email})</option>`).join('');
+function showGate() {
+  $('loginGate').style.display = 'block';
+  $('panel').style.display = 'none';
+}
+function showPanel() {
+  $('loginGate').style.display = 'none';
+  $('panel').style.display = 'block';
 }
 
-async function loadTasks() {
-  let res = await fetch('/api/tasks');
-  let data = await res.json();
-  document.getElementById('taskSelect').innerHTML = data.tasks.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
-}
+$('admLoginBtn').onclick = async () => {
+  $('loginErr').classList.remove('show');
+  const password = $('admPass').value;
+  if (!password) return $('loginErr').textContent = 'Enter password.', $('loginErr').classList.add('show');
+  const res = await admFetch('/api/admin/site-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return $('loginErr').textContent = data.error || 'Login failed.', $('loginErr').classList.add('show');
+  showPanel();
+  loadQueue();
+};
 
-async function loadSubmissions() {
-  let res = await fetch('/api/submissions');
-  let data = await res.json();
-  let html = data.submissions.filter(s => s.status === 'pending-review').map(s => `
-    <div class="card">
-      <h3>User: ${s.userId} | Task: ${s.taskId}</h3>
-      <p>Link: <a href="${s.githubUrl || s.path}" target="_blank" style="color:var(--red)">View Submission</a></p>
-      <input type="number" id="pts-${s.id}" class="input" placeholder="Points to award">
-      <button class="btn" onclick="reviewSub('${s.id}')">Approve</button>
-    </div>
-  `).join('');
-  document.getElementById('subsGrid').innerHTML = html || '<p>No pending submissions.</p>';
-}
+$('logoutBtn').onclick = async () => {
+  await admFetch('/api/admin/site-logout', { method: 'POST' });
+  $('admPass').value = '';
+  showGate();
+};
 
-async function addVideo() {
-  let url = document.getElementById('videoUrl').value;
-  let title = document.getElementById('videoTitle').value;
-  if(url) {
-    await fetch('/api/admin/videos', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url, title, adminId:session.id})});
-    alert('Video added!');
-    document.getElementById('videoUrl').value = ''; document.getElementById('videoTitle').value = '';
+$('refreshBtn').onclick = loadQueue;
+
+$('btnPostNews').onclick = async () => {
+  $('newsErr').classList.remove('show');
+  const title = $('brTitle').value.trim();
+  const details = $('brDetails').value.trim();
+  const relatedTasks = $('brRelated').value.trim();
+  if (!title || !details) return $('newsErr').textContent = 'Title + body required.', $('newsErr').classList.add('show');
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('details', details);
+  fd.append('relatedTasks', relatedTasks);
+  const f = $('brImg').files[0];
+  if (f) fd.append('image', f);
+
+  const res = await admFetch('/api/admin/be-relevant', { method: 'POST', body: fd });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) {
+    $('newsErr').textContent = data.error || 'Failed to post.';
+    return $('newsErr').classList.add('show');
   }
+  $('brTitle').value = '';
+  $('brDetails').value = '';
+  $('brRelated').value = '';
+  $('brImg').value = '';
+  alert('Post published.');
+};
+
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-async function assignTask() {
-  let userId = document.getElementById('userSelect').value;
-  let taskId = document.getElementById('taskSelect').value;
-  await fetch('/api/admin/assign-task', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId, taskId, adminId:session.id})});
-  alert('Assigned!');
-}
+async function loadQueue() {
+  $('queueErr').classList.remove('show');
+  $('queueMount').innerHTML = '<p style="color:var(--muted)">Loading…</p>';
 
-async function reviewSub(id) {
-  let pts = parseInt(document.getElementById('pts-'+id).value) || 0;
-  await fetch('/api/admin/review-submission', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({submissionId:id, points:pts, status:'approved', adminId:session.id})});
-  alert('Approved and awarded points!');
-  loadSubmissions();
-}
+  const res = await admFetch('/api/admin/users-with-pending');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    $('queueMount').innerHTML = '';
+    $('queueErr').textContent = data.error || 'Not authorized — log in.';
+    $('queueErr').classList.add('show');
+    if (res.status === 401) showGate();
+    return;
+  }
 
-async function postNews() {
-  const title = document.getElementById('newsTitle').value;
-  const details = document.getElementById('newsDetails').value;
-  const relatedTasks = document.getElementById('newsTasks').value;
-  const imageFile = document.getElementById('newsImage').files[0];
+  const groups = data.groups || [];
+  if (!groups.length) {
+    $('queueMount').innerHTML = '<p style="color:var(--muted)">No pending reviews ✓</p>';
+    return;
+  }
 
-  if (!title || !details) return alert('Title and details are required!');
+  let html = '';
+  for (const g of groups) {
+    const prof = g.user || {};
+    const dn = escHtml(prof.display_name || '(no profile name)');
+    const em = escHtml(prof.email || prof.id || '');
+    html +=
+      `<div class="user-block"><div class="user-head">${dn}</div><div class="meta">${em}</div>`;
+    for (const b of g.submissions || []) {
+      const task = b.task || {};
+      const tid = escHtml(task.title || '');
+      const status = escHtml((b.status || 'pending_review').replace(/_/g, ' '));
 
-  const formData = new FormData();
-  formData.append('title', title);
-  formData.append('details', details);
-  formData.append('relatedTasks', relatedTasks);
-  if (imageFile) formData.append('image', imageFile);
+      html += `<div class="sub-card"><div style="display:flex;gap:14px;flex-wrap:wrap;">`;
+      if (task.title) html += `<div style="flex:1;min-width:200px"><span class="badge pending">${status}</span><div style="margin-top:8px;font-weight:600">${tid}</div><div class="mini">${escHtml(task.objective || task.desc || '')}</div></div>`;
+      else html += `<div><span class="badge pending">${status}</span></div>`;
 
-  try {
-    const res = await fetch('/api/news', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert('News posted successfully!');
-      document.getElementById('newsTitle').value = '';
-      document.getElementById('newsDetails').value = '';
-      document.getElementById('newsTasks').value = '';
-      document.getElementById('newsImage').value = '';
-    } else {
-      alert('Failed to post news: ' + data.error);
+      html += `<div style="flex:1;min-width:220px;"><div class="links">`;
+
+      const gu = (b.github_url || '').trim();
+      const lu = (b.live_url || '').trim();
+      const dv = (b.demo_video_url || '').trim();
+      if (gu) html += `<a href="${escHtml(gu)}" target="_blank" rel="noopener">GitHub →</a>`;
+      if (lu) html += `<a href="${escHtml(lu)}" target="_blank" rel="noopener">Live / demo →</a>`;
+      if (dv) html += `<a href="${escHtml(dv)}" target="_blank" rel="noopener">Demo video →</a>`;
+
+      const shots = Array.isArray(b.screenshot_urls) ? b.screenshot_urls : [];
+      shots.forEach((u) => {
+        const uu = escHtml(u);
+        html +=
+          `<a href="${uu}" target="_blank" rel="noopener">Screenshot / asset →</a><img src="${uu}" alt="" class="thumb" loading="lazy" onerror="this.style.display='none'"/>`;
+      });
+
+      const files = Array.isArray(b.file_paths) ? b.file_paths : [];
+      files.forEach((p) => {
+        const pu = escHtml(p.startsWith('/') ? p : '/' + p);
+        html += `<a href="${pu}" target="_blank" rel="noopener">Uploaded file →</a>`;
+      });
+
+      html += `</div></div></div>`;
+
+      html += `
+        <div class="mini" style="margin-top:12px;">Cycle start: ${escHtml(b.cycle_start_iso || '')}</div>
+        <label>For learner (feedback)</label>
+        <textarea id="fb-${escHtml(b.id)}" placeholder="Nice work · needs tests · etc." style="min-height:70px;"></textarea>
+        <label>Award points (on Accept)</label>
+        <input type="text" id="pts-${escHtml(b.id)}" value="10" style="max-width:80px;display:inline-block;"/>
+        <div class="row adm-review-row">
+          <button type="button" class="btn small adm-accept" data-sid="${escHtml(b.id)}">Accept</button>
+          <button type="button" class="btn secondary small adm-reject" data-sid="${escHtml(b.id)}">Reject</button>
+        </div>
+      </div>`;
     }
-  } catch (e) { console.error(e); alert('Error posting news.'); }
+    html += `</div>`;
+  }
+
+  $('queueMount').innerHTML = html;
 }
 
-function logout() {
-  localStorage.removeItem('skillingit_session');
-  window.location.href = '/';
-}
-init();
+$('queueMount').addEventListener('click', async (ev) => {
+  const bt = ev.target.closest('.adm-accept, .adm-reject');
+  if (!bt) return;
+  const submissionId = bt.getAttribute('data-sid');
+  if (!submissionId) return;
+  const ptsIn = $('pts-' + submissionId);
+  const fbIn = $('fb-' + submissionId);
+  const points = ptsIn ? parseInt(ptsIn.value, 10) || 0 : 0;
+  const feedback = fbIn ? fbIn.value.trim() : '';
+  const status = bt.classList.contains('adm-accept') ? 'accepted' : 'rejected';
+  const res = await admFetch('/api/admin/review-submission', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ submissionId, status, feedback, points })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.success) return alert(data.error || 'Review failed.');
+  loadQueue();
+});
+
+(async function bootstrap() {
+  const res = await admFetch('/api/admin/session');
+  if (res.ok) {
+    showPanel();
+    loadQueue();
+  } else {
+    showGate();
+  }
+})();
+
+$('admPass').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') $('admLoginBtn').click();
+});
 </script>
 </body>
 </html>

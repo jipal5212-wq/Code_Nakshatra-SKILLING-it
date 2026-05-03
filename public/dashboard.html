@@ -90,8 +90,16 @@ async function loadVideos() {
 async function submitWork() {
   const url = document.getElementById('githubUrl').value;
   if(url) {
-    await fetch('/api/submissions/github', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:session.id, githubUrl:url})});
-    alert('Submitted!');
+    await fetch('/api/submissions/github', { 
+      method:'POST', 
+      headers:{'Content-Type':'application/json'}, 
+      body:JSON.stringify({
+        userId:session.id, 
+        githubUrl:url,
+        taskId: 'dashboard-direct' // Explicitly mark source
+      })
+    });
+    alert('Submitted successfully!');
     document.getElementById('githubUrl').value = '';
   }
 }
