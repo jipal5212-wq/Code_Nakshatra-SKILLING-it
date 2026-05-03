@@ -23,8 +23,18 @@ if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'YOUR_GEMINI_AP
 }
 
 function ensureUploadDir() {
-  const u = path.join(__dirname, '..', 'uploads');
-  if (!fs.existsSync(u)) fs.mkdirSync(u, { recursive: true });
+  const isVercel = process.env.VERCEL || process.env.NOW_REGION;
+  const u = isVercel 
+    ? path.join('/tmp', 'uploads')
+    : path.join(__dirname, '..', 'uploads');
+  
+  if (!fs.existsSync(u)) {
+    try {
+      fs.mkdirSync(u, { recursive: true });
+    } catch (err) {
+      console.warn('Could not create upload dir:', u, err.message);
+    }
+  }
   return u;
 }
 
