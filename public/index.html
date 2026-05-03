@@ -3555,7 +3555,7 @@
           if (n.relatedTasks) {
             rel = '<div style="font-size:12px;color:var(--red);margin-top:5px;font-weight:bold;">Related: ' + escHtml(n.relatedTasks) + '</div>';
           }
-          return '<div class="awareness-card reveal">\n          <span class="awareness-card-tag">Industry pulse</span>\n          <div class="awareness-card-date">' + escHtml(dateStr) + '</div>\n          ' + imgHtml + '\n          <div class="awareness-card-title">' + escHtml(n.title) + '</div>\n          <div class="awareness-card-body">' + escHtml(n.details) + '</div>\n          ' + rel + '\n          <button type="button" class="awareness-convert" onclick="window.location.href=\'/login.html\'">Connect to my build →</button>\n        </div>';
+          return '<div class="awareness-card reveal visible">\n          <span class="awareness-card-tag">Industry pulse</span>\n          <div class="awareness-card-date">' + escHtml(dateStr) + '</div>\n          ' + imgHtml + '\n          <div class="awareness-card-title">' + escHtml(n.title) + '</div>\n          <div class="awareness-card-body">' + escHtml(n.details) + '</div>\n          ' + rel + '\n          <button type="button" class="awareness-convert" onclick="window.location.href=\'/login.html\'">Connect to my build →</button>\n        </div>';
         }).join('');
   } catch(e) { console.error('News fetch error:', e); }
 }
