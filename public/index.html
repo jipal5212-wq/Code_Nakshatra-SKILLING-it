@@ -1856,7 +1856,12 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 14px;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
+    }
+
+    .guest-preview-login-row {
+      text-align: center;
+      margin-top: 8px;
     }
 
     .preview-task-strip {
@@ -2145,13 +2150,13 @@
         <span class="chip guest-chip" data-domain="Data">Data Science</span>
       </div>
       <label class="form-label" style="margin-bottom:12px;display:block;">Level</label>
-      <div class="chip-group" id="guestLevelChips" style="margin-bottom:28px;">
+      <div class="chip-group" id="guestLevelChips" style="margin-bottom:14px;">
         <span class="chip guest-chip-lvl active" data-level="Beginner">Beginner</span>
         <span class="chip guest-chip-lvl" data-level="Intermediate">Intermediate</span>
         <span class="chip guest-chip-lvl" data-level="Advanced">Advanced</span>
       </div>
       <div class="preview-pool-grid" id="guestPreviewGrid"></div>
-      <div style="text-align:center;margin-top:28px;">
+      <div class="guest-preview-login-row">
         <a href="/login.html" class="btn-pill" style="text-decoration:none;">Start the Loop → Login</a>
       </div>
     </div>
@@ -2883,7 +2888,7 @@
       grid.innerHTML = show.map(t => {
         const m = taskMeta(t);
         var expSnippet = escHtml(String(m.expected).substring(0, 160)) + (m.expected.length > 160 ? '…' : '');
-        return '<div class="preview-task-strip reveal"><div class="preview-task-inner"><span class="task-domain-tag">' + escHtml(t.domain) + '</span><div style="font-family:var(--display-font);font-weight:700;font-size:17px;color:var(--charcoal);text-transform:uppercase;margin:10px 0 8px;line-height:1.2">' + escHtml(t.title) + '</div><p style="font-family:var(--body-font);font-size:13px;color:var(--grey-body);line-height:1.5;margin-bottom:6px">' + escHtml(m.watchSeg) + '</p><p style="font-family:var(--body-font);font-size:13px;color:var(--charcoal);font-weight:500">' + expSnippet + '</p><span class="task-effort" style="display:inline-block;margin-top:12px;color:var(--grey-body)">' + escHtml(t.effort || '~1 hr') + '</span></div><div class="preview-task-dim"><span>Start the Loop → Login to execute</span></div></div>';
+        return '<div class="preview-task-strip reveal visible"><div class="preview-task-inner"><span class="task-domain-tag">' + escHtml(t.domain) + '</span><div style="font-family:var(--display-font);font-weight:700;font-size:17px;color:var(--charcoal);text-transform:uppercase;margin:10px 0 8px;line-height:1.2">' + escHtml(t.title) + '</div><p style="font-family:var(--body-font);font-size:13px;color:var(--grey-body);line-height:1.5;margin-bottom:6px">' + escHtml(m.watchSeg) + '</p><p style="font-family:var(--body-font);font-size:13px;color:var(--charcoal);font-weight:500">' + expSnippet + '</p><span class="task-effort" style="display:inline-block;margin-top:12px;color:var(--grey-body)">' + escHtml(t.effort || '~1 hr') + '</span></div><div class="preview-task-dim"><span>Start the Loop → Login to execute</span></div></div>';
       }).join('');
     }
 
