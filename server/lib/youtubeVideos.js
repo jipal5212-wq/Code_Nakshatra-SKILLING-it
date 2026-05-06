@@ -1,3 +1,50 @@
+// ─── In-memory cache (saves quota by reusing results for 1 hour) ──────────────
+const videoCache = new Map();
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+// ─── Quota-blocked state (auto-clears at midnight Pacific = 12:30 PM IST) ─────
+let quotaBlocked = false;
+let quotaBlockedUntil = null;
+
+function getMidnightPacific() {
+  // Calculate next midnight Pacific Time (UTC-7 or UTC-8)
+  const now = new Date();
+  const pacificOffset = -7 * 60; // PDT offset in minutes (adjust to -8 for PST)
+  const pacificNow = new Date(now.getTime() + (pacificOffset + now.getTimezoneOffset()) * 60000);
+  const midnight = new Date(pacificNow);
+  midnight.setHours(24, 0, 1, 0); // next midnight Pacific + 1 sec buffer
+  // Convert back to local time
+  return new Date(midnight.getTime() - (pacificOffset + now.getTimezoneOffset()) * 60000);
+}
+
+function isQuotaBlocked() {
+  if (!quotaBlocked) return false;
+  if (quotaBlockedUntil && new Date() >= quotaBlockedUntil) {
+    // Quota has reset — clear the block automatically!
+    console.log('[YouTube] Quota reset detected — resuming live API calls ✅');
+    quotaBlocked = false;
+    quotaBlockedUntil = null;
+    videoCache.clear(); // Clear cache so fresh results load
+    return false;
+  }
+  return true;
+}
+
+function getCached(key) {
+  const entry = videoCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    videoCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key, data) {
+  videoCache.set(key, { data, timestamp: Date.now() });
+}
+
+// ─── Fallback curated videos (used when API quota is exceeded) ────────────────
 function generateFallbackVideos(query) {
   // Action-oriented fallback videos — "build it / do it" not "what is X"
   const map = {
@@ -73,17 +120,45 @@ function generateFallbackVideos(query) {
   }));
 }
 
+// ─── Main search function with caching + auto quota recovery ─────────────────
 async function searchYouTube(q, maxResults = 7) {
   const YT_API_KEY = process.env.YOUTUBE_API_KEY;
+
+  // No key configured → use fallback immediately
   if (!YT_API_KEY || YT_API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE') {
     return { source: 'fallback', videos: generateFallbackVideos(q) };
   }
+
+  // Quota is blocked → use fallback (auto-unblocks at midnight Pacific)
+  if (isQuotaBlocked()) {
+    console.log(`[YouTube] Quota blocked until ${quotaBlockedUntil?.toISOString()} — using fallback`);
+    return { source: 'fallback', videos: generateFallbackVideos(q) };
+  }
+
+  // Check cache first — avoids wasting quota on repeated searches
+  const cacheKey = `${q}:${maxResults}`;
+  const cached = getCached(cacheKey);
+  if (cached) {
+    console.log(`[YouTube] Cache hit for "${q}" — no API call needed ✅`);
+    return cached;
+  }
+
   try {
     const url =
       `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=${maxResults}&q=${encodeURIComponent(q)}` +
       `&key=${YT_API_KEY}&videoDuration=medium`;
     const response = await fetch(url);
     const data = await response.json();
+
+    // Detect quota exceeded (403) — block and schedule auto-recovery
+    if (data.error && data.error.code === 403) {
+      console.warn('[YouTube] Quota exceeded! Switching to fallback until midnight Pacific ⚠️');
+      quotaBlocked = true;
+      quotaBlockedUntil = getMidnightPacific();
+      console.log(`[YouTube] Will auto-resume at ${quotaBlockedUntil.toISOString()}`);
+      return { source: 'fallback', videos: generateFallbackVideos(q) };
+    }
+
     const videos = (data.items || []).map((item) => ({
       id: item.id.videoId,
       title: item.snippet.title,
@@ -95,9 +170,17 @@ async function searchYouTube(q, maxResults = 7) {
       embedUrl: `https://www.youtube.com/embed/${item.id.videoId}`,
       watchUrl: `https://www.youtube.com/watch?v=${item.id.videoId}`
     }));
+
     if (videos.length === 0) return { source: 'fallback', videos: generateFallbackVideos(q) };
-    return { source: 'youtube-api', videos };
-  } catch {
+
+    // Cache successful result for 1 hour
+    const result = { source: 'youtube-api', videos };
+    setCache(cacheKey, result);
+    console.log(`[YouTube] Live results fetched & cached for "${q}" ✅`);
+    return result;
+
+  } catch (err) {
+    console.error('[YouTube] Fetch error:', err.message);
     return { source: 'fallback', videos: generateFallbackVideos(q) };
   }
 }
