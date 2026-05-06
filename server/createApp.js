@@ -68,7 +68,7 @@ function createApp() {
   else console.warn('⚠️  SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY missing — API routes needing DB disabled.');
 
   if (admin) {
-    app.use(publicRoutes(admin));
+    app.use(publicRoutes(admin, geminiModel));
     app.use(authRoutes(admin));
     app.use(userRoutes(admin, upload));
     app.use(taskRoutes(admin));

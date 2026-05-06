@@ -1,41 +1,57 @@
 const express = require('express');
 const { SKILL_MAP, normalizeSkillKey } = require('../lib/skills');
 const { searchYouTube } = require('../lib/youtubeVideos');
-const { loadMatchingTasks } = require('../services/cycleService');
-const { mapTaskRow } = require('./mapTask');
+const { generateTasks } = require('../lib/geminiTasks');
 
-module.exports = function publicRoutes(admin) {
+module.exports = function publicRoutes(admin, geminiModel) {
   const r = express.Router();
 
+  /* ─────────────────────────────────────────────────────────────────
+   * GET /api/public/content-pack?skill=aiml&level=Beginner
+   * Returns 7 video+task pairs, each task AI-generated and each
+   * video specifically matched to that task's ytQuery.
+   * ─────────────────────────────────────────────────────────────── */
   r.get('/api/public/content-pack', async (req, res) => {
     try {
-      if (!admin) return res.status(503).json({ error: 'Database not configured.' });
       const skillKey = normalizeSkillKey(req.query.skill || 'aiml');
-      const level = req.query.level || 'Beginner';
+      const level    = req.query.level || 'Beginner';
+
+      // 1. Generate 7 tasks via Gemini (falls back to static if Gemini unavailable)
+      const tasks = await generateTasks(geminiModel, skillKey, level);
+
+      // 2. Fetch a matching video per task using the task's ytQuery
+      //    Run all fetches in parallel for speed, fall back individually
       const sm = SKILL_MAP[skillKey] || SKILL_MAP.aiml;
+      const videoPromises = tasks.map(async (task) => {
+        const q = task.ytQuery || `${task.title} tutorial project`;
+        try {
+          const { videos } = await searchYouTube(q, 3);
+          return videos[0] || null;
+        } catch {
+          const { videos } = await searchYouTube(`${sm.query} project`, 2);
+          return videos[0] || null;
+        }
+      });
 
-      const { source, videos: rawVideos } = await searchYouTube(`${sm.query} ${level}`, 8);
-      const videos = rawVideos.slice(0, 7);
+      const videos = await Promise.all(videoPromises);
 
-      let pool = await loadMatchingTasks(admin, skillKey, level);
-      if (!pool.length) {
-        const { data: fallback } = await admin.from('tasks').select('*').limit(20);
-        pool = fallback || [];
-      }
-
-      const items = videos.map((v, i) => ({
-        video: v,
-        task: pool.length ? mapTaskRow(pool[i % pool.length]) : null,
-        suggestedTaskId: pool.length ? pool[i % pool.length].id : null
+      // 3. Pair each task with its video
+      const items = tasks.map((task, i) => ({
+        video: videos[i] || null,
+        task,
+        suggestedTaskId: task.id
       }));
 
-      res.json({ skillKey, level, source, items });
+      res.json({ skillKey, level, source: tasks[0]?.source || 'gemini', items });
     } catch (e) {
-      console.error(e);
+      console.error('[content-pack]', e);
       res.status(500).json({ error: e.message || 'Pack failed.' });
     }
   });
 
+  /* ─────────────────────────────────────────────────────────────────
+   * GET /api/youtube/search?q=...&maxResults=6
+   * ─────────────────────────────────────────────────────────────── */
   r.get('/api/youtube/search', async (req, res) => {
     const q = req.query.q;
     if (!q) return res.status(400).json({ error: 'Query required' });
@@ -48,44 +64,53 @@ module.exports = function publicRoutes(admin) {
     }
   });
 
-  /** Explore: beginner tasks + clips for any domain. Auth-optional. */
+  /* ─────────────────────────────────────────────────────────────────
+   * GET /api/public/explore?skill=aiml
+   * Explore page: beginner tasks + clips for any domain.
+   * ─────────────────────────────────────────────────────────────── */
   r.get('/api/public/explore', async (req, res) => {
     try {
       if (!admin) return res.status(503).json({ error: 'Database not configured.' });
       const skillKey = normalizeSkillKey(req.query.skill || 'aiml');
       const sm = SKILL_MAP[skillKey] || SKILL_MAP.aiml;
 
-      // Always beginner for exploration
-      let pool = await loadMatchingTasks(admin, skillKey, 'Beginner');
-      if (!pool.length) {
-        const { data: fallback } = await admin.from('tasks').select('*').eq('level', 'Beginner').limit(10);
-        pool = fallback || [];
-      }
-      const tasks = pool.slice(0, 7).map(mapTaskRow);
+      // Generate beginner tasks for explore
+      const allTasks = await generateTasks(geminiModel, skillKey, 'Beginner');
+      const tasks = allTasks.slice(0, 7);
 
-      // YouTube clips for this domain
-      const { source, videos: rawVideos } = await searchYouTube(`${sm.query} beginner tutorial`, 4);
-      const videos = rawVideos.slice(0, 4);
+      // Fetch 4 videos matched to the first 4 tasks
+      const videoPromises = tasks.slice(0, 4).map(async (task) => {
+        try {
+          const { videos } = await searchYouTube(task.ytQuery || sm.query, 2);
+          return videos[0] || null;
+        } catch {
+          return null;
+        }
+      });
+      const videos = (await Promise.all(videoPromises)).filter(Boolean);
 
-      // Domain task counts (for the card badges)
-      const { data: allTasks } = await admin.from('tasks').select('domain, level');
-      const counts = {};
-      for (const key of Object.keys(SKILL_MAP)) {
-        counts[key] = (allTasks || []).filter(t => {
-          const d = String(t.domain || '').toLowerCase();
-          if (key === 'aiml')        return d.includes('ai') || d.includes('ml');
-          if (key === 'datascience') return d.includes('data');
-          if (key === 'robotics')    return d.includes('robot');
-          if (key === 'iot')         return d.includes('iot');
-          if (key === 'cybersec')    return d.includes('cyber') || d.includes('sec');
-          if (key === 'webdev')      return d.includes('web');
-          return false;
-        }).length;
-      }
+      // Domain task counts (from DB if available)
+      let counts = {};
+      try {
+        const { data: allDBTasks } = await admin.from('tasks').select('domain, level');
+        const { SKILL_MAP: SM } = require('../lib/skills');
+        for (const key of Object.keys(SM)) {
+          counts[key] = (allDBTasks || []).filter(t => {
+            const d = String(t.domain || '').toLowerCase();
+            if (key === 'aiml')        return d.includes('ai') || d.includes('ml');
+            if (key === 'datascience') return d.includes('data');
+            if (key === 'robotics')    return d.includes('robot');
+            if (key === 'iot')         return d.includes('iot');
+            if (key === 'cybersec')    return d.includes('cyber') || d.includes('sec');
+            if (key === 'webdev')      return d.includes('web');
+            return false;
+          }).length;
+        }
+      } catch { counts = {}; }
 
-      res.json({ skillKey, label: sm.label, tasks, videos, source, counts });
+      res.json({ skillKey, label: sm.label, tasks, videos, source: tasks[0]?.source || 'gemini', counts });
     } catch (e) {
-      console.error(e);
+      console.error('[explore]', e);
       res.status(500).json({ error: e.message || 'Explore failed.' });
     }
   });
