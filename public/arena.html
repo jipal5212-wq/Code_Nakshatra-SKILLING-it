@@ -42,6 +42,7 @@
 <div id="tab-content-videos" class="tab-content"><div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">Learn By Watching</span></div><h2 class="section-title">YOUTUBE <em>VIDEO POOL</em></h2><p class="section-intro">Curated tutorials matched to your selected task. Watch the segment, then build.</p><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;"><button class="btn-ai" id="giveBestContent" onclick="loadVideos()">✨ Load Best Content</button><span id="videoPoolStatus" style="font-family:var(--body-font);font-size:13px;color:rgba(255,255,255,.35);"></span></div><div class="video-grid" id="videoGrid"><div class="empty-state"><span class="empty-icon">🎬</span><p class="empty-title">Select a task first, then load videos</p></div></div></div><div id="tab-content-how" class="tab-content"><div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">The System</span></div><h2 class="section-title">HOW THE <em>LOOP</em> WORKS</h2><p class="section-intro">Every 24 hours you enter a new cycle. Four phases. No skipping. No passive watching. Real output required.</p><div class="how-grid"><div class="how-card"><div class="how-card-num">1</div><div class="how-card-phase">Phase 01</div><div class="how-card-icon">🎯</div><div class="how-card-title">Task Selection</div><div class="how-card-body">You are shown 6–7 curated tasks matching your domain and level. Pick one within 2 hours — or the system picks for you. No choice paralysis.</div><span class="how-card-time">0 – 2 hrs</span></div><div class="how-card"><div class="how-card-num">2</div><div class="how-card-phase">Phase 02</div><div class="how-card-icon">⚡</div><div class="how-card-title">Execution</div><div class="how-card-body">Watch only the recommended video segment. Then build. No aimless scrolling. The task is small, practical, and action-oriented. Target: ~1 hour of deep work.</div><span class="how-card-time">Rest of 24h cycle</span></div><div class="how-card"><div class="how-card-num">3</div><div class="how-card-phase">Phase 03</div><div class="how-card-icon">📤</div><div class="how-card-title">Submission</div><div class="how-card-body">Submit proof: code, screenshot, video, or GitHub link. No submission = no streak. The proof requirement eliminates fake completion.</div><span class="how-card-time">Before 24 hrs</span></div><div class="how-card"><div class="how-card-num">4</div><div class="how-card-phase">Phase 04</div><div class="how-card-icon">✅</div><div class="how-card-title">Validation</div><div class="how-card-body">Admins review and approve or reject. Approved → streak continues, points added. Rejected → resubmit ASAP. Quality is enforced.</div><span class="how-card-time">Admin Review</span></div></div></div></div></div>
 <script src="/js/skilling-auth.js"></script><script>
 var session=null,tasks=[],poolItems=[],selectedTask=null,cycleData=null,_tickStart=Date.now();
+var _activePoolDomain=null,_activeLevel=null;
 window.addEventListener("DOMContentLoaded",init);
 function init(){
   var raw=window.SkillingAuth?window.SkillingAuth.read():null;
@@ -96,11 +97,8 @@ async function fetchContentPool(){
     // Or pick up server-locked task
     if(cycleData&&cycleData.locked_task_id){var li=poolItems.findIndex(function(it){return it.task&&it.task.id===cycleData.locked_task_id;});if(li>=0)selectedTask=li;}
     renderPool();
-  }catch(e){g.innerHTML="<div class='empty-state'><span class='empty-icon'>&#128203;</span><p class='empty-title'>Could not load pool</p></div>";}
+  }catch(e){console.warn('[pool] API failed, using static fallback:', e&&e.message);renderStaticFallback(_activePoolDomain||session.skill_domain||'aiml', _activeLevel||session.level||'Beginner');}
 }
-var _activePoolDomain = null;  // null = use session default
-var _activeLevel = null;       // null = use session default
-
 function filterPool(domain){
   _activePoolDomain = domain;
   // Update filter button styles
@@ -120,6 +118,97 @@ function filterLevel(level){
   fetchContentPool();
 }
 
+
+/* ── CLIENT-SIDE STATIC FALLBACK ────────────────────────────────────── */
+var STATIC_POOL={
+  aiml:[
+    {title:"Train a Digit Classifier on MNIST",desc:"Build and train a neural network using TensorFlow/Keras on the MNIST dataset.",effort:"~1.5 hr",ytQuery:"train MNIST neural network keras python from scratch"},
+    {title:"Build a Spam Email Detector",desc:"Create a text classifier using Naive Bayes and scikit-learn on email data.",effort:"~1 hr",ytQuery:"build spam email classifier python scikit-learn project"},
+    {title:"Create a Movie Recommendation System",desc:"Implement collaborative filtering using Pandas and cosine similarity.",effort:"~2 hr",ytQuery:"build movie recommendation system python project tutorial"},
+    {title:"Train an Image Classifier with Transfer Learning",desc:"Fine-tune MobileNet to classify your own images.",effort:"~2 hr",ytQuery:"transfer learning image classifier python keras project"},
+    {title:"Build a Sentiment Analysis Flask API",desc:"Train a sentiment model and expose it via Flask REST endpoint.",effort:"~2 hr",ytQuery:"sentiment analysis python flask api project tutorial"},
+    {title:"Implement K-Means Clustering on Customer Data",desc:"Segment customer data into clusters and visualize with Matplotlib.",effort:"~1 hr",ytQuery:"kmeans clustering python project tutorial pandas"},
+    {title:"Deploy an ML Model as a Streamlit App",desc:"Train a model, pickle it, and serve predictions via Streamlit.",effort:"~2 hr",ytQuery:"deploy machine learning model streamlit python project"}
+  ],
+  datascience:[
+    {title:"Analyze Netflix Dataset with Pandas",desc:"Load, clean and visualize trends in the Netflix titles dataset.",effort:"~1.5 hr",ytQuery:"netflix data analysis pandas python project tutorial"},
+    {title:"Build a Sales Dashboard with Plotly",desc:"Create an interactive analytics dashboard using Plotly Express.",effort:"~1.5 hr",ytQuery:"plotly express sales dashboard python project tutorial"},
+    {title:"Scrape and Analyze Job Postings",desc:"Web-scrape job listings and find the most in-demand tech skills.",effort:"~2 hr",ytQuery:"web scraping job postings python data analysis project"},
+    {title:"Predict House Prices with Linear Regression",desc:"Build a regression model on housing data and evaluate with RMSE.",effort:"~1 hr",ytQuery:"house price prediction linear regression python project"},
+    {title:"Build an SQL Analytics Report",desc:"Write SQL queries to analyze a real e-commerce database.",effort:"~1.5 hr",ytQuery:"sql project data analysis tutorial from scratch"},
+    {title:"Create a COVID-19 Data Visualization",desc:"Pull open COVID data and build animated time-series charts.",effort:"~1.5 hr",ytQuery:"covid data visualization python plotly project tutorial"},
+    {title:"Automate Excel Reports with Python",desc:"Use openpyxl and Pandas to auto-generate formatted Excel reports.",effort:"~1 hr",ytQuery:"automate excel report python openpyxl pandas project"}
+  ],
+  robotics:[
+    {title:"Build a Line Follower Robot",desc:"Wire IR sensors to Arduino and program a PID line-following algorithm.",effort:"~2 hr",ytQuery:"line follower robot arduino project build from scratch"},
+    {title:"Create an Obstacle Avoidance Bot",desc:"Use ultrasonic sensor to detect and avoid obstacles automatically.",effort:"~1.5 hr",ytQuery:"obstacle avoiding robot arduino ultrasonic project build"},
+    {title:"Build a Bluetooth Controlled Car",desc:"Control a 4-wheel robot from your phone via HC-05 Bluetooth module.",effort:"~2 hr",ytQuery:"bluetooth controlled car arduino project build tutorial"},
+    {title:"Control a Servo Arm with Joystick",desc:"Map joystick analog values to a 3-axis servo arm using PWM signals.",effort:"~1.5 hr",ytQuery:"servo arm joystick control arduino project tutorial"},
+    {title:"Build a Self-Balancing Robot",desc:"Use MPU-6050 gyroscope and PID control to balance a 2-wheel bot.",effort:"~3 hr",ytQuery:"self balancing robot arduino MPU6050 project build"},
+    {title:"Write a ROS Navigation Node",desc:"Create a ROS publisher/subscriber to control robot movement.",effort:"~2 hr",ytQuery:"ROS robot navigation tutorial project from scratch"},
+    {title:"Build a Voice-Controlled Robot",desc:"Integrate speech recognition with Arduino for voice commands.",effort:"~2 hr",ytQuery:"voice controlled robot arduino python project build"}
+  ],
+  iot:[
+    {title:"Build a Temperature Monitoring Dashboard",desc:"Read DHT11 from ESP32 and display live readings on Node-RED.",effort:"~1.5 hr",ytQuery:"ESP32 DHT11 temperature dashboard node-red project tutorial"},
+    {title:"Create a Smart Door Lock System",desc:"Use keypad and servo with ESP32 for a PIN-protected door lock.",effort:"~2 hr",ytQuery:"smart door lock ESP32 keypad servo project build"},
+    {title:"Build an MQTT Smart Home Hub",desc:"Publish sensor data via MQTT and subscribe on Raspberry Pi.",effort:"~2 hr",ytQuery:"MQTT smart home ESP32 raspberry pi project tutorial"},
+    {title:"Implement a Plant Watering Automation",desc:"Read soil moisture sensor and auto-trigger water pump via relay.",effort:"~1.5 hr",ytQuery:"automatic plant watering system ESP32 project build tutorial"},
+    {title:"Create a Real-Time GPS Tracker",desc:"Connect GPS module to ESP32 and send location to a web map.",effort:"~2 hr",ytQuery:"GPS tracker ESP32 real time project tutorial"},
+    {title:"Build an Air Quality Monitor",desc:"Use MQ-135 with ESP32 to log and alert on CO2 levels.",effort:"~1.5 hr",ytQuery:"air quality monitor ESP32 MQ135 project tutorial"},
+    {title:"Setup OTA Firmware Updates on ESP32",desc:"Implement Over-The-Air updates so your device updates without USB.",effort:"~1 hr",ytQuery:"ESP32 OTA update project tutorial from scratch"}
+  ],
+  cybersec:[
+    {title:"Build a Network Port Scanner in Python",desc:"Create a multithreaded TCP port scanner from scratch using sockets.",effort:"~1 hr",ytQuery:"python port scanner from scratch project tutorial"},
+    {title:"Write a Password Strength Analyser",desc:"Build a tool checking entropy, patterns and breach lists via API.",effort:"~1 hr",ytQuery:"password strength checker python project build tutorial"},
+    {title:"Solve a Beginner CTF on TryHackMe",desc:"Complete a TryHackMe beginner box and document your methodology.",effort:"~2 hr",ytQuery:"TryHackMe beginner CTF walkthrough tutorial hacking"},
+    {title:"Build a Packet Sniffer with Scapy",desc:"Capture and parse HTTP/DNS packets on your local network.",effort:"~1.5 hr",ytQuery:"python packet sniffer scapy project build tutorial"},
+    {title:"Implement a Caesar Cipher and Cracker",desc:"Code cipher encryption and a brute-force frequency analysis cracker.",effort:"~1 hr",ytQuery:"caesar cipher python project build from scratch"},
+    {title:"Exploit SQL Injection on DVWA",desc:"Set up DVWA locally and exploit SQL injection step by step.",effort:"~1.5 hr",ytQuery:"SQL injection DVWA tutorial ethical hacking practice"},
+    {title:"Build a Log Analyser for Intrusion Detection",desc:"Parse Apache logs with Python to detect suspicious IP patterns.",effort:"~1.5 hr",ytQuery:"python log analyzer intrusion detection project tutorial"}
+  ],
+  webdev:[
+    {title:"Build a REST API with Node.js and Express",desc:"Create a full CRUD API with Express, MongoDB and authentication.",effort:"~2 hr",ytQuery:"build REST API node express mongodb project tutorial"},
+    {title:"Create a Real-Time Chat App with Socket.io",desc:"Build a multi-room chat app using WebSockets via Socket.io.",effort:"~2 hr",ytQuery:"real time chat app socket.io node.js project build tutorial"},
+    {title:"Build a Full-Stack Todo App",desc:"Create a todo app with React frontend, Express API, and MongoDB.",effort:"~3 hr",ytQuery:"full stack todo app react node mongodb project tutorial"},
+    {title:"Deploy a Next.js Blog to Vercel",desc:"Build a blog with Next.js App Router and deploy it live.",effort:"~2 hr",ytQuery:"nextjs blog app router deploy vercel project tutorial"},
+    {title:"Implement JWT Authentication from Scratch",desc:"Build login/register with bcrypt hashing and JWT token issuance.",effort:"~2 hr",ytQuery:"JWT authentication node express from scratch project tutorial"},
+    {title:"Create a Weather Dashboard with an API",desc:"Fetch OpenWeatherMap data and display a responsive dashboard.",effort:"~1.5 hr",ytQuery:"weather app javascript API project build tutorial"},
+    {title:"Build a Stripe Payment Integration",desc:"Integrate Stripe checkout into a React/Node app with webhooks.",effort:"~2 hr",ytQuery:"stripe payment integration react node project tutorial"}
+  ]
+};
+var STATIC_VIDS={
+  aiml:['i_LwzRVP7bg','Fg2QH0BKQM','GwIo3gDZCVQ','bte6n7Bz_p4','Q58MD5f7lBw','vmEHCJofslg','7eh4d9ejO0'],
+  datascience:['vmEHCJofslg','GBr8GCNKOiA','Q1sojFGMxqc','r-uOLxNrNk8','ZyhVh-qRZPA','yZvFH7B6gKI','p_tg5SlbY8E'],
+  robotics:['fJEoYhTRuxs','BFdMrDe_oqY','e_4N5qKVV6A','kUHmYKWwuWs','dMBZsjLZGhk','mH7cQejntKw','RxpTScg9LX8'],
+  iot:['pKFBcB6V9Vk','jZEHDMRKNBk','LywjCVpM3V4','7h7s9FSPWRY','hFwvHsBhIQA','nkD8QZpLBsY','auPX1BKQVLI'],
+  cybersec:['pQSqMr0XFHI','nzZkKoREEGo','WnN6dbos5u8','EcE_KQd4PkA','mvzXZxYldaM','U9J2GRcSqxk','qiQR5rTSshw'],
+  webdev:['nu_pCVPKzTk','mrHNSanmqQ4','4sosXZsdy-s','bMknfKXIFA8','f2EqECiTBL8','Oe421EPjeBE','1aXZoefZkhQ']
+};
+function renderStaticFallback(skillKey,level){
+  var sk=(skillKey||'aiml').toLowerCase().replace(/[\s\-_\/]/g,'');
+  if(sk.includes('data'))sk='datascience';
+  else if(sk.includes('robot'))sk='robotics';
+  else if(sk.includes('iot'))sk='iot';
+  else if(sk.includes('cyber')||sk.includes('sec'))sk='cybersec';
+  else if(sk.includes('web'))sk='webdev';
+  else sk='aiml';
+  var taskList=STATIC_POOL[sk]||STATIC_POOL.aiml;
+  var vidIds=STATIC_VIDS[sk]||STATIC_VIDS.aiml;
+  poolItems=taskList.map(function(t,i){
+    var vid=vidIds[i%vidIds.length];
+    return {
+      task:{id:'static-'+sk+'-'+i,title:t.title,desc:t.desc,effort:t.effort,domain:sk,level:level||'Beginner'},
+      video:{id:vid,title:t.title+' — Hands-On Tutorial',channel:'freeCodeCamp / Various',
+        thumbnail:'https://img.youtube.com/vi/'+vid+'/hqdefault.jpg',
+        embedUrl:'https://www.youtube.com/embed/'+vid,
+        watchUrl:'https://www.youtube.com/watch?v='+vid,
+        ytQuery:t.ytQuery}
+    };
+  });
+  tasks=poolItems.map(function(it){return it.task;});
+  document.getElementById('poolIntro').textContent=poolItems.length+' build tasks for '+sk+' \u00b7 '+(level||'Beginner');
+  renderPool();
+}
 function renderPool(){
   var g=document.getElementById("poolGrid");
   if(!poolItems.length){g.innerHTML="<div class='empty-state'><span class='empty-icon'>&#128203;</span><p class='empty-title'>No content for your domain yet</p></div>";return;}

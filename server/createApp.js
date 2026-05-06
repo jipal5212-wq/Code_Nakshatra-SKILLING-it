@@ -67,8 +67,10 @@ function createApp() {
     seedTasksIfEmpty(admin).catch((err) => console.error('[startup seed]', err));
   else console.warn('⚠️  SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY missing — API routes needing DB disabled.');
 
+  // ── Content pack + explore: always available (Gemini + YT, no DB needed) ─
+  app.use(publicRoutes(admin, geminiModel));
+
   if (admin) {
-    app.use(publicRoutes(admin, geminiModel));
     app.use(authRoutes(admin));
     app.use(userRoutes(admin, upload));
     app.use(taskRoutes(admin));
@@ -78,7 +80,7 @@ function createApp() {
     app.use(cycleRoutes(admin));
   }
 
-  // ─── Legacy-compatible JSON fallbacks when Supabase off ───
+  // ── Legacy-compatible JSON fallbacks when Supabase off ───
   if (!admin) {
     app.get('/api/news', (_req, res) => res.json({ news: [] }));
     app.get('/api/tasks', (_req, res) => res.json({ tasks: [] }));
