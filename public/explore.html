@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explore Domains — S-KILLING IT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e60000;--charcoal:#25282b;--white:#fff;--grey:#f2f2f2;--grey-body:#7e7e7e;--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--body);background:var(--charcoal);color:var(--white);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--charcoal);display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;border-bottom:2px solid rgba(255,255,255,0.08);}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-logo-mark{width:36px;height:36px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:18px;color:#fff;}
+.nav-logo-text{font-family:var(--display);font-weight:800;font-size:20px;color:#fff;letter-spacing:2px;text-transform:uppercase;}
+.nav-logo-text span{color:var(--red);}
+.nav-actions{display:flex;align-items:center;gap:16px;}
+.btn-back{font-family:var(--display);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.6);text-decoration:none;transition:color 0.2s;}
+.btn-back:hover{color:#fff;}
+.btn-logout{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);font-family:var(--display);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;padding:8px 18px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* HERO */
+.hero{padding:120px 48px 64px;max-width:1200px;margin:0 auto;}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;margin-bottom:20px;}
+.hero-tag-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.6;transform:scale(1.3);}}
+.hero-tag-text{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--red);}
+.hero-headline{font-family:var(--display);font-weight:800;font-size:clamp(48px,7vw,96px);text-transform:uppercase;line-height:0.9;letter-spacing:-2px;color:#fff;margin-bottom:20px;}
+.hero-headline em{font-style:normal;color:var(--red);}
+.hero-sub{font-family:var(--body);font-size:18px;font-weight:300;color:rgba(255,255,255,0.55);max-width:520px;line-height:1.6;margin-bottom:12px;}
+.hero-note{display:inline-flex;align-items:center;gap:8px;background:rgba(230,0,0,0.12);border:1px solid rgba(230,0,0,0.3);border-radius:4px;padding:8px 16px;font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);}
+
+/* PRIMARY BADGE */
+.primary-badge{max-width:1200px;margin:0 auto 48px;padding:0 48px;}
+.primary-card{display:inline-flex;align-items:center;gap:14px;background:rgba(230,0,0,0.1);border:1px solid rgba(230,0,0,0.35);border-radius:6px;padding:14px 24px;}
+.primary-card-label{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.4);}
+.primary-card-value{font-family:var(--display);font-weight:800;font-size:22px;text-transform:uppercase;color:#fff;letter-spacing:1px;}
+.primary-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;}
+
+/* DOMAIN GRID */
+.domains-section{max-width:1200px;margin:0 auto;padding:0 48px 80px;}
+.domains-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+.domain-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:32px 28px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.domain-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:transparent;transition:background 0.25s;}
+.domain-card:hover,.domain-card.active{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.22);transform:translateY(-4px);}
+.domain-card.active::before{background:var(--red);}
+.domain-card.is-primary{border-color:rgba(230,0,0,0.4);}
+.domain-card.is-primary::before{background:var(--red);}
+.domain-icon{font-size:36px;display:block;margin-bottom:16px;}
+.domain-name{font-family:var(--display);font-weight:800;font-size:24px;text-transform:uppercase;letter-spacing:-0.5px;color:#fff;margin-bottom:8px;}
+.domain-desc{font-family:var(--body);font-size:13px;color:rgba(255,255,255,0.45);line-height:1.55;margin-bottom:16px;}
+.domain-meta{display:flex;align-items:center;justify-content:space-between;}
+.domain-count{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--red);}
+.domain-primary-badge{background:var(--red);color:#fff;font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:60px;}
+.domain-arrow{font-size:18px;color:rgba(255,255,255,0.3);transition:transform 0.2s;}
+.domain-card.active .domain-arrow,.domain-card:hover .domain-arrow{transform:translateX(4px);color:var(--red);}
+
+/* DETAIL PANEL */
+.detail-panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:40px;display:none;margin-top:4px;}
+.detail-panel.open{display:block;animation:slideDown 0.3s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+.detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+.detail-title{font-family:var(--display);font-weight:800;font-size:32px;text-transform:uppercase;color:#fff;letter-spacing:-0.5px;}
+.detail-subtitle{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-top:4px;}
+.detail-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-switch{background:transparent;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);font-family:var(--display);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;padding:10px 22px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+.btn-switch:hover{border-color:#fff;color:#fff;}
+.detail-section-label{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:16px;}
+
+/* TASK STRIPS */
+.task-strips{display:flex;flex-direction:column;gap:10px;margin-bottom:40px;}
+.task-strip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:20px 24px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;transition:background 0.2s;}
+.task-strip:hover{background:rgba(255,255,255,0.1);}
+.task-strip-domain{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--red);border:1px solid var(--red);padding:2px 10px;border-radius:60px;display:inline-block;margin-bottom:8px;}
+.task-strip-title{font-family:var(--display);font-weight:700;font-size:18px;text-transform:uppercase;color:#fff;margin-bottom:6px;line-height:1.2;}
+.task-strip-desc{font-family:var(--body);font-size:13px;color:rgba(255,255,255,0.45);line-height:1.55;}
+.task-strip-effort{font-family:var(--display);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-top:8px;}
+.btn-try{background:var(--red);color:#fff;font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:10px 18px;border:none;border-radius:2px;cursor:pointer;white-space:nowrap;transition:background 0.2s;text-decoration:none;display:inline-block;}
+.btn-try:hover{background:#cc0000;}
+
+/* VIDEO CLIPS */
+.video-clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px;}
+.clip-card{background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;cursor:pointer;transition:transform 0.2s;}
+.clip-card:hover{transform:translateY(-3px);}
+.clip-thumb{position:relative;}
+.clip-thumb img{width:100%;height:130px;object-fit:cover;display:block;background:#111;}
+.clip-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.clip-info{padding:10px 12px;}
+.clip-title{font-family:var(--display);font-weight:700;font-size:13px;color:#fff;line-height:1.3;margin-bottom:4px;}
+.clip-ch{font-family:var(--body);font-size:11px;color:rgba(255,255,255,0.35);}
+
+/* VIDEO MODAL */
+.vmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;}
+.vmodal.open{display:flex;}
+.vmodal-inner{width:90%;max-width:900px;background:#000;border-radius:12px;overflow:hidden;position:relative;}
+.vmodal-close{position:absolute;top:10px;right:10px;background:var(--red);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;z-index:10;font-size:14px;}
+.vmodal iframe{width:100%;aspect-ratio:16/9;border:none;}
+
+/* LOADER */
+.loader{text-align:center;padding:60px;font-family:var(--display);font-size:18px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.35);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;padding:12px 24px;border-radius:4px;font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:1px;z-index:9999;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:toastIn 0.3s ease;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px);}to{opacity:1;transform:translate(-50%,0);}}
+/* ─── USER AVATAR DROPDOWN ─── */
+.user-avatar-wrap{position:relative;}
+.user-avatar-btn{width:38px;height:38px;border-radius:50%;background:var(--red);border:2px solid rgba(255,255,255,0.25);color:#fff;font-family:var(--display);font-weight:800;font-size:14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+.user-avatar-btn:hover{transform:scale(1.08);border-color:#fff;box-shadow:0 0 0 3px rgba(230,0,0,0.3);}
+.user-dropdown{position:absolute;right:0;top:calc(100% + 14px);background:#1a1c1f;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:22px;min-width:252px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:9999;display:none;}
+.user-dropdown.open{display:block;animation:dropIn 0.2s ease;}
+@keyframes dropIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.dropdown-avatar-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.dropdown-avatar-circle{width:44px;height:44px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:16px;color:#fff;flex-shrink:0;}
+.dropdown-name{font-family:var(--display);font-weight:800;font-size:18px;color:#fff;text-transform:uppercase;letter-spacing:0.5px;line-height:1.1;}
+.dropdown-email{font-family:var(--body);font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;}
+.dropdown-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.dropdown-badge{font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border:1px solid var(--red);color:var(--red);padding:3px 10px;border-radius:60px;}
+.dropdown-pts-row{display:flex;align-items:baseline;gap:6px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.dropdown-pts-val{font-family:var(--display);font-weight:800;font-size:40px;color:#fff;line-height:1;letter-spacing:-2px;}
+.dropdown-pts-lbl{font-family:var(--body);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.35);}
+.dropdown-links{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
+.dropdown-link{font-family:var(--display);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.55);text-decoration:none;padding:7px 4px;border-radius:4px;transition:color 0.15s;display:flex;align-items:center;gap:8px;}
+.dropdown-link:hover{color:var(--red);}
+.dropdown-logout-btn{width:100%;background:rgba(230,0,0,0.12);border:1px solid rgba(230,0,0,0.3);color:var(--red);font-family:var(--display);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;padding:10px;border-radius:6px;cursor:pointer;transition:all 0.2s;}
+.dropdown-logout-btn:hover{background:var(--red);color:#fff;}
+
+@media(max-width:1024px){.domains-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){
+  .nav{padding:0 24px;}
+  .hero,.primary-badge,.domains-section{padding-left:24px;padding-right:24px;}
+  .domains-grid{grid-template-columns:1fr;}
+  .detail-panel{padding:24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">SI</div>
+    <span class="nav-logo-text">S-KILLING<span> it</span></span>
+  </a>
+  <div class="nav-actions">
+    <a href="/" class="btn-back">← Back to Dashboard</a>
+    <div class="user-avatar-wrap" id="userAvatarWrap">
+      <button class="user-avatar-btn" onclick="toggleUserDropdown()" title="My account"><span id="userAvatarInitials">?</span></button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-avatar-row">
+          <div class="dropdown-avatar-circle" id="dropdownAvatarCircle">?</div>
+          <div><div class="dropdown-name" id="dropdownName">—</div><div class="dropdown-email" id="dropdownEmail">—</div></div>
+        </div>
+        <div class="dropdown-badges"><span class="dropdown-badge" id="dropdownDomain">—</span><span class="dropdown-badge" id="dropdownLevel">—</span></div>
+        <div class="dropdown-pts-row"><span class="dropdown-pts-val" id="dropdownPoints">0</span><span class="dropdown-pts-lbl">pts earned</span></div>
+        <div class="dropdown-links">
+          <a href="/" class="dropdown-link">🏠 Dashboard</a>
+          <a href="/explore.html" class="dropdown-link">🔍 Explore Domains</a>
+          <a href="/track.html" class="dropdown-link">🗺️ Skill Track</a>
+          <a href="/#analytics" class="dropdown-link">📊 My Analytics</a>
+        </div>
+        <button class="dropdown-logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">
+    <div class="hero-tag-dot"></div>
+    <span class="hero-tag-text">Curiosity Mode</span>
+  </div>
+  <h1 class="hero-headline">EXPLORE<br><em>BEYOND</em><br>YOUR DOMAIN</h1>
+  <p class="hero-sub">You have a primary domain — but curiosity has no boundaries. Browse beginner-level tasks and curated videos from every skill domain we support.</p>
+  <div class="hero-note">🔒 Explore mode · No streak impact · View only</div>
+</div>
+
+<!-- PRIMARY BADGE -->
+<div class="primary-badge">
+  <div class="primary-card">
+    <div class="primary-dot"></div>
+    <div>
+      <div class="primary-card-label">Your Primary Domain</div>
+      <div class="primary-card-value" id="primaryDomainLabel">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<!-- DOMAIN GRID -->
+<div class="domains-section">
+  <div class="domains-grid" id="domainsGrid">
+    <div class="loader">Loading domains…</div>
+  </div>
+  <!-- DETAIL PANEL (single, shared) -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="detailTitle">Domain</div>
+        <div class="detail-subtitle">Beginner Level · Explore Mode</div>
+      </div>
+      <div class="detail-actions">
+        <button class="btn-switch" id="switchBtn" onclick="switchPrimary()">Make My Primary Domain →</button>
+      </div>
+    </div>
+    <div class="detail-section-label">Sample Tasks (Beginner)</div>
+    <div class="task-strips" id="detailTasks"><div class="loader">Loading tasks…</div></div>
+    <div class="detail-section-label">Curated Videos</div>
+    <div class="video-clips" id="detailVideos"><div class="loader">Loading videos…</div></div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="vmodal" id="vmodal" onclick="if(event.target===this)closeVideo()">
+  <div class="vmodal-inner">
+    <button class="vmodal-close" onclick="closeVideo()">✕</button>
+    <iframe id="vframe" src="" allowfullscreen allow="autoplay"></iframe>
+  </div>
+</div>
+
+<script src="/js/skilling-auth.js"></script>
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────────
+let session = SkillingAuth.toLegacy(SkillingAuth.read());
+if (!session?.access_token) { window.location.href = '/login.html'; }
+
+const DOMAINS = [
+  { key:'aiml',        label:'AI / ML',         icon:'🤖', desc:'Machine learning, classifiers, neural nets, APIs.' },
+  { key:'webdev',      label:'Web Dev',          icon:'💻', desc:'Frontend, backend, REST APIs, full-stack apps.' },
+  { key:'robotics',    label:'Robotics',         icon:'⚙️', desc:'Arduino, sensors, control logic, actuators.' },
+  { key:'cybersec',    label:'Cybersecurity',    icon:'🔐', desc:'Vulnerability scans, CTFs, ethical hacking labs.' },
+  { key:'datascience', label:'Data Science',     icon:'📊', desc:'Pandas, EDA, visualisation, SQL queries.' },
+  { key:'iot',         label:'IoT',              icon:'📡', desc:'ESP32, MQTT, sensor networks, embedded systems.' }
+];
+
+let activeKey = null;
+let activeSwitchKey = null;
+let counts = {};
+let userPrimaryKey = '';
+
+const DOMAIN_LABEL_MAP = { aiml:'AI / ML', datascience:'Data Science', robotics:'Robotics', iot:'IoT', cybersec:'Cybersecurity', webdev:'Web Dev' };
+
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0]+parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+}
+
+function populateAvatarDropdown(profile) {
+  const sk = profile?.skill_domain || session?.skill_domain || '';
+  const lv = profile?.level || session?.level || '';
+  const pts = profile?.points ?? 0;
+  const initials = getInitials(session?.name || '');
+  ['userAvatarInitials','dropdownAvatarCircle'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=initials; });
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('dropdownName', session?.name || '—');
+  set('dropdownEmail', session?.email || '');
+  set('dropdownDomain', DOMAIN_LABEL_MAP[sk] || sk || '—');
+  set('dropdownLevel', lv || '—');
+  set('dropdownPoints', pts);
+}
+
+function toggleUserDropdown() {
+  document.getElementById('userDropdown')?.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('userAvatarWrap');
+  if (wrap && !wrap.contains(e.target)) document.getElementById('userDropdown')?.classList.remove('open');
+});
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, 2800);
+}
+
+function logout(){
+  SkillingAuth.clear();
+  window.location.href = '/';
+}
+
+// ── Load user primary domain ──────────────────────────────────────────────────
+async function loadProfile(){
+  try {
+    const res = await fetch('/api/me/summary', { headers: SkillingAuth.bearerHeaders() });
+    const d = await res.json().catch(()=>({}));
+    const sk = d.profile?.skill_domain || session?.skill_domain || 'aiml';
+    userPrimaryKey = sk;
+    const dom = DOMAINS.find(x=>x.key===sk);
+    document.getElementById('primaryDomainLabel').textContent = dom ? dom.icon+' '+dom.label : sk.toUpperCase();
+    populateAvatarDropdown(d.profile || {});
+  } catch(e){ console.warn(e); populateAvatarDropdown({}); }
+}
+
+// ── Initial explore fetch (gets counts) ──────────────────────────────────────
+async function loadCounts(){
+  try {
+    const res = await fetch('/api/public/explore?skill=aiml');
+    const d = await res.json().catch(()=>({}));
+    counts = d.counts || {};
+  } catch(e){ console.warn(e); }
+  renderDomainCards();
+}
+
+function renderDomainCards(){
+  const grid = document.getElementById('domainsGrid');
+  grid.innerHTML = DOMAINS.map(dom => {
+    const isPrimary = dom.key === userPrimaryKey;
+    const cnt = counts[dom.key] || 0;
+    return `<div class="domain-card${isPrimary?' is-primary':''}${activeKey===dom.key?' active':''}" onclick="selectDomain('${dom.key}')">
+      <span class="domain-icon">${dom.icon}</span>
+      <div class="domain-name">${dom.label}</div>
+      <div class="domain-desc">${dom.desc}</div>
+      <div class="domain-meta">
+        <span class="domain-count">${cnt} task${cnt!==1?'s':''}</span>
+        ${isPrimary ? '<span class="domain-primary-badge">Primary</span>' : '<span class="domain-arrow">→</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Select a domain ───────────────────────────────────────────────────────────
+async function selectDomain(key){
+  if (activeKey === key) {
+    activeKey = null;
+    document.getElementById('detailPanel').classList.remove('open');
+    renderDomainCards();
+    return;
+  }
+  activeKey = key;
+  activeSwitchKey = key;
+  renderDomainCards();
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  const dom = DOMAINS.find(x=>x.key===key);
+  document.getElementById('detailTitle').textContent = (dom?.icon||'') + ' ' + (dom?.label||key);
+  document.getElementById('detailTasks').innerHTML = '<div class="loader">Loading tasks…</div>';
+  document.getElementById('detailVideos').innerHTML = '<div class="loader">Loading videos…</div>';
+
+  const isPrimary = key === userPrimaryKey;
+  document.getElementById('switchBtn').style.display = isPrimary ? 'none' : 'inline-block';
+
+  try {
+    const res = await fetch(`/api/public/explore?skill=${encodeURIComponent(key)}`);
+    const d = await res.json().catch(()=>({}));
+    counts = d.counts || counts;
+    renderTasks(d.tasks || []);
+    renderVideos(d.videos || []);
+    renderDomainCards();
+  } catch(e){
+    document.getElementById('detailTasks').innerHTML = '<div class="loader">Could not load tasks.</div>';
+    document.getElementById('detailVideos').innerHTML = '';
+  }
+}
+
+function renderTasks(tasks){
+  const el = document.getElementById('detailTasks');
+  if (!tasks.length){
+    el.innerHTML = '<div class="loader">No beginner tasks yet in this domain.</div>';
+    return;
+  }
+  el.innerHTML = tasks.map(t => `
+    <div class="task-strip">
+      <div>
+        <span class="task-strip-domain">${escHtml(t.domain||'')}</span>
+        <div class="task-strip-title">${escHtml(t.title)}</div>
+        <div class="task-strip-desc">${escHtml((t.desc||t.description||'').slice(0,160))}${(t.desc||t.description||'').length>160?'…':''}</div>
+        <div class="task-strip-effort">⏱ ${escHtml(t.effort||'~1 hr')}</div>
+      </div>
+      <a href="/#submit" class="btn-try" onclick="sessionStorage.setItem('exploreTask',JSON.stringify(${JSON.stringify(JSON.stringify(t))}))">Try Task →</a>
+    </div>`).join('');
+}
+
+function renderVideos(videos){
+  const el = document.getElementById('detailVideos');
+  if (!videos.length){
+    el.innerHTML = '<div class="loader">No videos available.</div>';
+    return;
+  }
+  el.innerHTML = videos.map(v => {
+    const enc = encodeURIComponent(v.embedUrl||'');
+    return `<div class="clip-card" onclick="openVideo('${enc}')">
+      <div class="clip-thumb">
+        <img src="${escHtml(v.thumbnail||'')}" alt="" onerror="this.src='https://img.youtube.com/vi/${escHtml(v.id||'')}/mqdefault.jpg'">
+        <div class="clip-play">▶</div>
+      </div>
+      <div class="clip-info">
+        <div class="clip-title">${escHtml(String(v.title||'').slice(0,60))}</div>
+        <div class="clip-ch">${escHtml(v.channel||'YouTube')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Switch primary domain ─────────────────────────────────────────────────────
+async function switchPrimary(){
+  if (!activeSwitchKey || activeSwitchKey === userPrimaryKey) return;
+  try {
+    const res = await fetch('/api/me/profile', {
+      method:'PATCH',
+      headers: SkillingAuth.bearerHeaders(),
+      body: JSON.stringify({ skillDomain: activeSwitchKey })
+    });
+    if (!res.ok) throw new Error('Failed');
+    userPrimaryKey = activeSwitchKey;
+    toast('✅ Primary domain updated!');
+    renderDomainCards();
+    const dom = DOMAINS.find(x=>x.key===activeSwitchKey);
+    document.getElementById('primaryDomainLabel').textContent = dom ? dom.icon+' '+dom.label : activeSwitchKey;
+    document.getElementById('switchBtn').style.display = 'none';
+  } catch(e){
+    toast('⚠ Could not update domain.');
+  }
+}
+
+// ── Video modal ───────────────────────────────────────────────────────────────
+function openVideo(enc){
+  const url = decodeURIComponent(enc);
+  const sep = url.includes('?') ? '&' : '?';
+  document.getElementById('vframe').src = url + sep + 'autoplay=1';
+  document.getElementById('vmodal').classList.add('open');
+}
+function closeVideo(){
+  document.getElementById('vmodal').classList.remove('open');
+  document.getElementById('vframe').src = '';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeVideo(); });
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function init(){
+  await loadProfile();
+  await loadCounts();
+})();
+</script>
+</body>
+</html>

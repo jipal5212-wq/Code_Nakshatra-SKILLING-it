@@ -242,5 +242,106 @@ module.exports = function userRoutes(admin, upload) {
     }
   });
 
+  /** Progress analytics — aggregated from submission history */
+  r.get('/api/me/analytics', requireUser, async (req, res) => {
+    try {
+      const uid = req.user.id;
+
+      const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).single();
+      const { data: bundles } = await admin
+        .from('submission_bundles')
+        .select('*')
+        .eq('user_id', uid)
+        .order('cycle_start_iso', { ascending: true });
+
+      const rows = bundles || [];
+
+      // ── KPIs ──────────────────────────────────────────────────────────────
+      const acceptedRows = rows.filter(b => b.status === 'accepted');
+      const rejectedRows = rows.filter(b => b.status === 'rejected');
+      const pendingRows  = rows.filter(b => b.status === 'pending_review');
+      const totalPoints  = acceptedRows.reduce((s, b) => s + (b.points_awarded || 0), 0);
+
+      // streak: consecutive accepted days (from newest going back)
+      const acceptedDays = new Set(
+        acceptedRows
+          .filter(b => b.reviewed_at)
+          .map(b => b.reviewed_at.slice(0, 10))
+      );
+      let bestStreak = 0, cur = 0;
+      const today = new Date();
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().slice(0, 10);
+        if (acceptedDays.has(ds)) { cur++; bestStreak = Math.max(bestStreak, cur); }
+        else if (i > 0) cur = 0;
+      }
+
+      // ── Points timeline (cumulative) ──────────────────────────────────────
+      let cumulative = 0;
+      const pointsTimeline = acceptedRows
+        .filter(b => b.reviewed_at)
+        .map(b => {
+          cumulative += (b.points_awarded || 0);
+          return { date: b.reviewed_at.slice(0, 10), cumulative, points: b.points_awarded || 0 };
+        });
+
+      // ── Activity heatmap (all submissions, last 90 days) ─────────────────
+      const heatmapData = {};
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 90);
+      for (const b of rows) {
+        const ds = (b.cycle_start_iso || '').slice(0, 10);
+        if (!ds || new Date(ds) < cutoff) continue;
+        heatmapData[ds] = (heatmapData[ds] || 0) + 1;
+      }
+
+      // ── Status breakdown ──────────────────────────────────────────────────
+      const statusBreakdown = {
+        accepted:       acceptedRows.length,
+        rejected:       rejectedRows.length,
+        pending_review: pendingRows.length
+      };
+
+      // ── Weekly accepted count (last 8 weeks) ──────────────────────────────
+      const weeklyActivity = [];
+      for (let w = 7; w >= 0; w--) {
+        const wStart = new Date();
+        wStart.setDate(wStart.getDate() - w * 7 - wStart.getDay());
+        wStart.setHours(0, 0, 0, 0);
+        const wEnd = new Date(wStart);
+        wEnd.setDate(wEnd.getDate() + 7);
+        const label = wStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const count = acceptedRows.filter(b => {
+          if (!b.reviewed_at) return false;
+          const d = new Date(b.reviewed_at);
+          return d >= wStart && d < wEnd;
+        }).length;
+        weeklyActivity.push({ week: label, count });
+      }
+
+      res.json({
+        kpis: {
+          totalPoints,
+          tasksCompleted: rows.length,
+          acceptedCount: acceptedRows.length,
+          rejectedCount: rejectedRows.length,
+          bestStreak,
+          level: profile?.level || 'Beginner',
+          domain: profile?.skill_domain || '',
+          displayName: profile?.display_name || ''
+        },
+        pointsTimeline,
+        heatmapData,
+        statusBreakdown,
+        weeklyActivity
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   return r;
 };

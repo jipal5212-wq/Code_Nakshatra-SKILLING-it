@@ -48,5 +48,47 @@ module.exports = function publicRoutes(admin) {
     }
   });
 
+  /** Explore: beginner tasks + clips for any domain. Auth-optional. */
+  r.get('/api/public/explore', async (req, res) => {
+    try {
+      if (!admin) return res.status(503).json({ error: 'Database not configured.' });
+      const skillKey = normalizeSkillKey(req.query.skill || 'aiml');
+      const sm = SKILL_MAP[skillKey] || SKILL_MAP.aiml;
+
+      // Always beginner for exploration
+      let pool = await loadMatchingTasks(admin, skillKey, 'Beginner');
+      if (!pool.length) {
+        const { data: fallback } = await admin.from('tasks').select('*').eq('level', 'Beginner').limit(10);
+        pool = fallback || [];
+      }
+      const tasks = pool.slice(0, 7).map(mapTaskRow);
+
+      // YouTube clips for this domain
+      const { source, videos: rawVideos } = await searchYouTube(`${sm.query} beginner tutorial`, 4);
+      const videos = rawVideos.slice(0, 4);
+
+      // Domain task counts (for the card badges)
+      const { data: allTasks } = await admin.from('tasks').select('domain, level');
+      const counts = {};
+      for (const key of Object.keys(SKILL_MAP)) {
+        counts[key] = (allTasks || []).filter(t => {
+          const d = String(t.domain || '').toLowerCase();
+          if (key === 'aiml')        return d.includes('ai') || d.includes('ml');
+          if (key === 'datascience') return d.includes('data');
+          if (key === 'robotics')    return d.includes('robot');
+          if (key === 'iot')         return d.includes('iot');
+          if (key === 'cybersec')    return d.includes('cyber') || d.includes('sec');
+          if (key === 'webdev')      return d.includes('web');
+          return false;
+        }).length;
+      }
+
+      res.json({ skillKey, label: sm.label, tasks, videos, source, counts });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: e.message || 'Explore failed.' });
+    }
+  });
+
   return r;
 };

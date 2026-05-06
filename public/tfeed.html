@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T-Feed — S-KILLING IT</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/tfeed.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">SI</div>
+    <span class="nav-logo-text">S-KILLING<em> it</em></span>
+  </a>
+  <div class="nav-right">
+    <a href="/" class="btn-back">← Dashboard</a>
+    <div class="av-wrap" id="avWrap">
+      <button class="av-btn" onclick="toggleAv()" title="My account"><span id="avInit">?</span></button>
+      <div class="av-drop" id="avDrop">
+        <div class="av-row"><div class="av-circle" id="avCircle">?</div><div><div class="av-name" id="avName">—</div><div class="av-email" id="avEmail">—</div></div></div>
+        <div class="av-badges"><span class="av-badge" id="avDomain">—</span><span class="av-badge" id="avLevel">—</span></div>
+        <div class="av-pts"><span class="av-pts-v" id="avPts">0</span><span class="av-pts-l">pts earned</span></div>
+        <div class="av-links">
+          <a href="/" class="av-link">🏠 Dashboard</a>
+          <a href="/explore.html" class="av-link">🔍 Explore</a>
+          <a href="/track.html" class="av-link">🗺️ Skill Track</a>
+          <a href="/tfeed.html" class="av-link">📡 T-Feed</a>
+          <a href="/#analytics" class="av-link">📊 Analytics</a>
+        </div>
+        <button class="av-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-hero">
+    <div class="hero-tag"><div class="hero-dot"></div><span class="hero-tag-text">AI-Powered</span></div>
+    <h1 class="page-title"><em>T</em>-FEED</h1>
+    <p class="page-sub">Latest tech breakthroughs, curated by Gemini AI. Like, comment, and get inspired to build something great.</p>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshFeed()">⚡ Refresh Feed</button>
+  </div>
+
+  <div class="cols">
+    <div class="feed-col" id="feedCol">
+      <div class="empty-state">Loading feed…</div>
+    </div>
+
+    <div class="build-col">
+      <div class="build-header">BUILD<br><em>SPARK</em></div>
+      <p class="build-sub">Project ideas generated from today's tech news. Pick one and start building.</p>
+      <div id="ideaList">
+        <div class="empty-state" style="padding:32px 0">Loading ideas…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/skilling-auth.js"></script>
+<script src="/js/tfeed.js"></script>
+</body>
+</html>

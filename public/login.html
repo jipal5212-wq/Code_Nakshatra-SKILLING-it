@@ -2,311 +2,179 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>SKILLING IT – Sign in</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="/js/skilling-auth.js"></script>
 <style>
-:root{--red:#e60000;--charcoal:#25282b;--white:#fff;--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
+:root{--red:#e60000;--ch:#25282b;--dark:#111315;--D:'Barlow Condensed',sans-serif;--B:'Barlow',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--body);background:var(--charcoal);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.auth-container{width:100%;max-width:480px}
+body{font-family:var(--B);background:var(--dark);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.wrap{width:100%;max-width:460px}
 .brand{text-align:center;margin-bottom:28px}
-.brand-logo{width:56px;height:56px;background:var(--red);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:22px;margin-bottom:12px}
-.brand-name{font-family:var(--display);font-weight:800;font-size:32px;text-transform:uppercase;letter-spacing:3px}
-.brand-name span{color:var(--red)}
-.brand-sub{font-size:14px;color:rgba(255,255,255,.35);margin-top:8px}
-.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:28px}
-.tabs{display:flex;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1)}
-.tab{flex:1;padding:14px;text-align:center;font-family:var(--display);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.25);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent}
+.brand-logo{width:60px;height:60px;background:var(--red);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--D);font-weight:800;font-size:24px;margin-bottom:14px}
+.brand-name{font-family:var(--D);font-weight:800;font-size:34px;text-transform:uppercase;letter-spacing:3px}
+.brand-name em{color:var(--red);font-style:normal}
+.brand-sub{font-size:14px;color:rgba(255,255,255,.3);margin-top:8px}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:32px}
+.tabs{display:flex;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.1)}
+.tab{flex:1;padding:14px;text-align:center;font-family:var(--D);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.25);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s}
 .tab.active{color:#fff;border-color:var(--red)}
-.step{display:none}
-.step.active{display:block}
-.form-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.45);margin:14px 0 8px}
-.input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:12px 14px;color:#fff;font-size:15px;font-family:var(--body)}
-.input:focus{outline:none;border-color:var(--red)}
-.btn{width:100%;margin-top:20px;padding:14px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:var(--display);font-weight:700;text-transform:uppercase;cursor:pointer;font-size:14px;letter-spacing:1px}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.hint{font-size:12px;color:rgba(255,255,255,.38);margin-top:12px;line-height:1.5}
-.err{background:rgba(230,0,0,.14);border:1px solid rgba(230,0,0,.35);padding:12px;border-radius:6px;font-size:13px;color:#ffb4b4;margin-bottom:14px;display:none}
+.panel{display:none}.panel.active{display:block}
+.lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.4);margin:16px 0 7px}
+.inp{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:12px 14px;color:#fff;font-size:15px;font-family:var(--B);transition:border-color .2s}
+.inp:focus{outline:none;border-color:var(--red)}
+.inp::placeholder{color:rgba(255,255,255,.2)}
+select.inp{cursor:pointer}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pw{position:relative}
+.pw .inp{padding-right:46px}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:16px;line-height:1}
+.eye:hover{color:#fff}
+.sb{height:3px;border-radius:2px;margin-top:7px;background:rgba(255,255,255,.08);overflow:hidden}
+.sf{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
+.sl{font-size:10px;color:rgba(255,255,255,.28);margin-top:4px;letter-spacing:1px;text-transform:uppercase}
+.btn{width:100%;margin-top:22px;padding:14px;background:var(--red);color:#fff;border:none;border-radius:7px;font-family:var(--D);font-weight:700;text-transform:uppercase;cursor:pointer;font-size:15px;letter-spacing:1.5px;transition:background .2s}
+.btn:hover{background:#c20000}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{background:rgba(230,0,0,.12);border:1px solid rgba(230,0,0,.3);padding:12px 16px;border-radius:7px;font-size:13px;color:#ffb4b4;margin-bottom:16px;display:none;line-height:1.4}
 .err.show{display:block}
-.links{text-align:center;margin-top:22px;font-size:14px}
-.links a{color:var(--red);text-decoration:none}
-select.input{appearance:auto}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:rgba(255,255,255,.28);margin-top:14px;line-height:1.5}
+.foot{text-align:center;margin-top:20px;font-size:14px}
+.foot a{color:var(--red);text-decoration:none;font-weight:500}
 </style>
 </head>
 <body>
-<div class="auth-container">
+<div class="wrap">
   <div class="brand">
     <div class="brand-logo">SI</div>
-    <div class="brand-name">S-KILLING<span> it</span></div>
-    <div class="brand-sub">Email · OTP · Password · Loop</div>
+    <div class="brand-name">S-KILLING <em>it</em></div>
+    <div class="brand-sub">Daily execution. Proven skills.</div>
   </div>
   <div class="card">
     <div class="tabs">
-      <button type="button" class="tab active" data-tab="signin">Sign in</button>
-      <button type="button" class="tab" data-tab="create">Create account</button>
+      <button class="tab active" data-tab="in">Sign in</button>
+      <button class="tab" data-tab="up">Create account</button>
     </div>
 
-    <!-- Sign in (existing accounts) -->
-    <div id="stepSignIn" class="step active">
-      <div id="errSignIn" class="err"></div>
-      <label class="form-label">Email</label>
-      <input class="input" type="email" id="signInEmail" autocomplete="username" placeholder="you@email.com"/>
-      <label class="form-label">Password</label>
-      <input class="input" type="password" id="signInPassword" autocomplete="current-password"/>
-      <button type="button" class="btn" id="btnSignIn">Enter platform →</button>
-      <p class="hint">Users sign in here. Site admin signs in separately from the link at the bottom of the homepage.</p>
-    </div>
-
-    <!-- Create: email + OTP -->
-    <div id="stepCreateEmail" class="step">
-      <div id="errCreate" class="err"></div>
-      <label class="form-label">Email</label>
-      <input class="input" type="email" id="createEmail" autocomplete="email" placeholder="you@email.com"/>
-      <button type="button" class="btn" id="btnSendOtp">Send OTP →</button>
-      <p class="hint">We email a 6-digit code (valid a few minutes) via Resend.</p>
-    </div>
-
-    <div id="stepCreateCode" class="step">
-      <div id="errCode" class="err"></div>
-      <label class="form-label">Verification code</label>
-      <input class="input" type="text" id="otpCode" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"/>
-      <button type="button" class="btn" id="btnVerifyOtp">Verify code →</button>
-    </div>
-
-    <!-- Password + profile after OTP -->
-    <div id="stepCreateFinish" class="step">
-      <div id="errFinish" class="err"></div>
-      <label class="form-label">Display name</label>
-      <input class="input" type="text" id="dispName" maxlength="120"/>
-      <div class="grid2">
-        <div>
-          <label class="form-label">Skill</label>
-          <select class="input" id="skillSel">
-            <option value="aiml">AI / ML</option>
-            <option value="datascience">Data Science</option>
-            <option value="robotics">Robotics</option>
-            <option value="iot">IoT</option>
-            <option value="cybersec">Cybersecurity</option>
-            <option value="webdev">Web Dev</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label">Level</label>
-          <select class="input" id="levelSel">
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-          </select>
-        </div>
+    <!-- SIGN IN -->
+    <div id="pIn" class="panel active">
+      <div id="eIn" class="err"></div>
+      <label class="lbl">Email</label>
+      <input class="inp" type="email" id="siEmail" placeholder="you@email.com" autocomplete="username"/>
+      <label class="lbl">Password</label>
+      <div class="pw">
+        <input class="inp" type="password" id="siPw" autocomplete="current-password"/>
+        <button class="eye" onclick="eyeToggle('siPw',this)">👁</button>
       </div>
-      <label class="form-label">Password (min 8)</label>
-      <input class="input" type="password" id="pw1"/>
-      <label class="form-label">Confirm password</label>
-      <input class="input" type="password" id="pw2"/>
-      <button type="button" class="btn" id="btnComplete">Finish signup →</button>
+      <button class="btn" id="btnIn">Enter platform →</button>
+      <p class="hint">New here? Switch to <strong>Create account</strong> above.</p>
     </div>
 
-    <div class="links">
-      <a href="/">← Back to SKILLING IT</a>
+    <!-- CREATE ACCOUNT -->
+    <div id="pUp" class="panel">
+      <div id="eUp" class="err"></div>
+      <label class="lbl">Username</label>
+      <input class="inp" type="text" id="rName" maxlength="60" placeholder="Display name" autocomplete="nickname"/>
+      <label class="lbl">Email</label>
+      <input class="inp" type="email" id="rEmail" placeholder="you@email.com" autocomplete="email"/>
+      <label class="lbl">Password</label>
+      <div class="pw">
+        <input class="inp" type="password" id="rPw" autocomplete="new-password" oninput="strength(this.value)"/>
+        <button class="eye" onclick="eyeToggle('rPw',this)">👁</button>
+      </div>
+      <div class="sb"><div class="sf" id="sf"></div></div>
+      <div class="sl" id="sl">Enter a password</div>
+      <label class="lbl">Confirm password</label>
+      <div class="pw">
+        <input class="inp" type="password" id="rPw2" autocomplete="new-password"/>
+        <button class="eye" onclick="eyeToggle('rPw2',this)">👁</button>
+      </div>
+      <button class="btn" id="btnUp">Create account →</button>
     </div>
+
+    <div class="foot"><a href="/">← Back to SKILLING IT</a></div>
   </div>
 </div>
 
 <script>
-(function () {
-  if (window.SkillingAuth.read()) window.location.href = '/';
+// Redirect if already logged in
+if(window.SkillingAuth&&SkillingAuth.read())location.href='/';
 
-  let signupToken = '';
-  let pendingEmail = '';
-  let mainTab = 'signin';
-
-  const $ = (id) => document.getElementById(id);
-  function showErr(elId, msg) {
-    const e = $(elId);
-    e.textContent = msg;
-    e.classList.add('show');
-  }
-  function hideErr(elId) {
-    $(elId).classList.remove('show');
-  }
-
-  function showSteps(map) {
-    ['stepSignIn', 'stepCreateEmail', 'stepCreateCode', 'stepCreateFinish'].forEach(id => {
-      const el = $(id);
-      if (!el) return;
-      el.classList.toggle('active', !!map[id]);
-    });
-  }
-
-  async function startLoopQuiet(token) {
-    try {
-      await fetch('/api/me/start-loop', {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        },
-        body: '{}'
-      });
-    } catch (_) {}
-  }
-
-  document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-      t.classList.add('active');
-      mainTab = t.getAttribute('data-tab');
-      if (mainTab === 'signin') showSteps({ stepSignIn: true });
-      else {
-        signupToken = '';
-        pendingEmail = '';
-        showSteps({ stepCreateEmail: true });
-      }
-    });
-  });
-
-  $('btnSignIn').onclick = async () => {
-    hideErr('errSignIn');
-    const email = $('signInEmail').value.trim();
-    const password = $('signInPassword').value;
-    if (!email || !password) return showErr('errSignIn', 'Enter email and password.');
-    $('btnSignIn').disabled = true;
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        $('btnSignIn').disabled = false;
-        return showErr('errSignIn', data.error || 'Could not sign in.');
-      }
-      const sess = data.session;
-      SkillingAuth.write(sess);
-      await startLoopQuiet(sess.access_token);
-      window.location.href = '/';
-    } catch (_) {
-      $('btnSignIn').disabled = false;
-      showErr('errSignIn', 'Network error.');
-    }
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab==='in'?'pIn':'pUp').classList.add('active');
   };
-
-  $('btnSendOtp').onclick = async () => {
-    hideErr('errCreate');
-    const email = $('createEmail').value.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('errCreate', 'Valid email required.');
-    $('btnSendOtp').disabled = true;
-    try {
-      const res = await fetch('/api/auth/otp/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        $('btnSendOtp').disabled = false;
-        return showErr('errCreate', data.error || 'Could not send OTP.');
-      }
-      pendingEmail = email;
-      showSteps({ stepCreateCode: true });
-    } catch (_) {
-      showErr('errCreate', 'Network error.');
-    } finally {
-      $('btnSendOtp').disabled = false;
-    }
-  };
-
-  $('btnVerifyOtp').onclick = async () => {
-    hideErr('errCode');
-    const code = $('otpCode').value.replace(/\s/g, '');
-    if (!pendingEmail || code.length !== 6) return showErr('errCode', 'Enter the 6-digit code.');
-    $('btnVerifyOtp').disabled = true;
-    try {
-      const res = await fetch('/api/auth/otp/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: pendingEmail, code })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        $('btnVerifyOtp').disabled = false;
-        return showErr('errCode', data.error || 'Invalid code.');
-      }
-      signupToken = data.signupToken;
-      $('dispName').value = pendingEmail.split('@')[0] || '';
-      showSteps({ stepCreateFinish: true });
-    } catch (_) {
-      showErr('errCode', 'Network error.');
-    } finally {
-      $('btnVerifyOtp').disabled = false;
-    }
-  };
-
-  $('btnComplete').onclick = async () => {
-    hideErr('errFinish');
-    const displayName = $('dispName').value.trim();
-    const password = $('pw1').value;
-    const confirm = $('pw2').value;
-    const skillDomain = $('skillSel').value;
-    const level = $('levelSel').value;
-    if (!displayName || password.length < 8) return showErr('errFinish', 'Name required; password ≥ 8 chars.');
-    if (password !== confirm) return showErr('errFinish', 'Passwords do not match.');
-    if (!signupToken || !pendingEmail) return showErr('errFinish', 'Start over from email step.');
-    $('btnComplete').disabled = true;
-    try {
-      const res = await fetch('/api/auth/complete-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: pendingEmail,
-          signupToken,
-          password,
-          confirmPassword: confirm,
-          displayName,
-          skillDomain,
-          level
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        $('btnComplete').disabled = false;
-        return showErr('errFinish', data.error || 'Could not finish signup.');
-      }
-      if (data.session?.access_token) {
-        SkillingAuth.write(data.session);
-        await startLoopQuiet(data.session.access_token);
-        window.location.href = '/';
-      } else {
-        showSteps({ stepSignIn: true });
-        document.querySelectorAll('.tab').forEach((x, i) => x.classList.toggle('active', i === 0));
-        mainTab = 'signin';
-        $('signInEmail').value = pendingEmail;
-        showErr(
-          'errSignIn',
-          (data.message || 'Account ready — log in.') + ''
-        );
-        $('stepSignIn').scrollIntoView({ behavior: 'smooth' });
-      }
-    } catch (_) {
-      showErr('errFinish', 'Network error.');
-    } finally {
-      $('btnComplete').disabled = false;
-    }
-  };
-})();
-['signInEmail', 'signInPassword', 'otpCode', 'pw1', 'pw2'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el)
-    el.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        if (id === 'signInPassword') document.getElementById('btnSignIn').click();
-      }
-    });
 });
+
+function eyeToggle(id,btn){const e=document.getElementById(id);if(e.type==='password'){e.type='text';btn.textContent='🙈';}else{e.type='password';btn.textContent='👁';}}
+
+function strength(pw){
+  const f=document.getElementById('sf'),l=document.getElementById('sl');
+  let s=0;
+  if(pw.length>=8)s++;if(pw.length>=12)s++;
+  if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const labs=['Too short','Weak','Fair','Good','Strong','Excellent!'];
+  const cols=['#555','#e60000','#ff6b00','#f5c400','#4caf50','#00c864'];
+  f.style.width=(s*20)+'%';f.style.background=cols[s];l.textContent=labs[s];
+}
+
+function err(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
+function clr(id){document.getElementById(id).classList.remove('show');}
+
+async function startLoop(tok){try{await fetch('/api/me/start-loop',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:'{}'});}catch(_){}}
+
+// Sign in
+document.getElementById('btnIn').onclick=async()=>{
+  clr('eIn');
+  const email=document.getElementById('siEmail').value.trim();
+  const pw=document.getElementById('siPw').value;
+  if(!email||!pw)return err('eIn','Enter email and password.');
+  document.getElementById('btnIn').disabled=true;
+  const res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})}).catch(()=>null);
+  if(!res){document.getElementById('btnIn').disabled=false;return err('eIn','Network error.');}
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){document.getElementById('btnIn').disabled=false;return err('eIn',d.error||'Could not sign in.');}
+  SkillingAuth.write(d.session);
+  await startLoop(d.session.access_token);
+  location.href='/';
+};
+
+// Create account — direct, no OTP
+document.getElementById('btnUp').onclick=async()=>{
+  clr('eUp');
+  const name=document.getElementById('rName').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const pw=document.getElementById('rPw').value;
+  const pw2=document.getElementById('rPw2').value;
+  if(!name)return err('eUp','Username is required.');
+  if(!email)return err('eUp','Email is required.');
+  if(pw.length<8)return err('eUp','Password must be at least 8 characters.');
+  if(pw!==pw2)return err('eUp','Passwords do not match.');
+  document.getElementById('btnUp').disabled=true;
+  const res=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({displayName:name,email,password:pw})}).catch(()=>null);
+  if(!res){document.getElementById('btnUp').disabled=false;return err('eUp','Network error.');}
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){document.getElementById('btnUp').disabled=false;return err('eUp',d.error||'Could not create account.');}
+  if(d.session?.access_token){
+    SkillingAuth.write(d.session);
+    await startLoop(d.session.access_token);
+    location.href='/';
+  } else {
+    document.getElementById('btnUp').disabled=false;
+    document.querySelector('[data-tab="in"]').click();
+    document.getElementById('siEmail').value=email;
+    err('eIn',d.message||'Account created — sign in now.');
+  }
+};
+
+// Enter key
+document.getElementById('siPw')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btnIn').click();});
+document.getElementById('rPw2')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('btnUp').click();});
 </script>
 </body>
 </html>

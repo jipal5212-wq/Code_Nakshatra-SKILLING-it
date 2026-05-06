@@ -2034,24 +2034,161 @@
     }
 
     @media (max-width: 768px) {
-      .guest-preview-inner {
-        padding: 64px 24px;
-      }
-
-      .preview-pool-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .loop-strip-inner {
-        grid-template-columns: 1fr;
-      }
-
-      .streak-inner {
-        padding: 64px 24px;
-      }
+      .analytics-kpis { grid-template-columns: repeat(2, 1fr); }
+      .analytics-charts-row { grid-template-columns: 1fr; }
     }
-  
-</style>
+    @media (max-width: 480px) {
+      .analytics-kpis { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ─── ANALYTICS SECTION ─── */
+    #analytics { background: var(--white); display: none; }
+    .analytics-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 96px 48px;
+    }
+    .analytics-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+    .analytics-kpi-card {
+      background: var(--grey-light);
+      border-radius: 8px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .analytics-kpi-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    }
+    .analytics-kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: var(--red);
+    }
+    .analytics-kpi-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .analytics-kpi-value {
+      font-family: var(--display-font);
+      font-weight: 800;
+      font-size: 48px;
+      color: var(--charcoal);
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 6px;
+    }
+    .analytics-kpi-value span { color: var(--red); }
+    .analytics-kpi-label {
+      font-family: var(--body-font);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--grey-body);
+    }
+    .analytics-charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .analytics-chart-box {
+      background: var(--grey-light);
+      border-radius: 8px;
+      padding: 28px;
+    }
+    .analytics-chart-box.wide {
+      grid-column: 1 / -1;
+    }
+    .analytics-chart-title {
+      font-family: var(--display-font);
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--red);
+      margin-bottom: 20px;
+    }
+    /* Heatmap grid */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap: 4px;
+    }
+    .heatmap-week { display: flex; flex-direction: column; gap: 4px; }
+    .heatmap-cell {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: #e8e8e8;
+      transition: opacity 0.2s;
+      cursor: default;
+    }
+    .heatmap-cell[data-level="1"] { background: rgba(230,0,0,0.25); }
+    .heatmap-cell[data-level="2"] { background: rgba(230,0,0,0.5); }
+    .heatmap-cell[data-level="3"] { background: rgba(230,0,0,0.75); }
+    .heatmap-cell[data-level="4"] { background: var(--red); }
+    .heatmap-cell:hover { opacity: 0.75; }
+    .analytics-empty-state {
+      text-align: center;
+      padding: 60px 32px;
+      color: var(--grey-body);
+      font-family: var(--body-font);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .analytics-empty-state .empty-icon { font-size: 48px; display: block; margin-bottom: 16px; }
+    @media (max-width: 1024px) {
+      .analytics-kpis { grid-template-columns: repeat(2, 1fr); }
+      .analytics-charts-row { grid-template-columns: 1fr; }
+      .analytics-chart-box.wide { grid-column: 1; }
+    }
+
+    /* ─── USER AVATAR DROPDOWN ─── */
+    .user-avatar-wrap { position: relative; display: none; }
+    .user-avatar-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--red); border: 2px solid rgba(255,255,255,0.25);
+      color: #fff; font-family: var(--display); font-weight: 800; font-size: 14px;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; letter-spacing: 0;
+    }
+    .user-avatar-btn:hover { transform: scale(1.08); border-color: #fff; box-shadow: 0 0 0 3px rgba(230,0,0,0.3); }
+    .user-dropdown {
+      position: absolute; right: 0; top: calc(100% + 14px);
+      background: #1a1c1f; border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; padding: 22px; min-width: 252px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6); z-index: 9999;
+      display: none;
+    }
+    .user-dropdown.open { display: block; animation: dropIn 0.2s ease; }
+    @keyframes dropIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+    .dropdown-avatar-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .dropdown-avatar-circle { width: 44px; height: 44px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 800; font-size: 16px; color: #fff; flex-shrink: 0; }
+    .dropdown-name { font-family: var(--display); font-weight: 800; font-size: 18px; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.1; }
+    .dropdown-email { font-family: var(--body); font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 3px; }
+    .dropdown-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .dropdown-badge { font-family: var(--display); font-weight: 700; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; border: 1px solid var(--red); color: var(--red); padding: 3px 10px; border-radius: 60px; }
+    .dropdown-pts-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .dropdown-pts-val { font-family: var(--display); font-weight: 800; font-size: 40px; color: #fff; line-height: 1; letter-spacing: -2px; }
+    .dropdown-pts-lbl { font-family: var(--body); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); }
+    .dropdown-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
+    .dropdown-link { font-family: var(--display); font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.55); text-decoration: none; padding: 7px 4px; border-radius: 4px; transition: color 0.15s; display: flex; align-items: center; gap: 8px; }
+    .dropdown-link:hover { color: var(--red); }
+    .dropdown-logout { width: 100%; background: rgba(230,0,0,0.12); border: 1px solid rgba(230,0,0,0.3); color: var(--red); font-family: var(--display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; padding: 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .dropdown-logout:hover { background: var(--red); color: #fff; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 
 <body><nav class="nav" id="navbar">
@@ -2059,16 +2196,37 @@
       <div class="nav-logo-mark">SI</div>
       <span class="nav-logo-text">S-KILLING<span> it</span></span>
     </a>
-    <ul class="nav-links">
+    <ul class="nav-links" id="mainNavLinks">
       <li id="navPreviewLi"><a href="#guestPreview" id="navPreviewPool">Preview pool</a></li>
       <li id="navVideosGuestLi"><a href="#videoPool">Best videos</a></li>
-      <li><a href="#how" class="active">How It Works</a></li>
-      <li><a href="#dashboard">Dashboard</a></li>
-      <li><a href="#streaks">Streaks</a></li>
-      <li><a href="#awareness">Awareness</a></li>
-      <li><a href="#submit">Submit</a></li>
+      <li id="navHowLi"><a href="#how" class="active">How It Works</a></li>
+      <li id="navArenaLi" style="display:none"><a href="/arena.html">My Arena</a></li>
+      <li id="navAnalyticsLi"><a href="#analytics">Analytics</a></li>
+      <li id="navSubmitLi"><a href="#submit">Submit</a></li>
+      <li id="navExploreLi"><a href="/explore.html">Explore</a></li>
+      <li id="navTrackLi"><a href="/track.html">Track</a></li>
+      <li id="navTFeedLi"><a href="/tfeed.html">T-Feed</a></li>
     </ul>
-    <a href="/login.html" class="nav-cta">Login →</a>
+    <a href="/login.html" class="nav-cta" id="navLoginCta">Login →</a>
+    <div class="user-avatar-wrap" id="userAvatarWrap">
+      <button class="user-avatar-btn" id="userAvatarBtn" onclick="toggleUserDropdown()" title="My account"><span id="userAvatarInitials">?</span></button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-avatar-row">
+          <div class="dropdown-avatar-circle" id="dropdownAvatarCircle">?</div>
+          <div><div class="dropdown-name" id="dropdownName">—</div><div class="dropdown-email" id="dropdownEmail">—</div></div>
+        </div>
+        <div class="dropdown-badges"><span class="dropdown-badge" id="dropdownDomain">—</span><span class="dropdown-badge" id="dropdownLevel">—</span></div>
+        <div class="dropdown-pts-row"><span class="dropdown-pts-val" id="dropdownPoints">0</span><span class="dropdown-pts-lbl">pts earned</span></div>
+        <div class="dropdown-links">
+          <a href="/" class="dropdown-link">🏠 Dashboard</a>
+          <a href="/explore.html" class="dropdown-link">🔍 Explore Domains</a>
+          <a href="/track.html" class="dropdown-link">🗺️ Skill Track</a>
+          <a href="/tfeed.html" class="dropdown-link">📡 T-Feed</a>
+          <a href="/#analytics" class="dropdown-link">📊 My Analytics</a>
+        </div>
+        <button class="dropdown-logout" onclick="logoutAndReload()">Logout</button>
+      </div>
+    </div>
     <div class="hamburger" id="hamburger" onclick="toggleMobileNav()">
       <span></span><span></span><span></span>
     </div>
@@ -2358,7 +2516,85 @@
         </div>
       </div>
     </div>
-  </section><div class="stats-panel">
+  </section>
+
+  <!-- ANALYTICS SECTION -->
+  <section id="analytics">
+    <div class="analytics-inner">
+      <div class="section-tag">
+        <div class="section-tag-bar"></div><span class="section-tag-text">Personal Growth</span>
+      </div>
+      <h2 class="section-title reveal">SKILL<br><em>ANALYTICS</em></h2>
+      <p class="section-intro reveal">Your personal skill growth dashboard — built from every cycle you complete.</p>
+
+      <!-- KPI Cards -->
+      <div class="analytics-kpis" id="analyticsKpis">
+        <div class="analytics-kpi-card reveal">
+          <span class="analytics-kpi-icon">🏆</span>
+          <div class="analytics-kpi-value" id="kpiPoints">—</div>
+          <div class="analytics-kpi-label">Total Points</div>
+        </div>
+        <div class="analytics-kpi-card reveal">
+          <span class="analytics-kpi-icon">⚡</span>
+          <div class="analytics-kpi-value" id="kpiTasks">—</div>
+          <div class="analytics-kpi-label">Cycles Attempted</div>
+        </div>
+        <div class="analytics-kpi-card reveal">
+          <span class="analytics-kpi-icon">✅</span>
+          <div class="analytics-kpi-value" id="kpiAccepted">—<span>%</span></div>
+          <div class="analytics-kpi-label">Acceptance Rate</div>
+        </div>
+        <div class="analytics-kpi-card reveal">
+          <span class="analytics-kpi-icon">🔥</span>
+          <div class="analytics-kpi-value" id="kpiStreak">—</div>
+          <div class="analytics-kpi-label">Best Streak (days)</div>
+        </div>
+      </div>
+
+      <!-- Row 1: Points Timeline (full width) -->
+      <div class="analytics-charts-row">
+        <div class="analytics-chart-box wide">
+          <div class="analytics-chart-title">📈 Points Over Time</div>
+          <div id="analyticsTimelineEmpty" style="display:none;" class="analytics-empty-state">
+            <span class="empty-icon">📊</span>
+            Complete and get your first submission accepted to see your points timeline here.
+          </div>
+          <canvas id="analyticsTimelineChart" height="90"></canvas>
+        </div>
+      </div>
+
+      <!-- Row 2: Doughnut + Bar -->
+      <div class="analytics-charts-row">
+        <div class="analytics-chart-box">
+          <div class="analytics-chart-title">🍩 Submission Breakdown</div>
+          <div id="analyticsDoughnutEmpty" style="display:none;" class="analytics-empty-state">
+            <span class="empty-icon">📋</span>
+            No submissions yet.
+          </div>
+          <canvas id="analyticsDoughnutChart"></canvas>
+        </div>
+        <div class="analytics-chart-box">
+          <div class="analytics-chart-title">📊 Weekly Accepted Builds</div>
+          <div id="analyticsBarEmpty" style="display:none;" class="analytics-empty-state">
+            <span class="empty-icon">📅</span>
+            Start completing weekly cycles to see your momentum here.
+          </div>
+          <canvas id="analyticsBarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Row 3: Activity Heatmap (full width) -->
+      <div class="analytics-charts-row">
+        <div class="analytics-chart-box wide">
+          <div class="analytics-chart-title">🔥 90-Day Activity Heatmap</div>
+          <p style="font-family:var(--body-font);font-size:13px;color:var(--grey-body);margin-bottom:16px;">Each square = one day. Colour intensity = submission activity.</p>
+          <div id="analyticsHeatmap" class="heatmap-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-panel">
     <div class="stats-panel-inner">
       <div class="stat-block reveal">
         <div class="stat-block-num">10<span>+</span></div>
@@ -2561,11 +2797,13 @@
   <div class="mobile-nav" id="mobileNav">
     <a href="#guestPreview" id="mobileNavPreview" onclick="toggleMobileNav()">Preview pool</a>
     <a href="#videoPool" id="mobileNavVideosGuest" onclick="toggleMobileNav()">Best videos</a>
-    <a href="#how" onclick="toggleMobileNav()">How It Works</a>
-    <a href="#dashboard" onclick="toggleMobileNav()">Dashboard</a>
-    <a href="#streaks" onclick="toggleMobileNav()">Streaks</a>
-    <a href="#awareness" onclick="toggleMobileNav()">Awareness</a>
-    <a href="#submit" onclick="toggleMobileNav()">Submit</a>
+    <a href="#how" id="mobileNavHow" onclick="toggleMobileNav()">How It Works</a>
+    <a href="/arena.html" id="mobileNavArena" style="display:none" onclick="toggleMobileNav()">My Arena</a>
+    <a href="/analytics.html" id="mobileNavAnalytics" onclick="toggleMobileNav()">Analytics</a>
+    <a href="/submit.html" id="mobileNavSubmit" onclick="toggleMobileNav()">Submit</a>
+    <a href="/explore.html" id="mobileNavExplore" onclick="toggleMobileNav()">Explore</a>
+    <a href="/track.html" id="mobileNavTrack" onclick="toggleMobileNav()">Track</a>
+    <a href="/tfeed.html" id="mobileNavTFeed" onclick="toggleMobileNav()">T-Feed</a>
     <a href="/login.html" id="mobileNavAccount" onclick="toggleMobileNav()">Login →</a>
   </div>
 
@@ -2998,110 +3236,133 @@
       } catch (_) {}
     }
 
+    const DOMAIN_LABELS = { aiml:'AI / ML', datascience:'Data Science', robotics:'Robotics', iot:'IoT', cybersec:'Cybersecurity', webdev:'Web Dev' };
+
+    function getInitials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(/\s+/);
+      return parts.length >= 2 ? (parts[0][0]+parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+    }
+
+    function populateUserDropdown() {
+      if (!session) return;
+      const sk = cachedProfile?.skill_domain || session?.skill_domain || '';
+      const lv = cachedProfile?.level || session?.level || '';
+      const pts = cachedProfile?.points ?? 0;
+      const initials = getInitials(session.name);
+      ['userAvatarInitials','dropdownAvatarCircle'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = initials; });
+      const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+      set('dropdownName', session.name || '—');
+      set('dropdownEmail', session.email || '');
+      set('dropdownDomain', DOMAIN_LABELS[sk] || sk || '—');
+      set('dropdownLevel', lv || '—');
+      set('dropdownPoints', pts);
+    }
+
+    function toggleUserDropdown() {
+      document.getElementById('userDropdown')?.classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(e) {
+      const wrap = document.getElementById('userAvatarWrap');
+      if (wrap && !wrap.contains(e.target)) document.getElementById('userDropdown')?.classList.remove('open');
+    });
+
     function enforceAuth() {
       const guestPrev = document.getElementById('guestPreview');
-      const navPv = document.getElementById('navPreviewLi');
-      const mobPv = document.getElementById('mobileNavPreview');
-      const navVid = document.getElementById('navVideosGuestLi');
-      const mobVid = document.getElementById('mobileNavVideosGuest');
+      const navPv    = document.getElementById('navPreviewLi');
+      const mobPv    = document.getElementById('mobileNavPreview');
+      const navVid   = document.getElementById('navVideosGuestLi');
+      const mobVid   = document.getElementById('mobileNavVideosGuest');
+
+      // Sections that only exist on index.html for logged-in users (now moved to own pages)
+      const loggedInOnPageSections = ['dashboard','streaks','analytics','submit','videoPool','awareness','aiChatWidget'];
 
       if (!session) {
+        // ── GUEST ──
         if (guestPrev) guestPrev.style.display = 'block';
-        if (navPv) navPv.style.display = 'block';
-        if (mobPv) mobPv.style.display = 'block';
+        if (navPv)  navPv.style.display  = 'block';
+        if (mobPv)  mobPv.style.display  = 'block';
         if (navVid) navVid.style.display = 'block';
         if (mobVid) mobVid.style.display = 'block';
         fetchGuestTasks();
 
-        ['dashboard', 'streaks', 'submit', 'aiChatWidget'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.style.display = 'none';
-        });
-        const vidSec = document.getElementById('videoPool');
-        if (vidSec) vidSec.style.display = 'block';
+        // Hide logged-in-only sections
+        loggedInOnPageSections.forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
 
-        document
-          .querySelectorAll('.nav-links a[href="#dashboard"], .nav-links a[href="#streaks"], .nav-links a[href="#submit"]')
-          .forEach(el => {
-            if (el.closest('li')) el.closest('li').style.display = 'none';
-          });
-        document
-          .querySelectorAll('.mobile-nav a[href="#dashboard"], .mobile-nav a[href="#streaks"], .mobile-nav a[href="#submit"]')
-          .forEach(el => {
-            el.style.display = 'none';
-          });
+        // Hide Arena/Analytics/Submit nav items (they point to auth-required pages)
+        ['navArenaLi','navAnalyticsLi','navSubmitLi','navExploreLi','navTrackLi','navTFeedLi'].forEach(id=>{
+          const el=document.getElementById(id); if(el) el.style.display='none';
+        });
+        ['mobileNavArena','mobileNavAnalytics','mobileNavSubmit','mobileNavExplore','mobileNavTrack','mobileNavTFeed'].forEach(id=>{
+          const el=document.getElementById(id); if(el) el.style.display='none';
+        });
 
         document.querySelectorAll('.nav-cta').forEach(cta => {
-          cta.textContent = 'Login →';
-          cta.href = '/login.html';
-          cta.onclick = null;
+          cta.textContent='Login →'; cta.href='/login.html'; cta.onclick=null; cta.style.display='';
         });
-
+        const aw = document.getElementById('userAvatarWrap');
+        if (aw) aw.style.display = 'none';
         const mobileAcct = document.getElementById('mobileNavAccount');
-        if (mobileAcct) {
-          mobileAcct.style.display = 'block';
-          mobileAcct.textContent = 'Login →';
-          mobileAcct.href = '/login.html';
-          mobileAcct.onclick = null;
-        }
+        if (mobileAcct) { mobileAcct.style.display='block'; mobileAcct.textContent='Login →'; mobileAcct.href='/login.html'; mobileAcct.onclick=null; }
 
         const heroCta = document.querySelector('.hero-actions .btn-pill');
-        if (heroCta) {
-          heroCta.textContent = 'Preview pool →';
-          heroCta.href = '#guestPreview';
-        }
-      } else {
-        if (guestPrev) guestPrev.style.display = 'none';
-        if (navPv) navPv.style.display = 'none';
-        if (mobPv) mobPv.style.display = 'none';
+        if (heroCta) { heroCta.textContent='Preview pool →'; heroCta.href='#guestPreview'; }
 
-        ['dashboard', 'streaks', 'submit', 'videoPool', 'aiChatWidget'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.style.display = 'block';
-        });
+      } else {
+        // ── LOGGED IN ──
+        if (guestPrev) guestPrev.style.display = 'none';
+        if (navPv)  navPv.style.display  = 'none';
+        if (mobPv)  mobPv.style.display  = 'none';
         if (navVid) navVid.style.display = 'none';
         if (mobVid) mobVid.style.display = 'none';
 
-        if (document.getElementById('streakGuestView')) document.getElementById('streakGuestView').style.display = 'none';
-        if (document.getElementById('streakDashboard')) document.getElementById('streakDashboard').style.display = 'block';
-        if (document.getElementById('submitGuestView')) document.getElementById('submitGuestView').style.display = 'none';
-        if (document.getElementById('submitDashboard')) document.getElementById('submitDashboard').style.display = 'contents';
+        // Hide ALL in-page sections (features now live on separate pages)
+        loggedInOnPageSections.forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+        const howSec=document.getElementById('how'); if(howSec) howSec.style.display='none';
+        const guestPreviewSec=document.getElementById('guestPreview'); if(guestPreviewSec) guestPreviewSec.style.display='none';
+        const loopStrip=document.getElementById('loopStrip'); if(loopStrip) loopStrip.style.display='none';
+        document.querySelectorAll('.red-band,.stats-panel,.cta-section').forEach(el=>el.style.display='none');
 
-        document.querySelectorAll('.nav-links li').forEach(li => {
-          li.style.display = 'block';
+        // Show: How It Works nav hidden, show Arena + others
+        const navHow=document.getElementById('navHowLi'); if(navHow) navHow.style.display='none';
+        document.getElementById('navArenaLi').style.display   = 'list-item';
+        document.getElementById('navAnalyticsLi').style.display = 'list-item';
+        document.getElementById('navSubmitLi').style.display   = 'list-item';
+        document.getElementById('navExploreLi').style.display  = 'list-item';
+        document.getElementById('navTrackLi').style.display    = 'list-item';
+        document.getElementById('navTFeedLi').style.display    = 'list-item';
+
+        // Update Analytics + Submit nav hrefs to standalone pages
+        const analyticsLi=document.getElementById('navAnalyticsLi');
+        if(analyticsLi){ const a=analyticsLi.querySelector('a'); if(a) a.href='/analytics.html'; }
+        const submitLi=document.getElementById('navSubmitLi');
+        if(submitLi){ const a=submitLi.querySelector('a'); if(a) a.href='/submit.html'; }
+
+        // Mobile nav
+        const mobileNavHow=document.getElementById('mobileNavHow'); if(mobileNavHow) mobileNavHow.style.display='none';
+        ['mobileNavArena','mobileNavAnalytics','mobileNavSubmit','mobileNavExplore','mobileNavTrack','mobileNavTFeed'].forEach(id=>{
+          const el=document.getElementById(id); if(el) el.style.display='block';
         });
-        document.querySelectorAll('.mobile-nav a').forEach(a => {
-          a.style.display = 'block';
-        });
+        const mobileAnalytics=document.getElementById('mobileNavAnalytics'); if(mobileAnalytics) mobileAnalytics.href='/analytics.html';
+        const mobileSubmit=document.getElementById('mobileNavSubmit'); if(mobileSubmit) mobileSubmit.href='/submit.html';
 
         if (document.getElementById('aiChatWidget')) document.getElementById('aiChatWidget').style.display = 'block';
-
-        document.querySelectorAll('.nav-cta').forEach(cta => {
-          cta.removeAttribute('href');
-          cta.textContent = '👤 ' + session.name + ' · Logout';
-          cta.onclick = logoutAndReload;
-        });
+        document.querySelectorAll('.nav-cta').forEach(cta => { cta.style.display = 'none'; });
+        const aw2 = document.getElementById('userAvatarWrap');
+        if (aw2) aw2.style.display = 'block';
+        populateUserDropdown();
 
         const mobileAcctLogged = document.getElementById('mobileNavAccount');
-        if (mobileAcctLogged) {
-          mobileAcctLogged.textContent = 'Logout (' + session.name + ')';
-          mobileAcctLogged.href = '#';
-          mobileAcctLogged.onclick = logoutAndReload;
-        }
+        if (mobileAcctLogged) { mobileAcctLogged.textContent='Logout ('+session.name+')'; mobileAcctLogged.href='#'; mobileAcctLogged.onclick=logoutAndReload; }
 
         const heroCta2 = document.querySelector('.hero-actions .btn-pill');
-        if (heroCta2) {
-          heroCta2.textContent = 'Open dashboard →';
-          heroCta2.href = '#dashboard';
-          heroCta2.onclick = null;
-        }
+        if (heroCta2) { heroCta2.textContent='Open My Arena →'; heroCta2.href='/arena.html'; heroCta2.onclick=null; }
 
+        // Also show AI chat widget for logged in users
         startCycleTicker();
         fetchTasks();
-        pollCycleFromServer().then(() => {
-          refreshSubmissionBanner();
-          renderRewardsDeck();
-        });
+        pollCycleFromServer().then(() => { refreshSubmissionBanner(); renderRewardsDeck(); });
       }
       fetchNews();
     }
@@ -3538,6 +3799,187 @@
     }
 
     // ─── TECH NEWS ───
+    async function loadAnalytics() {
+      if (!session?.access_token) return;
+      let _timelineChart = null, _doughnutChart = null, _barChart = null;
+
+      // Destroy previous chart instances to avoid canvas reuse errors
+      ['analyticsTimelineChart','analyticsDoughnutChart','analyticsBarChart'].forEach(id => {
+        const existing = Chart.getChart(id);
+        if (existing) existing.destroy();
+      });
+
+      try {
+        const res = await fetch('/api/me/analytics', { headers: SkillingAuth.bearerHeaders() });
+        if (!res.ok) return;
+        const d = await res.json().catch(() => ({}));
+        const { kpis, pointsTimeline, statusBreakdown, weeklyActivity, heatmapData } = d;
+
+        // ── KPI Cards ──────────────────────────────────────────────────────
+        const kpiPts   = document.getElementById('kpiPoints');
+        const kpiTasks = document.getElementById('kpiTasks');
+        const kpiAcc   = document.getElementById('kpiAccepted');
+        const kpiStr   = document.getElementById('kpiStreak');
+        if (kpiPts)   kpiPts.innerHTML   = escHtml(String(kpis.totalPoints)) + '<span>pts</span>';
+        if (kpiTasks) kpiTasks.textContent = kpis.tasksCompleted;
+        const rate = kpis.tasksCompleted > 0 ? Math.round(kpis.acceptedCount / kpis.tasksCompleted * 100) : 0;
+        if (kpiAcc) kpiAcc.innerHTML = escHtml(String(rate)) + '<span>%</span>';
+        if (kpiStr) kpiStr.innerHTML  = escHtml(String(kpis.bestStreak)) + '<span>d</span>';
+
+        // ── Chart defaults ─────────────────────────────────────────────────
+        const chartFont = { family: "'Barlow Condensed', sans-serif", size: 12, weight: '700' };
+        const gridColor = 'rgba(37,40,43,0.06)';
+
+        // ── 1. Points Timeline (line) ──────────────────────────────────────
+        const tlEmpty = document.getElementById('analyticsTimelineEmpty');
+        const tlCanvas = document.getElementById('analyticsTimelineChart');
+        if (!pointsTimeline || pointsTimeline.length === 0) {
+          if (tlEmpty)  tlEmpty.style.display  = 'block';
+          if (tlCanvas) tlCanvas.style.display = 'none';
+        } else {
+          if (tlEmpty)  tlEmpty.style.display  = 'none';
+          if (tlCanvas) tlCanvas.style.display = 'block';
+          const labels = pointsTimeline.map(p => p.date);
+          const data   = pointsTimeline.map(p => p.cumulative);
+          _timelineChart = new Chart(tlCanvas, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Cumulative Points',
+                data,
+                borderColor: '#e60000',
+                backgroundColor: 'rgba(230,0,0,0.08)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#e60000',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.35
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: { bodyFont: chartFont, titleFont: chartFont }
+              },
+              scales: {
+                x: { ticks: { font: chartFont, color: '#7e7e7e' }, grid: { color: gridColor } },
+                y: { beginAtZero: true, ticks: { font: chartFont, color: '#7e7e7e' }, grid: { color: gridColor } }
+              }
+            }
+          });
+        }
+
+        // ── 2. Status Doughnut ─────────────────────────────────────────────
+        const dEmpty  = document.getElementById('analyticsDoughnutEmpty');
+        const dCanvas = document.getElementById('analyticsDoughnutChart');
+        const total   = (statusBreakdown.accepted||0) + (statusBreakdown.rejected||0) + (statusBreakdown.pending_review||0);
+        if (total === 0) {
+          if (dEmpty)  dEmpty.style.display  = 'block';
+          if (dCanvas) dCanvas.style.display = 'none';
+        } else {
+          if (dEmpty)  dEmpty.style.display  = 'none';
+          if (dCanvas) dCanvas.style.display = 'block';
+          _doughnutChart = new Chart(dCanvas, {
+            type: 'doughnut',
+            data: {
+              labels: ['Accepted', 'Rejected', 'Pending'],
+              datasets: [{
+                data: [statusBreakdown.accepted, statusBreakdown.rejected, statusBreakdown.pending_review],
+                backgroundColor: ['#e60000', '#25282b', '#bebebe'],
+                borderWidth: 0,
+                hoverOffset: 6
+              }]
+            },
+            options: {
+              cutout: '68%',
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: { font: chartFont, color: '#25282b', padding: 16 }
+                },
+                tooltip: { bodyFont: chartFont, titleFont: chartFont }
+              }
+            }
+          });
+        }
+
+        // ── 3. Weekly Bar ──────────────────────────────────────────────────
+        const bEmpty  = document.getElementById('analyticsBarEmpty');
+        const bCanvas = document.getElementById('analyticsBarChart');
+        const hasBar  = weeklyActivity && weeklyActivity.some(w => w.count > 0);
+        if (!hasBar) {
+          if (bEmpty)  bEmpty.style.display  = 'block';
+          if (bCanvas) bCanvas.style.display = 'none';
+        } else {
+          if (bEmpty)  bEmpty.style.display  = 'none';
+          if (bCanvas) bCanvas.style.display = 'block';
+          _barChart = new Chart(bCanvas, {
+            type: 'bar',
+            data: {
+              labels: weeklyActivity.map(w => w.week),
+              datasets: [{
+                label: 'Accepted Builds',
+                data: weeklyActivity.map(w => w.count),
+                backgroundColor: 'rgba(230,0,0,0.85)',
+                borderRadius: 4,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: { bodyFont: chartFont, titleFont: chartFont }
+              },
+              scales: {
+                x: { ticks: { font: chartFont, color: '#7e7e7e' }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: { font: chartFont, color: '#7e7e7e', stepSize: 1 }, grid: { color: gridColor } }
+              }
+            }
+          });
+        }
+
+        // ── 4. Activity Heatmap (90 days) ──────────────────────────────────
+        const heatEl = document.getElementById('analyticsHeatmap');
+        if (heatEl) {
+          const today90  = new Date();
+          const cutoff90 = new Date();
+          cutoff90.setDate(cutoff90.getDate() - 90);
+          // Build 13 columns (weeks), 7 rows (days Mon-Sun)
+          // Find start of first week
+          const start = new Date(cutoff90);
+          start.setDate(start.getDate() - start.getDay()); // back to Sunday
+          const weeks = [];
+          let cur90 = new Date(start);
+          for (let w = 0; w < 13; w++) {
+            const week = [];
+            for (let d = 0; d < 7; d++) {
+              const ds = cur90.toISOString().slice(0, 10);
+              week.push({ ds, count: heatmapData[ds] || 0, isFuture: cur90 > today90 });
+              cur90.setDate(cur90.getDate() + 1);
+            }
+            weeks.push(week);
+          }
+          heatEl.innerHTML = weeks.map(week => {
+            return '<div class="heatmap-week">' +
+              week.map(cell => {
+                if (cell.isFuture) return '<div class="heatmap-cell" style="opacity:0.15" title="Future"></div>';
+                const level = cell.count >= 4 ? 4 : cell.count >= 2 ? 3 : cell.count === 1 ? 2 : cell.count > 0 ? 1 : 0;
+                const title = cell.ds + (cell.count ? ' · ' + cell.count + ' submission' + (cell.count > 1 ? 's' : '') : '');
+                return '<div class="heatmap-cell" data-level="' + level + '" title="' + escHtml(title) + '"></div>';
+              }).join('') +
+            '</div>';
+          }).join('');
+        }
+      } catch (e) {
+        console.error('[Analytics]', e);
+      }
+    }
+
+    // ─── TECH NEWS ───
     async function fetchNews() {
       try {
         const res = await fetch('/api/news');
@@ -3793,6 +4235,8 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshSubmissionBanner();
         renderRewardsDeck();
         renderCalendar();
+        loadAnalytics();
+        populateUserDropdown();
       })
       .catch(function () {});
   }

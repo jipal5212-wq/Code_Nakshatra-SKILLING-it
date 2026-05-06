@@ -22,7 +22,20 @@ module.exports = function authRoutes(admin) {
     await admin.from('email_otps').upsert({ email, code, expires_at, attempts: 0 }, { onConflict: 'email' });
 
     const sent = await sendOtpEmail(email, code);
+
+    // Dev mode: always log OTP to console so you can test without email delivery
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`\n  ┌─────────────────────────────────────┐`);
+      console.log(`  │  DEV OTP  →  ${email}`);
+      console.log(`  │  Code     →  ${code}`);
+      console.log(`  └─────────────────────────────────────┘\n`);
+    }
+
     if (!sent.ok) {
+      // In dev mode, still allow flow even if email fails
+      if (process.env.NODE_ENV !== 'production') {
+        return res.json({ ok: true, expiresInMinutes: OTP_MIN_MS / 60000, devNote: 'OTP logged to server console' });
+      }
       console.error('[OTP send]', sent.error);
       return res.status(502).json({ error: sent.error || 'Email send failed.' });
     }
@@ -156,6 +169,74 @@ module.exports = function authRoutes(admin) {
         }
       }
     });
+  });
+
+  /** Direct signup — no OTP. Username + email + password in one step. */
+  r.post('/api/auth/register', async (req, res) => {
+    if (!admin) return res.status(503).json({ error: 'Server not configured.' });
+    const email = normEmail(req.body?.email);
+    const password = String(req.body?.password || '');
+    const displayName = String(req.body?.displayName || '').trim().slice(0, 120);
+    const skillDomain = normalizeSkillKey(req.body?.skillDomain || 'aiml');
+    const level = ['Beginner', 'Intermediate', 'Advanced'].includes(req.body?.level) ? req.body.level : 'Beginner';
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Valid email required.' });
+    if (!displayName) return res.status(400).json({ error: 'Username is required.' });
+    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+
+    try {
+      // Create user via Supabase Admin (skips email confirmation)
+      const { data: created, error: createErr } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { displayName }
+      });
+      if (createErr) {
+        if (createErr.message?.toLowerCase().includes('already')) {
+          return res.status(400).json({ error: 'An account with this email already exists.' });
+        }
+        return res.status(400).json({ error: createErr.message });
+      }
+      const uid = created.user.id;
+
+      // Create profile row
+      await admin.from('profiles').upsert({
+        id: uid,
+        display_name: displayName,
+        skill_domain: skillDomain,
+        level,
+        points: 0,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+
+      // Sign in to get a session token
+      const anonClient = getAnonAuthClient();
+      const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password });
+      if (signInErr || !signInData?.session) {
+        return res.status(200).json({ ok: true, message: 'Account created. Please sign in.' });
+      }
+
+      res.json({
+        ok: true,
+        session: {
+          access_token: signInData.session.access_token,
+          refresh_token: signInData.session.refresh_token,
+          expires_at: signInData.session.expires_at,
+          user: {
+            id: uid,
+            email,
+            displayName,
+            skill_domain: skillDomain,
+            level,
+            points: 0
+          }
+        }
+      });
+    } catch (e) {
+      console.error('[register]', e);
+      res.status(500).json({ error: e.message });
+    }
   });
 
   return r;
