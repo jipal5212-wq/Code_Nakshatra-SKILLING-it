@@ -4,17 +4,27 @@ echo ===================================================
 echo     Starting the SKILLING IT Platform...
 echo ===================================================
 echo.
-echo Launching server... Please wait...
-echo.
 
-:: Wait for a second to ensure the command prompt is ready
-timeout /t 1 /nobreak >nul
+:: Check for .env file
+if not exist ".env" (
+    echo  WARNING: No .env file found!
+    echo  Copy .env.example to .env and fill in your Supabase keys.
+    echo.
+)
 
-:: Automatically open the default web browser to the platform
+:: Start server in background
+echo  Launching server...
+start /B node server.js
+
+:: Wait 3 seconds for server to be ready, then open browser
+echo  Waiting for server to start...
+timeout /t 3 /nobreak >nul
 start http://localhost:3000
 
-:: Run the Node.js server
-node server.js
+echo  Server is running at http://localhost:3000
+echo  Press Ctrl+C to stop.
+echo.
 
-:: If the server crashes or is stopped, pause so the user can see the error
+:: Keep window open and show server output
+node server.js
 pause

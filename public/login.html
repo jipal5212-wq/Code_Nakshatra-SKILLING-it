@@ -39,6 +39,8 @@ select.inp{cursor:pointer}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .err{background:rgba(230,0,0,.12);border:1px solid rgba(230,0,0,.3);padding:12px 16px;border-radius:7px;font-size:13px;color:#ffb4b4;margin-bottom:16px;display:none;line-height:1.4}
 .err.show{display:block}
+.succ{background:rgba(0,200,100,.12);border:1px solid rgba(0,200,100,.35);padding:12px 16px;border-radius:7px;font-size:13px;color:#7fffc4;margin-bottom:16px;display:none;line-height:1.4}
+.succ.show{display:block}
 .hint{font-size:12px;color:rgba(255,255,255,.28);margin-top:14px;line-height:1.5}
 .foot{text-align:center;margin-top:20px;font-size:14px}
 .foot a{color:var(--red);text-decoration:none;font-weight:500}
@@ -59,6 +61,7 @@ select.inp{cursor:pointer}
 
     <!-- SIGN IN -->
     <div id="pIn" class="panel active">
+      <div id="sIn" class="succ"></div>
       <div id="eIn" class="err"></div>
       <label class="lbl">Email</label>
       <input class="inp" type="email" id="siEmail" placeholder="you@email.com" autocomplete="username"/>
@@ -124,7 +127,9 @@ function strength(pw){
 }
 
 function err(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
+function clrEl(el){el.classList.remove('show');}
 function clr(id){document.getElementById(id).classList.remove('show');}
+function succ(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
 
 async function startLoop(tok){try{await fetch('/api/me/start-loop',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:'{}'});}catch(_){}}
 
@@ -165,10 +170,13 @@ document.getElementById('btnUp').onclick=async()=>{
     await startLoop(d.session.access_token);
     location.href='/';
   } else {
+    // Account created but auto-login didn't fire — redirect to Sign In tab
     document.getElementById('btnUp').disabled=false;
     document.querySelector('[data-tab="in"]').click();
     document.getElementById('siEmail').value=email;
-    err('eIn',d.message||'Account created — sign in now.');
+    document.getElementById('siPw').focus();
+    clr('eIn');
+    succ('sIn','✅ Account created! Enter your password below to sign in.');
   }
 };
 

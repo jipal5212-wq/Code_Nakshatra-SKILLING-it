@@ -148,7 +148,14 @@ module.exports = function authRoutes(admin) {
     const password = String(req.body?.password || '');
     if (!email || !password) return res.status(400).json({ error: 'Email and password required.' });
     const { data, error } = await anon.auth.signInWithPassword({ email, password });
-    if (error || !data.session) return res.status(401).json({ error: 'Invalid credentials.' });
+    if (error || !data?.session) {
+      const msg = error?.message || '';
+      // Surface meaningful error vs generic invalid credentials
+      const friendlyMsg = msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials')
+        ? 'Incorrect email or password.'
+        : msg || 'Could not sign in.';
+      return res.status(401).json({ error: friendlyMsg });
+    }
 
     const uid = data.user.id;
     const { data: profile } = admin ? await admin.from('profiles').select('*').eq('id', uid).maybeSingle() : { data: null };
@@ -210,10 +217,25 @@ module.exports = function authRoutes(admin) {
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' });
 
-      // Sign in to get a session token
+      // Sign in to get a session token — retry once after brief delay
+      // (Supabase admin user creation may need a moment to propagate)
       const anonClient = getAnonAuthClient();
-      const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password });
+      if (!anonClient) {
+        console.warn('[register] SUPABASE_ANON_KEY not set — cannot auto sign-in after register.');
+        return res.status(200).json({ ok: true, message: 'Account created. Please sign in.' });
+      }
+
+      const trySignIn = () => anonClient.auth.signInWithPassword({ email, password });
+      let { data: signInData, error: signInErr } = await trySignIn();
+
       if (signInErr || !signInData?.session) {
+        // Wait 800ms and retry — Supabase needs a moment after admin createUser
+        await new Promise(r => setTimeout(r, 800));
+        ({ data: signInData, error: signInErr } = await trySignIn());
+      }
+
+      if (signInErr || !signInData?.session) {
+        console.warn('[register] Auto sign-in failed after retry:', signInErr?.message);
         return res.status(200).json({ ok: true, message: 'Account created. Please sign in.' });
       }
 

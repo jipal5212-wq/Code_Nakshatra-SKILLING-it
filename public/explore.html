@@ -371,19 +371,34 @@ function renderTasks(tasks){
     el.innerHTML = '<div class="loader">No beginner tasks yet in this domain.</div>';
     return;
   }
-  el.innerHTML = tasks.map(t => `
+  window._exploreTasks = tasks;
+  el.innerHTML = tasks.map((t,i) => `
     <div class="task-strip">
       <div>
-        <span class="task-strip-domain">${escHtml(t.domain||'')}</span>
-        <div class="task-strip-title">${escHtml(t.title)}</div>
-        <div class="task-strip-desc">${escHtml((t.desc||t.description||'').slice(0,160))}${(t.desc||t.description||'').length>160?'…':''}</div>
-        <div class="task-strip-effort">⏱ ${escHtml(t.effort||'~1 hr')}</div>
+        <span class="task-strip-domain"></span>
+        <div class="task-strip-title"></div>
+        <div class="task-strip-desc"></div>
+        <div class="task-strip-effort">&#x23f1; </div>
       </div>
-      <a href="/#submit" class="btn-try" onclick="sessionStorage.setItem('exploreTask',JSON.stringify(${JSON.stringify(JSON.stringify(t))}))">Try Task →</a>
+      <button class="btn-try" onclick="tryTask()">Try Task &#x2192;</button>
     </div>`).join('');
 }
 
+function tryTask(idx){
+  const t=(window._exploreTasks||[])[idx]; if(!t){alert('Not found');return;}
+  const vids=window._exploreVideos||[];
+  const v=vids[Math.floor(Math.random()*vids.length)]||null;
+  function nxt6(){var d=new Date();d.setHours(6,0,0,0);if(Date.now()>=d.getTime())d.setDate(d.getDate()+1);return d.getTime();}
+  try{sessionStorage.setItem('skilling_chosen_task',JSON.stringify({
+    title:t.title,domain:t.domain||'',id:t.id||t._id||'',
+    desc:t.desc||t.description||'',effort:t.effort||'~1 hr',confirmed:false,lock_until:nxt6(),
+    pairedVideo:v?{title:v.title||'',embedUrl:v.embedUrl||'',thumbnail:v.thumbnail||'',channel:v.channel||''}:null
+  }));}catch(_){}
+  window.location.href='/submit.html';
+}
+
 function renderVideos(videos){
+  window._exploreVideos = videos;
   const el = document.getElementById('detailVideos');
   if (!videos.length){
     el.innerHTML = '<div class="loader">No videos available.</div>';
@@ -406,22 +421,34 @@ function renderVideos(videos){
 
 // ── Switch primary domain ─────────────────────────────────────────────────────
 async function switchPrimary(){
-  if (!activeSwitchKey || activeSwitchKey === userPrimaryKey) return;
+  if (!activeSwitchKey) { toast('Select a domain card first.'); return; }
+  if (activeSwitchKey === userPrimaryKey) { toast('This is already your primary domain.'); return; }
+  const btn = document.getElementById('switchBtn');
+  btn.disabled = true; btn.textContent = 'Updating...';
   try {
+    const token = SkillingAuth.read()?.access_token;
     const res = await fetch('/api/me/profile', {
-      method:'PATCH',
-      headers: SkillingAuth.bearerHeaders(),
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ skillDomain: activeSwitchKey })
     });
-    if (!res.ok) throw new Error('Failed');
+    if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||'HTTP '+res.status); }
+    // Persist new domain into localStorage so arena picks it up
+    const raw = SkillingAuth.read();
+    if (raw && raw.user) { raw.user.skill_domain = activeSwitchKey; SkillingAuth.write(raw); }
+    try { sessionStorage.removeItem('skilling_chosen_task'); } catch(_){}
+    try { sessionStorage.removeItem('skilling_extra_tasks'); } catch(_){}
     userPrimaryKey = activeSwitchKey;
-    toast('✅ Primary domain updated!');
+    const dom = DOMAINS.find(x => x.key === activeSwitchKey);
+    const label = dom ? dom.icon + ' ' + dom.label : activeSwitchKey;
+    document.getElementById('primaryDomainLabel').textContent = label;
     renderDomainCards();
-    const dom = DOMAINS.find(x=>x.key===activeSwitchKey);
-    document.getElementById('primaryDomainLabel').textContent = dom ? dom.icon+' '+dom.label : activeSwitchKey;
-    document.getElementById('switchBtn').style.display = 'none';
+    btn.textContent = 'Primary Domain Set \u2713'; btn.disabled = false;
+    btn.style.cssText += ';background:rgba(230,0,0,.15);border-color:rgba(230,0,0,.4);color:var(--red);';
+    toast('Domain set to ' + label + '! Arena will now show ' + label + ' content.');
   } catch(e){
-    toast('⚠ Could not update domain.');
+    toast('Could not update: ' + e.message);
+    btn.disabled = false; btn.textContent = 'Make My Primary Domain \u2192';
   }
 }
 
