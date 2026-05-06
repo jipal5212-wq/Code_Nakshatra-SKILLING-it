@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8">
 <link rel="icon" type="image/png" href="/logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,6 +91,11 @@
       letter-spacing: -1px;
       flex-shrink: 0;
     }
+
+    .nav-logo { transition: transform .25s ease; }
+    .nav-logo:hover { transform: scale(1.06); }
+    .nav-logo-mark img { transition: transform .25s ease, box-shadow .25s ease; border-radius: 50%; }
+    .nav-logo:hover .nav-logo-mark img { transform: scale(1.2); box-shadow: 0 0 18px rgba(230,0,0,.55); }
 
     .nav-logo-text {
       font-family: var(--display-font);

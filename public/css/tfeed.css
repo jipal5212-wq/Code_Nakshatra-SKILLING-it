@@ -1,4 +1,4 @@
-:root{--red:#e60000;--ch:#25282b;--dark:#111315;--D:'Barlow Condensed',sans-serif;--B:'Barlow',sans-serif}
+﻿:root{--red:#e60000;--ch:#25282b;--dark:#111315;--D:'Barlow Condensed',sans-serif;--B:'Barlow',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--B);background:var(--dark);color:#fff;min-height:100vh;-webkit-font-smoothing:antialiased}
 .nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(17,19,21,.96);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;border-bottom:1px solid rgba(255,255,255,.07)}
@@ -109,3 +109,5 @@ body{font-family:var(--B);background:var(--dark);color:#fff;min-height:100vh;-we
 .setup-text code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px}
 @media(max-width:900px){.cols{grid-template-columns:1fr}.build-col{position:static}}
 @media(max-width:600px){.nav{padding:0 20px}.page-wrap{padding-left:16px;padding-right:16px}}
+
+.nav-logo{transition:transform .25s ease}.nav-logo:hover{transform:scale(1.06)}.nav-logo-mark img{transition:transform .25s ease,box-shadow .25s ease;border-radius:50%}.nav-logo:hover .nav-logo-mark img{transform:scale(1.2);box-shadow:0 0 18px rgba(230,0,0,.55)}
