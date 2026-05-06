@@ -97,30 +97,36 @@ document.addEventListener("click",function(e){var d=document.getElementById("avD
 async function loadCurrentTask(){
   function showBanner(title,domain,confirmed,taskObj){
     var banner=document.getElementById("taskConfirmedBanner");
-    var labelEl=banner.querySelector(".task-confirmed-label");
-    labelEl.textContent=confirmed?"You are building this today":"Selected — watch the video and build it";
-    banner.style.borderColor=confirmed?"rgba(230,0,0,.45)":"rgba(255,200,0,.4)";
-    document.getElementById("confirmedTaskTitle").textContent=title;
-    var domEl=document.getElementById("confirmedTaskDomain");
-    if(domain){domEl.textContent=domain;domEl.style.display="inline-block";}else{domEl.style.display="none";}
-    // Show task description if available
-    var descEl=document.getElementById("confirmedTaskDesc");
-    if(descEl&&taskObj&&taskObj.desc){descEl.textContent=taskObj.desc;descEl.style.display="block";}
-    // Show paired video if available
-    var vid=taskObj&&taskObj.pairedVideo;
-    var vidPanel=document.getElementById("pairedVideoPanel");
-    if(vidPanel&&vid&&vid.embedUrl){
-      var embedId=vid.embedUrl.match(/embed\/([^?]+)/)?.[1]||vid.embedUrl.match(/v=([^&]+)/)?.[1]||"";
-      var thumb=vid.thumbnail||(embedId?"https://img.youtube.com/vi/"+embedId+"/hqdefault.jpg":"");
-      vidPanel.innerHTML="<div style='font-family:var(--display-font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px'>WATCH FIRST</div>"
-        +"<div style='position:relative;aspect-ratio:16/9;background:#111;border-radius:6px;overflow:hidden;margin-bottom:8px'>"
-        +(thumb?"<img src='"+thumb+"' style='width:100%;height:100%;object-fit:cover' onerror='this.style.display=false'>":"")
-        +"<a href='"+vid.embedUrl.replace("embed/","watch?v=")+"' target='_blank' rel='noopener' style='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);text-decoration:none'>"
-        +"<div style='width:48px;height:48px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff'>&#9654;</div></a></div>"
-        +"<div style='font-family:var(--display-font);font-weight:700;font-size:13px;color:#fff;line-height:1.3'>"+escS(vid.title)+"</div>"
-        +(vid.channel?"<div style='font-size:11px;color:rgba(255,255,255,.35);margin-top:3px'>"+escS(vid.channel)+"</div>":"");
-      vidPanel.style.display="block";
-    }else if(vidPanel){vidPanel.style.display="none";}
+    var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+    var vid=taskObj&&taskObj.pairedVideo?taskObj.pairedVideo:null;
+    var vidHtml="";
+    if(vid&&(vid.embedUrl||vid.id)){
+      var watchUrl=vid.watchUrl||(vid.id?"https://www.youtube.com/watch?v="+vid.id:"");
+      var thumb=vid.thumbnail||(vid.id?"https://img.youtube.com/vi/"+vid.id+"/hqdefault.jpg":"");
+      vidHtml='<div style="flex-shrink:0;width:280px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;">'
+        +'<div style="padding:10px 14px 6px;font-family:var(--display-font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red)">▶ WATCH FIRST</div>'
+        +'<a href="'+esc(watchUrl)+'" target="_blank" rel="noopener" style="display:block;position:relative;aspect-ratio:16/9;background:#111;">'
+        +(thumb?'<img src="'+esc(thumb)+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.opacity=0">':""),
+        +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.42);">'
+        +'<div style="width:50px;height:50px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">&#9654;</div>'
+        +'</div></a>'
+        +'<div style="padding:10px 14px 14px;">'
+        +'<div style="font-family:var(--display-font);font-weight:700;font-size:13px;color:#fff;line-height:1.3;margin-bottom:4px">'+esc(vid.title||"Curated Tutorial")+'</div>'
+        +(vid.channel?'<div style="font-size:11px;color:rgba(255,255,255,.35);">'+esc(vid.channel)+'</div>':""),
+        +'<a href="'+esc(watchUrl)+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-family:var(--display-font);font-weight:700;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);border:1px solid rgba(230,0,0,.35);padding:5px 12px;border-radius:4px;text-decoration:none;">Open on YouTube ↗</a>'
+        +'</div></div>';
+    }
+    var desc=taskObj&&taskObj.desc?taskObj.desc:"";
+    var effort=taskObj&&taskObj.effort?taskObj.effort:"";
+    var taskHtml='<div style="flex:1;min-width:200px;">'
+      +'<div style="font-family:var(--display-font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:'+(confirmed?'var(--red)':'rgba(255,200,0,.8)')+'">'+(confirmed?'🎯 YOUR TASK FOR TODAY':'📌 SELECTED – COMPLETE & SUBMIT')+'</div>'
+      +(domain?'<div style="display:inline-block;margin-top:8px;font-family:var(--display-font);font-weight:700;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);border:1px solid rgba(230,0,0,.45);padding:2px 10px;border-radius:60px;">'+esc(domain)+'</div>':"")
+      +'<div style="font-family:var(--display-font);font-weight:800;font-size:clamp(20px,2.5vw,32px);text-transform:uppercase;color:#fff;line-height:1.15;margin:10px 0 8px;letter-spacing:-0.5px;">'+esc(title)+'</div>'
+      +(desc?'<div style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.65;margin-bottom:8px;">'+esc(desc)+'</div>':"")
+      +(effort?'<div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:600">⏱ '+esc(effort)+'</div>':"")
+      +'</div>';
+    banner.innerHTML='<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;padding:24px;">'+taskHtml+vidHtml+'</div>';
+    banner.style.borderColor=confirmed?"rgba(230,0,0,.5)":"rgba(255,200,0,.4)";
     banner.style.display="block";
     var lbl=document.getElementById("submitTimerLabel");
     if(lbl)lbl.textContent="Locked Until "+fmt6AM();
@@ -145,14 +151,11 @@ async function loadCurrentTask(){
       var dom=cycle.locked_task&&cycle.locked_task.domain||"";
       // Save to session storage with 6AM lock
       try{sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:title,domain:dom,confirmed:true,lock_until:nextSixAM()}));}catch(_){}
-      showBanner(title,dom,!!cycle.locked_task_id);
+      showBanner(title,dom,!!cycle.locked_task_id,{desc:cycle.locked_task&&cycle.locked_task.desc||cycle.task_desc||"",effort:cycle.locked_task&&cycle.locked_task.effort||"",pairedVideo:null});
     }else{
-      // No task yet — show prompt to go to arena
       var banner=document.getElementById("taskConfirmedBanner");
-      banner.style.display="block";banner.style.borderColor="rgba(255,200,0,.4)";
-      banner.querySelector(".task-confirmed-label").textContent="No Task Selected Yet";
-      document.getElementById("confirmedTaskTitle").textContent="Go to Execute tab to pick your video + task";
-      document.getElementById("confirmedTaskDomain").style.display="none";
+      banner.innerHTML='<div style="padding:20px 24px;text-align:center;"><div style="font-family:var(--display-font);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,200,0,.7);margin-bottom:8px">No Task Selected Yet</div><div style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:14px">Go to the Execute tab to pick your video + task for today</div><a href="/" style="font-family:var(--display-font);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--red);text-decoration:none;border:1px solid rgba(230,0,0,.4);padding:8px 18px;border-radius:4px">Go to Execute →</a></div>';
+      banner.style.display="block";banner.style.borderColor="rgba(255,200,0,.3)";
     }
   }catch(e){}
 }

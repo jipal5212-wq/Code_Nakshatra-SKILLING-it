@@ -197,7 +197,7 @@ async function confirmTask(){
   btn.disabled=true;btn.textContent="Locking in...";
   noteEl.textContent="Confirming your task...";
   // Save immediately so submit always has it
-  try{sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:t.title,domain:t.domain||"",id:t.id||t._id||"",confirmed:false,lock_until:nextSixAM()}));}catch(_){}
+  try{var _v=poolItem&&poolItem.video?poolItem.video:null;var _pv=_v?{title:_v.title||"",id:_v.id||"",thumbnail:_v.thumbnail||(_v.id?"https://img.youtube.com/vi/"+_v.id+"/hqdefault.jpg":""),embedUrl:_v.embedUrl||(_v.id?"https://www.youtube.com/embed/"+_v.id:""),watchUrl:_v.watchUrl||(_v.id?"https://www.youtube.com/watch?v="+_v.id:""),channel:_v.channel||""}:null;sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:t.title,domain:t.domain||"",id:t.id||t._id||"",desc:t.desc||t.objective||"",effort:t.effort||"~1 hr",confirmed:false,lock_until:nextSixAM(),pairedVideo:_pv}));}catch(_){}
 
   try{
     var r=await fetch("/api/cycles/select-task",{
@@ -208,7 +208,7 @@ async function confirmTask(){
     var d=await r.json();
     if(d.success){
       if(cycleData){cycleData.locked_task_id=t.id||t._id;cycleData.auto_assigned=false;cycleData.locked_task={title:t.title};}
-      try{sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:t.title,domain:t.domain||"",id:t.id||t._id||"",confirmed:true,lock_until:nextSixAM()}));}catch(_){}
+      try{sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:t.title,domain:t.domain||"",id:t.id||t._id||"",desc:t.desc||t.objective||"",effort:t.effort||"~1 hr",confirmed:true,lock_until:nextSixAM(),pairedVideo:_pv}));}catch(_){}
     }
   }catch(e){}
   noteEl.textContent="Primary task locked! Heading to Submit...";
@@ -239,7 +239,7 @@ async function randomTask(){
       // Save for submit page
       try{
         var ends=cycleData&&cycleData.cycle_ends_ms?cycleData.cycle_ends_ms:null;
-        sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:d.task.title,domain:d.task.domain||"",id:d.task.id,confirmed:true,...(ends?{cycle_ends_ms:ends}:{})}));
+        sessionStorage.setItem("skilling_chosen_task",JSON.stringify({title:d.task.title,domain:d.task.domain||"",id:d.task.id,desc:d.task.desc||d.task.objective||"",effort:d.task.effort||"~1 hr",confirmed:true,lock_until:nextSixAM(),pairedVideo:null}));
       }catch(_){}
       renderPool();renderCycleUI();
     } else {
