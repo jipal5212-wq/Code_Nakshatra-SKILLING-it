@@ -88,7 +88,11 @@ async function generateTasks(geminiModel, skillKey, level) {
 
   try {
     const prompt = buildPrompt(skillKey, level);
-    const result = await geminiModel.generateContent(prompt);
+    // 3-second timeout so Gemini never blocks the pool from loading
+    const result = await Promise.race([
+      geminiModel.generateContent(prompt),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Gemini timeout')), 3000))
+    ]);
     const text = result.response.text();
     const raw = parseGeminiJSON(text);
 
@@ -112,7 +116,10 @@ async function generateTasks(geminiModel, skillKey, level) {
     return tasks;
   } catch (err) {
     console.error('[geminiTasks] Error:', err.message);
-    return getStaticTasks(skillKey, level);
+    const staticTasks = getStaticTasks(skillKey, level);
+    // Cache static so next call within TTL is instant
+    CACHE.set(cacheKey, { ts: Date.now(), tasks: staticTasks });
+    return staticTasks;
   }
 }
 

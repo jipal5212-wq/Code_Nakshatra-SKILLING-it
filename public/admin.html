@@ -1,272 +1,551 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SKILLING IT – Site admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="/logo.png"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SKILLING IT — Admin Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--red:#e60000;--bg:#181a1d;--card:#22252a;--line:rgba(255,255,255,.08);--text:#f2f3f5;--muted:rgba(242,243,245,.55);--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
-*{box-sizing:border-box}
-body{font-family:var(--body);background:var(--bg);color:var(--text);margin:0;padding:28px;line-height:1.45;font-size:15px;}
-h1{font-family:var(--display);font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:1.55rem;margin:0 0 16px;}
-h2{font-family:var(--display);font-size:1.15rem;text-transform:uppercase;letter-spacing:1px;margin:32px 0 14px;border-bottom:1px solid var(--line);padding-bottom:8px;}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:14px;}
-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;margin-top:10px;}
-input[type=text],input[type=password],textarea{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:#121316;color:var(--text);font:inherit;}
-textarea{min-height:100px;resize:vertical;}
-.btn{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--red);border:none;color:#fff;padding:11px 18px;border-radius:8px;cursor:pointer;font-size:.85rem;}
-.btn.secondary{background:rgba(255,255,255,.08);border:1px solid var(--line);}
-.btn.small{padding:8px 12px;font-size:.76rem;margin-right:8px;margin-top:8px;}
-.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px;}
-.err{color:#ffb4b4;font-size:.9rem;margin:8px 0;display:none;}
-.err.show{display:block;}
-.auth-wrap{max-width:420px;margin:48px auto}
-.user-block{margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid var(--line);}
-.user-head{font-family:var(--display);font-weight:700;font-size:1.05rem;text-transform:uppercase;margin-bottom:10px;color:var(--red);}
-.meta{font-size:.86rem;color:var(--muted);margin-bottom:12px;font-family:var(--body);}
-.badge{font-size:.72rem;padding:4px 8px;border-radius:4px;background:rgba(255,255,255,.08);}
-.badge.pending{background:rgba(230,176,0,.15);color:#ffb44c;}
-.sub-card{border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;background:#17191c;}
-.thumb{width:120px;height:76px;border-radius:6px;object-fit:cover;display:block;margin-bottom:8px;background:#333;}
-.links a{color:#7ec8ff;word-break:break-all;font-size:.88rem;display:block;margin:4px 0;}
-.mini{font-size:.8rem;color:var(--muted);margin-top:6px;line-height:1.4;}
+:root{--bg:#0d0f14;--surf:#161921;--card:#1e2229;--border:rgba(255,255,255,.08);--red:#e60000;--green:#22c55e;--amber:#f59e0b;--text:#f2f3f5;--muted:rgba(242,243,245,.5);--ff-head:'Barlow Condensed',sans-serif;--ff-body:'Inter',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff-body);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+h1,h2,h3{font-family:var(--ff-head);text-transform:uppercase;letter-spacing:.05em}
+/* GATE */
+.gate{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.gate-box{background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:40px;width:100%;max-width:400px}
+.gate-box h1{font-size:1.6rem;margin-bottom:6px}
+.gate-box p{color:var(--muted);font-size:.85rem;margin-bottom:24px}
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--surf);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.hdr-brand{display:flex;align-items:baseline;gap:10px}
+.hdr-logo{font-family:var(--ff-head);font-weight:800;font-size:1.3rem;letter-spacing:.1em;color:var(--red)}
+.hdr-sub{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.hdr-btns{display:flex;gap:8px}
+/* TABS */
+.tab-nav{display:flex;gap:2px;padding:12px 24px 0;background:var(--surf);border-bottom:1px solid var(--border)}
+.tab-btn{font-family:var(--ff-head);font-weight:700;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;position:relative}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--red)}
+.badge-pill{background:var(--red);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:99px;margin-left:6px;font-family:var(--ff-body);font-weight:600}
+/* CONTENT */
+.content{max-width:1280px;margin:0 auto;padding:28px 24px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* INPUTS */
+.fld{display:block;width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:#0d0f14;color:var(--text);font-family:var(--ff-body);font-size:.9rem;transition:border-color .2s}
+.fld:focus{outline:none;border-color:var(--red)}
+select.fld option{background:#1e2229}
+textarea.fld{min-height:90px;resize:vertical}
+label.lbl{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:14px 0 5px}
+/* BUTTONS */
+.btn{font-family:var(--ff-head);font-weight:700;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;transition:opacity .2s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border)}
+.btn-green{background:var(--green);color:#fff}
+.btn-sm{padding:7px 12px;font-size:.75rem}
+.btn:hover{opacity:.85}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.sec-hdr h2{font-size:1.2rem}
+/* ERROR/SUCCESS */
+.msg{padding:10px 14px;border-radius:8px;font-size:.88rem;margin:10px 0;display:none}
+.msg.show{display:block}
+.msg-err{background:rgba(230,0,0,.12);color:#ff7070;border:1px solid rgba(230,0,0,.25)}
+.msg-ok{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+/* USERS GRID */
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:border-color .2s,background .2s}
+.user-card:hover{border-color:rgba(255,255,255,.18);background:#23272f}
+.user-avatar{width:44px;height:44px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:12px}
+.user-name{font-family:var(--ff-head);font-weight:700;font-size:1.05rem;margin-bottom:2px}
+.user-email{color:var(--muted);font-size:.8rem;margin-bottom:10px;word-break:break-all}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.pill{font-size:.7rem;padding:3px 8px;border-radius:99px;font-weight:600}
+.pill-domain{background:rgba(96,165,250,.15);color:#60a5fa}
+.pill-level{background:rgba(245,158,11,.12);color:var(--amber)}
+.pill-pts{background:rgba(34,197,94,.12);color:var(--green)}
+.user-stats{display:flex;gap:14px;font-size:.8rem;color:var(--muted)}
+.user-detail{display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
+.user-detail.open{display:block}
+/* HISTORY TABLE */
+.htable{width:100%;border-collapse:collapse;font-size:.82rem}
+.htable th{text-align:left;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;font-size:.7rem;letter-spacing:.08em}
+.htable td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
+.htable tr:last-child td{border:none}
+/* STATUS BADGES */
+.status{font-size:.7rem;padding:3px 8px;border-radius:99px;font-weight:600;white-space:nowrap}
+.status-pending{background:rgba(245,158,11,.15);color:var(--amber)}
+.status-accepted{background:rgba(34,197,94,.15);color:var(--green)}
+.status-rejected{background:rgba(230,0,0,.15);color:#ff6b6b}
+/* ASSIGN TAB */
+.assign-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.assign-grid{grid-template-columns:1fr}}
+.col-title{font-size:1.1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.user-pick-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:6px}
+.user-pick-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;font-size:.88rem}
+.user-pick-item:last-child{border:none}
+.user-pick-item:hover{background:rgba(255,255,255,.05)}
+.user-pick-item.selected{background:rgba(230,0,0,.1);border-left:3px solid var(--red)}
+.selected-user-info{background:rgba(255,255,255,.04);border-radius:8px;padding:12px 14px;margin:10px 0;font-size:.85rem}
+.task-list{max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:6px}
+.task-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.task-item:last-child{border:none}
+.task-item:hover{background:rgba(255,255,255,.05)}
+.task-item.selected{background:rgba(230,0,0,.1);border-left:3px solid var(--red)}
+.task-item-title{font-size:.88rem;font-weight:600;margin-bottom:2px}
+.task-item-meta{font-size:.75rem;color:var(--muted)}
+/* SUBMISSIONS */
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{font-family:var(--ff-head);font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.filter-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+.sub-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.sub-card.pending{border-left:3px solid var(--amber)}
+.sub-card.accepted{border-left:3px solid var(--green)}
+.sub-card.rejected{border-left:3px solid #ef4444}
+.sub-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.sub-user{font-family:var(--ff-head);font-weight:700;font-size:1rem}
+.sub-task{color:var(--muted);font-size:.85rem;margin-bottom:8px}
+.links a{color:#60a5fa;font-size:.82rem;display:inline-block;margin-right:12px;text-decoration:none}
+.links a:hover{text-decoration:underline}
+.sub-files img{width:100px;height:64px;object-fit:cover;border-radius:6px;margin:4px;background:#333}
+.review-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.pts-inp{width:70px;padding:7px 10px;border-radius:8px;border:1px solid var(--border);background:#0d0f14;color:var(--text);font-family:var(--ff-body);font-size:.88rem}
+.search-inp{padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:#0d0f14;color:var(--text);font-family:var(--ff-body);font-size:.88rem;width:260px}
+.search-inp:focus{outline:none;border-color:var(--red)}
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:10px}
+/* LOADING */
+.loading{padding:32px;text-align:center;color:var(--muted)}
+/* GRID 2 */
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
 </style>
 </head>
 <body>
-<div id="loginGate" class="auth-wrap">
-  <h1>Site admin login</h1>
-  <p style="color:var(--muted);font-size:.9rem;">Shared site password — not tied to learner accounts.</p>
-  <div id="loginErr" class="err"></div>
-  <label for="admPass">Password</label>
-  <input id="admPass" type="password" autocomplete="current-password"/>
-  <div class="row">
-    <button type="button" class="btn" id="admLoginBtn">Unlock panel</button>
-    <button type="button" class="btn secondary" onclick="location.href='/'">Home</button>
-  </div>
-</div>
-
-<div id="panel" style="display:none;max-width:1100px;margin:0 auto;">
-  <div class="row" style="justify-content:space-between;width:100%;margin-bottom:8px;">
-    <h1>Admin console</h1>
-    <div>
-      <button type="button" class="btn secondary" id="refreshBtn">Refresh queue</button>
-      <button type="button" class="btn secondary" id="logoutBtn">Logout</button>
+<!-- LOGIN GATE -->
+<div id="loginGate" class="gate">
+  <div class="gate-box">
+    <h1>ADMIN CONSOLE</h1>
+    <p>S-KILLING IT · Site admin access only</p>
+    <div id="loginErr" class="msg msg-err"></div>
+    <label class="lbl">Password</label>
+    <input id="admPass" type="password" class="fld" autocomplete="current-password" placeholder="Enter site password">
+    <div class="row" style="margin-top:16px">
+      <button id="admLoginBtn" class="btn btn-red">Unlock Panel</button>
+      <button class="btn btn-ghost" onclick="location.href='/'">Home</button>
     </div>
   </div>
-
-  <div class="card">
-    <h2 style="margin-top:0;border:none;padding:0;">Be relevant · new post</h2>
-    <p style="margin:0 0 14px;color:var(--muted);font-size:.9rem;">Image + rich text surfaced to learners in “Tech Awareness”.</p>
-    <div id="newsErr" class="err"></div>
-    <label for="brTitle">Title</label>
-    <input id="brTitle" type="text"/>
-    <label for="brDetails">Body</label>
-    <textarea id="brDetails"></textarea>
-    <label for="brRelated">Tags / related tasks (comma text)</label>
-    <input id="brRelated" type="text" placeholder="e.g. AIML · robotics"/>
-    <label for="brImg">Image</label>
-    <input id="brImg" type="file" accept="image/*"/>
-    <div class="row">
-      <button type="button" class="btn" id="btnPostNews">Publish</button>
-    </div>
-  </div>
-
-  <h2>Submissions · grouped by learner</h2>
-  <p style="color:var(--muted);font-size:.9rem;">Review proof bundles · accept or reject feedback + points reaches their rewards dashboard.</p>
-  <div id="queueErr" class="err"></div>
-  <div id="queueMount"></div>
 </div>
-
-<script>
-const $ = (id) => document.getElementById(id);
-
-async function admFetch(path, opts = {}) {
-  const o = opts || {};
-  o.credentials = 'include';
-  if (!o.headers) o.headers = {};
-  const res = await fetch(path, o);
-  return res;
-}
-
-function showGate() {
-  $('loginGate').style.display = 'block';
-  $('panel').style.display = 'none';
-}
-function showPanel() {
-  $('loginGate').style.display = 'none';
-  $('panel').style.display = 'block';
-}
-
-$('admLoginBtn').onclick = async () => {
-  $('loginErr').classList.remove('show');
-  const password = $('admPass').value;
-  if (!password) return $('loginErr').textContent = 'Enter password.', $('loginErr').classList.add('show');
-  const res = await admFetch('/api/admin/site-login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return $('loginErr').textContent = data.error || 'Login failed.', $('loginErr').classList.add('show');
-  showPanel();
-  loadQueue();
-};
-
-$('logoutBtn').onclick = async () => {
-  await admFetch('/api/admin/site-logout', { method: 'POST' });
-  $('admPass').value = '';
-  showGate();
-};
-
-$('refreshBtn').onclick = loadQueue;
-
-$('btnPostNews').onclick = async () => {
-  $('newsErr').classList.remove('show');
-  const title = $('brTitle').value.trim();
-  const details = $('brDetails').value.trim();
-  const relatedTasks = $('brRelated').value.trim();
-  if (!title || !details) return $('newsErr').textContent = 'Title + body required.', $('newsErr').classList.add('show');
-  const fd = new FormData();
-  fd.append('title', title);
-  fd.append('details', details);
-  fd.append('relatedTasks', relatedTasks);
-  const f = $('brImg').files[0];
-  if (f) fd.append('image', f);
-
-  const res = await admFetch('/api/admin/be-relevant', { method: 'POST', body: fd });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.success) {
-    $('newsErr').textContent = data.error || 'Failed to post.';
-    return $('newsErr').classList.add('show');
-  }
-  $('brTitle').value = '';
-  $('brDetails').value = '';
-  $('brRelated').value = '';
-  $('brImg').value = '';
-  alert('Post published.');
-};
-
-function escHtml(s) {
-  if (s == null) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-async function loadQueue() {
-  $('queueErr').classList.remove('show');
-  $('queueMount').innerHTML = '<p style="color:var(--muted)">Loading…</p>';
-
-  const res = await admFetch('/api/admin/users-with-pending');
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    $('queueMount').innerHTML = '';
-    $('queueErr').textContent = data.error || 'Not authorized — log in.';
-    $('queueErr').classList.add('show');
-    if (res.status === 401) showGate();
-    return;
-  }
-
-  const groups = data.groups || [];
-  if (!groups.length) {
-    $('queueMount').innerHTML = '<p style="color:var(--muted)">No pending reviews ✓</p>';
-    return;
-  }
-
-  let html = '';
-  for (const g of groups) {
-    const prof = g.user || {};
-    const dn = escHtml(prof.display_name || '(no profile name)');
-    const em = escHtml(prof.email || prof.id || '');
-    html +=
-      `<div class="user-block"><div class="user-head">${dn}</div><div class="meta">${em}</div>`;
-    for (const b of g.submissions || []) {
-      const task = b.task || {};
-      const tid = escHtml(task.title || '');
-      const status = escHtml((b.status || 'pending_review').replace(/_/g, ' '));
-
-      html += `<div class="sub-card"><div style="display:flex;gap:14px;flex-wrap:wrap;">`;
-      if (task.title) html += `<div style="flex:1;min-width:200px"><span class="badge pending">${status}</span><div style="margin-top:8px;font-weight:600">${tid}</div><div class="mini">${escHtml(task.objective || task.desc || '')}</div></div>`;
-      else html += `<div><span class="badge pending">${status}</span></div>`;
-
-      html += `<div style="flex:1;min-width:220px;"><div class="links">`;
-
-      const gu = (b.github_url || '').trim();
-      const lu = (b.live_url || '').trim();
-      const dv = (b.demo_video_url || '').trim();
-      if (gu) html += `<a href="${escHtml(gu)}" target="_blank" rel="noopener">GitHub →</a>`;
-      if (lu) html += `<a href="${escHtml(lu)}" target="_blank" rel="noopener">Live / demo →</a>`;
-      if (dv) html += `<a href="${escHtml(dv)}" target="_blank" rel="noopener">Demo video →</a>`;
-
-      const shots = Array.isArray(b.screenshot_urls) ? b.screenshot_urls : [];
-      shots.forEach((u) => {
-        const uu = escHtml(u);
-        html +=
-          `<a href="${uu}" target="_blank" rel="noopener">Screenshot / asset →</a><img src="${uu}" alt="" class="thumb" loading="lazy" onerror="this.style.display='none'"/>`;
-      });
-
-      const files = Array.isArray(b.file_paths) ? b.file_paths : [];
-      files.forEach((p) => {
-        const pu = escHtml(p.startsWith('/') ? p : '/' + p);
-        html += `<a href="${pu}" target="_blank" rel="noopener">Uploaded file →</a>`;
-      });
-
-      html += `</div></div></div>`;
-
-      html += `
-        <div class="mini" style="margin-top:12px;">Cycle start: ${escHtml(b.cycle_start_iso || '')}</div>
-        <label>For learner (feedback)</label>
-        <textarea id="fb-${escHtml(b.id)}" placeholder="Nice work · needs tests · etc." style="min-height:70px;"></textarea>
-        <label>Award points (on Accept)</label>
-        <input type="text" id="pts-${escHtml(b.id)}" value="10" style="max-width:80px;display:inline-block;"/>
-        <div class="row adm-review-row">
-          <button type="button" class="btn small adm-accept" data-sid="${escHtml(b.id)}">Accept</button>
-          <button type="button" class="btn secondary small adm-reject" data-sid="${escHtml(b.id)}">Reject</button>
+<!-- MAIN PANEL -->
+<div id="panel" style="display:none">
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <span class="hdr-logo">S-KILLING IT</span>
+      <span class="hdr-sub">Admin Console</span>
+    </div>
+    <div class="hdr-btns">
+      <button id="refreshBtn" class="btn btn-ghost btn-sm">&#8635; Refresh</button>
+      <button id="logoutBtn" class="btn btn-ghost btn-sm">Logout &rarr;</button>
+    </div>
+  </header>
+  <!-- TAB NAV -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="users">&#128101; Users</button>
+    <button class="tab-btn" data-tab="assign">&#128203; Assign Task</button>
+    <button class="tab-btn" data-tab="subs">&#128229; Submissions <span id="pendingBadge" class="badge-pill" style="display:none">0</span></button>
+    <button class="tab-btn" data-tab="news">&#128240; Post News</button>
+  </nav>
+  <!-- CONTENT -->
+  <main class="content">
+    <!-- USERS TAB -->
+    <section id="tab-users" class="tab-panel active">
+      <div class="sec-hdr">
+        <h2>&#128101; All Learners</h2>
+        <input id="userSearch" type="text" class="search-inp" placeholder="Search name or email...">
+      </div>
+      <div id="usersMount"><div class="loading">Loading users…</div></div>
+    </section>
+    <!-- ASSIGN TASK TAB -->
+    <section id="tab-assign" class="tab-panel">
+      <div class="assign-grid">
+        <!-- COL 1: Force-assign daily task -->
+        <div>
+          <h3 class="col-title">&#128203; Force-Assign Daily Task</h3>
+          <div id="assignErr" class="msg msg-err"></div>
+          <div id="assignOk" class="msg msg-ok"></div>
+          <label class="lbl">1. Select Learner</label>
+          <input id="assignUserSearch" type="text" class="fld" placeholder="Filter users…">
+          <div id="assignUserList" class="user-pick-list"></div>
+          <div id="selectedUserInfo" class="selected-user-info" style="display:none"></div>
+          <label class="lbl">2. Filter Tasks</label>
+          <div style="display:flex;gap:8px">
+            <select id="taskFilterDomain" class="fld">
+              <option value="">All Domains</option>
+              <option value="aiml">AI / ML</option>
+              <option value="webdev">Web Dev</option>
+              <option value="datascience">Data Science</option>
+              <option value="robotics">Robotics</option>
+              <option value="iot">IoT</option>
+              <option value="cybersec">Cybersecurity</option>
+            </select>
+            <select id="taskFilterLevel" class="fld">
+              <option value="">All Levels</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+          <div id="assignTaskList" class="task-list" style="margin-top:8px"></div>
+          <div id="selectedTaskInfo" style="display:none;margin:10px 0;font-size:.85rem;color:var(--muted)"></div>
+          <button id="forceAssignBtn" class="btn btn-red" style="margin-top:14px;width:100%" disabled>Force Assign Task</button>
         </div>
-      </div>`;
-    }
-    html += `</div>`;
-  }
+        <!-- COL 2: Push training feed post -->
+        <div>
+          <h3 class="col-title">&#128640; Push Training Feed Post</h3>
+          <div id="tfeedErr" class="msg msg-err"></div>
+          <div id="tfeedOk" class="msg msg-ok"></div>
+          <label class="lbl">Title *</label>
+          <input id="tfTitle" type="text" class="fld" placeholder="e.g. Build a CLI Todo App">
+          <label class="lbl">Summary *</label>
+          <textarea id="tfSummary" class="fld" placeholder="Brief description of the topic or news…"></textarea>
+          <label class="lbl">Domain</label>
+          <select id="tfDomain" class="fld">
+            <option value="General">General</option>
+            <option value="AI/ML">AI / ML</option>
+            <option value="Web Dev">Web Dev</option>
+            <option value="Data Science">Data Science</option>
+            <option value="Robotics">Robotics</option>
+            <option value="IoT">IoT</option>
+            <option value="Cybersecurity">Cybersecurity</option>
+          </select>
+          <label class="lbl">Project Idea</label>
+          <textarea id="tfIdea" class="fld" placeholder="Hands-on project students can build…" style="min-height:70px"></textarea>
+          <label class="lbl">Tech Stack</label>
+          <input id="tfStack" type="text" class="fld" placeholder="e.g. Python, Flask, SQLite">
+          <label class="lbl">Effort</label>
+          <input id="tfEffort" type="text" class="fld" placeholder="e.g. ~2 hrs" value="~2 hrs">
+          <label class="lbl">Tags (comma-separated)</label>
+          <input id="tfTags" type="text" class="fld" placeholder="python, backend, beginner">
+          <label class="lbl">Article URL (optional)</label>
+          <input id="tfUrl" type="text" class="fld" placeholder="https://…">
+          <button id="pushTfeedBtn" class="btn btn-red" style="margin-top:16px;width:100%">Push to Training Feed</button>
+        </div>
+      </div>
+    </section>
+    <!-- SUBMISSIONS TAB -->
+    <section id="tab-subs" class="tab-panel">
+      <div class="sec-hdr">
+        <h2>&#128229; Submissions <small style="font-size:.75rem;color:var(--muted);font-family:var(--ff-body);text-transform:none;letter-spacing:0">(last 2 days)</small></h2>
+        <div class="filter-bar" style="margin:0">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="pending_review">&#128993; Pending</button>
+          <button class="filter-btn" data-filter="accepted">&#9989; Accepted</button>
+          <button class="filter-btn" data-filter="rejected">&#10060; Rejected</button>
+        </div>
+      </div>
+      <div id="subsErr" class="msg msg-err"></div>
+      <div id="subsMount"><div class="loading">Loading submissions…</div></div>
+    </section>
+    <!-- POST NEWS TAB -->
+    <section id="tab-news" class="tab-panel">
+      <h2 style="margin-bottom:20px">&#128240; Be Relevant · New Post</h2>
+      <div class="card" style="max-width:680px">
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px">Image + rich text surfaced to learners in "Tech Awareness".</p>
+        <div id="newsErr" class="msg msg-err"></div>
+        <div id="newsOk" class="msg msg-ok"></div>
+        <label class="lbl">Title</label>
+        <input id="brTitle" type="text" class="fld">
+        <label class="lbl">Body</label>
+        <textarea id="brDetails" class="fld"></textarea>
+        <label class="lbl">Tags / Related Tasks</label>
+        <input id="brRelated" type="text" class="fld" placeholder="e.g. AIML · robotics">
+        <label class="lbl">Image</label>
+        <input id="brImg" type="file" accept="image/*" class="fld" style="padding:8px">
+        <div class="row" style="margin-top:14px">
+          <button id="btnPostNews" class="btn btn-red">Publish Post</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let allUsers=[],allTasks=[],currentFilter='all',assignUserId=null,assignTaskId=null;
 
-  $('queueMount').innerHTML = html;
+// ── Utilities ──────────────────────────────────────────────────
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function timeAgo(iso){if(!iso)return'';const s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function domainLabel(k){const m={aiml:'AI/ML',webdev:'Web Dev',datascience:'Data Science',robotics:'Robotics',iot:'IoT',cybersec:'Cybersecurity'};return m[k]||k||'—';}
+function statusClass(s){if(s==='accepted')return'status-accepted';if(s==='rejected')return'status-rejected';return'status-pending';}
+function statusLabel(s){if(s==='accepted')return'✅ Accepted';if(s==='rejected')return'❌ Rejected';return'⏳ Pending';}
+
+async function admFetch(path,opts={}){
+  opts.credentials='include';
+  if(opts.body&&!(opts.body instanceof FormData)){
+    opts.headers={...opts.headers,'Content-Type':'application/json'};
+  }
+  return fetch(path,opts);
 }
 
-$('queueMount').addEventListener('click', async (ev) => {
-  const bt = ev.target.closest('.adm-accept, .adm-reject');
-  if (!bt) return;
-  const submissionId = bt.getAttribute('data-sid');
-  if (!submissionId) return;
-  const ptsIn = $('pts-' + submissionId);
-  const fbIn = $('fb-' + submissionId);
-  const points = ptsIn ? parseInt(ptsIn.value, 10) || 0 : 0;
-  const feedback = fbIn ? fbIn.value.trim() : '';
-  const status = bt.classList.contains('adm-accept') ? 'accepted' : 'rejected';
-  const res = await admFetch('/api/admin/review-submission', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ submissionId, status, feedback, points })
+function showMsg(id,text,type='err'){
+  const el=$(id);if(!el)return;
+  el.textContent=text;el.className='msg '+(type==='ok'?'msg-ok':'msg-err')+' show';
+  setTimeout(()=>{el.className='msg '+(type==='ok'?'msg-ok':'msg-err');},4000);
+}
+
+// ── Auth ────────────────────────────────────────────────────────
+function showGate(){$('loginGate').style.display='flex';$('panel').style.display='none';}
+function showPanel(){$('loginGate').style.display='none';$('panel').style.display='block';}
+
+$('admLoginBtn').onclick=async()=>{
+  const password=$('admPass').value;
+  if(!password){showMsg('loginErr','Enter password.');return;}
+  const res=await admFetch('/api/admin/site-login',{method:'POST',body:JSON.stringify({password})});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){showMsg('loginErr',d.error||'Login failed.');return;}
+  showPanel();loadCurrentTab();
+};
+$('admPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('admLoginBtn').click();});
+$('logoutBtn').onclick=async()=>{await admFetch('/api/admin/site-logout',{method:'POST'});$('admPass').value='';showGate();};
+$('refreshBtn').onclick=()=>loadCurrentTab();
+
+// ── Tabs ────────────────────────────────────────────────────────
+let activeTab='users';
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    const t=btn.dataset.tab;activeTab=t;
+    $('tab-'+t).classList.add('active');
+    loadTab(t);
   });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.success) return alert(data.error || 'Review failed.');
-  loadQueue();
+});
+function loadCurrentTab(){loadTab(activeTab);}
+function loadTab(t){
+  if(t==='users')loadUsers();
+  else if(t==='assign')loadAssignTab();
+  else if(t==='subs')loadSubmissions();
+}
+
+// ── USERS TAB ───────────────────────────────────────────────────
+async function loadUsers(){
+  $('usersMount').innerHTML='<div class="loading">Loading…</div>';
+  const res=await admFetch('/api/admin/all-users');
+  if(res.status===401){showGate();return;}
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){$('usersMount').innerHTML='<div class="loading">'+esc(d.error||'Error')+'</div>';return;}
+  allUsers=d.users||[];
+  renderUsers(allUsers);
+}
+function renderUsers(users){
+  if(!users.length){$('usersMount').innerHTML='<div class="empty"><div class="empty-icon">👥</div><p>No users found.</p></div>';return;}
+  $('usersMount').innerHTML='<div class="users-grid">'+users.map(u=>userCard(u)).join('')+'</div>';
+}
+function userCard(u){
+  const init=esc((u.displayName||'?')[0].toUpperCase());
+  return`<div class="user-card" onclick="toggleDetail('${esc(u.id)}')">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div class="user-avatar">${init}</div>
+      <div><div class="user-name">${esc(u.displayName)}</div><div class="user-email">${esc(u.email)}</div></div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-domain">${esc(domainLabel(u.skillDomain))}</span>
+      <span class="pill pill-level">${esc(u.level)}</span>
+      <span class="pill pill-pts">&#127381; ${u.points} pts</span>
+    </div>
+    <div class="user-stats">
+      <span>📤 ${u.totalSubmissions} submitted</span>
+      <span>✅ ${u.acceptedSubmissions} accepted</span>
+    </div>
+    <div class="user-detail" id="detail-${esc(u.id)}"><div class="loading">Loading history…</div></div>
+  </div>`;
+}
+async function toggleDetail(uid){
+  const el=$('detail-'+uid);if(!el)return;
+  if(el.classList.contains('open')){el.classList.remove('open');return;}
+  el.classList.add('open');
+  el.innerHTML='<div class="loading">Loading…</div>';
+  const res=await admFetch('/api/admin/user/'+uid+'/history');
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){el.innerHTML='<div style="color:var(--muted)">'+esc(d.error||'Error')+'</div>';return;}
+  const h=d.history||[];
+  if(!h.length){el.innerHTML='<div style="color:var(--muted);font-size:.85rem">No submissions yet.</div>';return;}
+  el.innerHTML='<table class="htable"><thead><tr><th>Task</th><th>Status</th><th>Points</th><th>When</th></tr></thead><tbody>'+
+    h.map(b=>`<tr><td>${esc(b.task?.title||'—')}</td><td><span class="status ${statusClass(b.status)}">${statusLabel(b.status)}</span></td><td>${b.points_awarded||0}</td><td style="color:var(--muted)">${timeAgo(b.updated_at)}</td></tr>`).join('')+'</tbody></table>';
+}
+$('userSearch').addEventListener('input',function(){
+  const q=this.value.toLowerCase();
+  renderUsers(allUsers.filter(u=>(u.displayName||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
 });
 
-(async function bootstrap() {
-  const res = await admFetch('/api/admin/session');
-  if (res.ok) {
-    showPanel();
-    loadQueue();
-  } else {
-    showGate();
-  }
+// ── ASSIGN TAB ──────────────────────────────────────────────────
+async function loadAssignTab(){
+  if(!allUsers.length){const res=await admFetch('/api/admin/all-users');const d=await res.json().catch(()=>({}));allUsers=d.users||[];}
+  renderAssignUserList(allUsers);
+  if(!allTasks.length){const res=await admFetch('/api/tasks');const d=await res.json().catch(()=>({}));allTasks=d.tasks||[];}
+  renderAssignTaskList(allTasks);
+}
+function renderAssignUserList(users){
+  $('assignUserList').innerHTML=users.slice(0,30).map(u=>`<div class="user-pick-item${u.id===assignUserId?' selected':''}" onclick="selectAssignUser('${esc(u.id)}','${esc(u.displayName)}','${esc(u.skillDomain)}','${esc(u.level)}')">${esc(u.displayName)} <span style="color:var(--muted);font-size:.78rem">${esc(u.email)}</span></div>`).join('')||'<div style="padding:10px;color:var(--muted)">No users</div>';
+}
+$('assignUserSearch').addEventListener('input',function(){
+  const q=this.value.toLowerCase();
+  renderAssignUserList(allUsers.filter(u=>(u.displayName||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
+});
+function selectAssignUser(id,name,domain,level){
+  assignUserId=id;
+  document.querySelectorAll('.user-pick-item').forEach(el=>{el.classList.toggle('selected',el.getAttribute('onclick').includes("'"+id+"'"));});
+  $('selectedUserInfo').style.display='block';
+  $('selectedUserInfo').innerHTML=`<strong>${esc(name)}</strong> &nbsp; <span class="pill pill-domain">${esc(domainLabel(domain))}</span> <span class="pill pill-level">${esc(level)}</span>`;
+  $('taskFilterDomain').value=domain;
+  filterAssignTasks();
+  updateAssignBtn();
+}
+function filterAssignTasks(){
+  const dom=$('taskFilterDomain').value;const lvl=$('taskFilterLevel').value;
+  let filtered=allTasks;
+  if(dom)filtered=filtered.filter(t=>(t.domain||'').toLowerCase().includes(dom.replace('aiml','ai').replace('webdev','web').replace('datascience','data').replace('cybersec','cyber')));
+  if(lvl)filtered=filtered.filter(t=>!t.level||t.level===lvl);
+  renderAssignTaskList(filtered);
+}
+$('taskFilterDomain').addEventListener('change',filterAssignTasks);
+$('taskFilterLevel').addEventListener('change',filterAssignTasks);
+function renderAssignTaskList(tasks){
+  $('assignTaskList').innerHTML=tasks.slice(0,40).map(t=>`<div class="task-item${t.id===assignTaskId?' selected':''}" onclick="selectAssignTask('${esc(t.id)}','${esc(t.title||'')}','${esc(t.domain||'')}','${esc(t.level||'')}')"><div class="task-item-title">${esc(t.title)}</div><div class="task-item-meta">${esc(t.domain)} · ${esc(t.level)} · ${esc(t.effort||'')}</div></div>`).join('')||'<div style="padding:10px;color:var(--muted)">No tasks match filter.</div>';
+}
+function selectAssignTask(id,title,domain,level){
+  assignTaskId=id;
+  document.querySelectorAll('.task-item').forEach(el=>{el.classList.toggle('selected',el.getAttribute('onclick').includes("'"+id+"'"));});
+  $('selectedTaskInfo').style.display='block';
+  $('selectedTaskInfo').textContent='Selected: '+title+' ('+domain+' · '+level+')';
+  updateAssignBtn();
+}
+function updateAssignBtn(){$('forceAssignBtn').disabled=!(assignUserId&&assignTaskId);}
+$('forceAssignBtn').onclick=async()=>{
+  if(!assignUserId||!assignTaskId)return;
+  $('forceAssignBtn').disabled=true;$('forceAssignBtn').textContent='Assigning…';
+  const res=await admFetch('/api/admin/assign-task',{method:'POST',body:JSON.stringify({userId:assignUserId,taskId:assignTaskId})});
+  const d=await res.json().catch(()=>({}));
+  $('forceAssignBtn').disabled=false;$('forceAssignBtn').textContent='Force Assign Task';
+  if(!res.ok){showMsg('assignErr',d.error||'Failed.');return;}
+  showMsg('assignOk','Task assigned successfully!','ok');
+  assignTaskId=null;assignUserId=null;
+  document.querySelectorAll('.task-item,.user-pick-item').forEach(el=>el.classList.remove('selected'));
+  $('selectedUserInfo').style.display='none';$('selectedTaskInfo').style.display='none';
+  updateAssignBtn();
+};
+$('pushTfeedBtn').onclick=async()=>{
+  const title=$('tfTitle').value.trim();const summary=$('tfSummary').value.trim();
+  if(!title||!summary){showMsg('tfeedErr','Title and summary required.');return;}
+  $('pushTfeedBtn').disabled=true;$('pushTfeedBtn').textContent='Pushing…';
+  const body={title,summary,domain:$('tfDomain').value,projectIdea:$('tfIdea').value.trim(),projectStack:$('tfStack').value.trim(),projectEffort:$('tfEffort').value.trim()||'~2 hrs',tags:$('tfTags').value.split(',').map(t=>t.trim()).filter(Boolean),articleUrl:$('tfUrl').value.trim()};
+  const res=await admFetch('/api/admin/tfeed-post',{method:'POST',body:JSON.stringify(body)});
+  const d=await res.json().catch(()=>({}));
+  $('pushTfeedBtn').disabled=false;$('pushTfeedBtn').textContent='Push to Training Feed';
+  if(!res.ok){showMsg('tfeedErr',d.error||'Failed.');return;}
+  showMsg('tfeedOk','Post pushed to training feed!','ok');
+  ['tfTitle','tfSummary','tfIdea','tfStack','tfUrl','tfTags'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('tfEffort').value='~2 hrs';
+};
+
+// ── SUBMISSIONS TAB ─────────────────────────────────────────────
+let allSubs=[];
+async function loadSubmissions(){
+  $('subsMount').innerHTML='<div class="loading">Loading…</div>';
+  const res=await admFetch('/api/admin/all-submissions');
+  if(res.status===401){showGate();return;}
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){$('subsErr').textContent=d.error||'Error';$('subsErr').className='msg msg-err show';$('subsMount').innerHTML='';return;}
+  allSubs=d.submissions||[];
+  const pending=allSubs.filter(s=>s.status==='pending_review').length;
+  const badge=$('pendingBadge');
+  if(pending>0){badge.textContent=pending;badge.style.display='inline';}else{badge.style.display='none';}
+  renderSubs(currentFilter);
+}
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');currentFilter=btn.dataset.filter;renderSubs(currentFilter);
+  });
+});
+function renderSubs(filter){
+  let list=allSubs;
+  if(filter&&filter!=='all')list=list.filter(s=>s.status===filter);
+  if(!list.length){$('subsMount').innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>No submissions '+(filter==='all'?'in the last 2 days':'with this status')+'.</p></div>';return;}
+  $('subsMount').innerHTML=list.map(s=>subCard(s)).join('');
+}
+function subCard(s){
+  const u=s.user||{};const t=s.task||{};
+  const cls=s.status==='accepted'?'accepted':s.status==='rejected'?'rejected':'pending';
+  const isPending=s.status==='pending_review';
+  let links='';
+  if(s.github_url)links+=`<a href="${esc(s.github_url)}" target="_blank" rel="noopener">GitHub →</a>`;
+  if(s.live_url)links+=`<a href="${esc(s.live_url)}" target="_blank" rel="noopener">Live →</a>`;
+  if(s.demo_video_url)links+=`<a href="${esc(s.demo_video_url)}" target="_blank" rel="noopener">Demo Video →</a>`;
+  (s.screenshot_urls||[]).forEach(u=>{links+=`<a href="${esc(u)}" target="_blank">Screenshot →</a>`;});
+  (s.file_paths||[]).forEach(p=>{const pp=p.startsWith('/')?p:'/'+p;links+=`<a href="${esc(pp)}" target="_blank">File →</a>`;});
+  const imgs=(s.screenshot_urls||[]).map(u=>`<img src="${esc(u)}" alt="" style="width:100px;height:64px;object-fit:cover;border-radius:6px;margin:4px" loading="lazy" onerror="this.style.display='none'">`).join('');
+  return`<div class="sub-card ${cls}">
+    <div class="sub-hdr">
+      <div>
+        <div class="sub-user">${esc(u.display_name||u.id||'Unknown User')}</div>
+        <div style="color:var(--muted);font-size:.8rem">${esc(u.email||'')} · ${timeAgo(s.updated_at)}</div>
+      </div>
+      <span class="status ${statusClass(s.status)}">${statusLabel(s.status)}</span>
+    </div>
+    ${t.title?`<div class="sub-task">&#128196; ${esc(t.title)}<span style="color:var(--muted);margin-left:8px">${esc(t.domain||'')} · ${esc(t.level||'')}</span></div>`:''}
+    <div class="links">${links||'<span style="color:var(--muted)">No links submitted</span>'}</div>
+    ${imgs?`<div style="margin-top:8px">${imgs}</div>`:''}
+    ${s.admin_feedback?`<div style="margin-top:8px;font-size:.82rem;color:var(--muted);background:rgba(255,255,255,.04);border-radius:6px;padding:8px">Feedback: ${esc(s.admin_feedback)}</div>`:''}
+    ${isPending?`
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+      <label class="lbl">Feedback for learner</label>
+      <textarea id="fb-${esc(s.id)}" class="fld" style="min-height:60px" placeholder="Great work! / Needs improvement…"></textarea>
+      <div class="review-row">
+        <label class="lbl" style="margin:0">Points:</label>
+        <input type="number" id="pts-${esc(s.id)}" value="10" min="0" max="100" class="pts-inp">
+        <button class="btn btn-green btn-sm adm-accept" data-sid="${esc(s.id)}">✅ Accept</button>
+        <button class="btn btn-sm adm-reject" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)" data-sid="${esc(s.id)}">❌ Reject</button>
+      </div>
+    </div>`:''}
+  </div>`;
+}
+$('subsMount').addEventListener('click',async ev=>{
+  const btn=ev.target.closest('.adm-accept,.adm-reject');if(!btn)return;
+  const sid=btn.dataset.sid;if(!sid)return;
+  const fb=$('fb-'+sid);const pts=$('pts-'+sid);
+  const feedback=fb?fb.value.trim():'';const points=pts?parseInt(pts.value)||0:0;
+  const status=btn.classList.contains('adm-accept')?'accepted':'rejected';
+  btn.disabled=true;btn.textContent='Saving…';
+  const res=await admFetch('/api/admin/review-submission',{method:'POST',body:JSON.stringify({submissionId:sid,status,feedback,points})});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok||!d.success){alert(d.error||'Review failed.');btn.disabled=false;btn.textContent=status==='accepted'?'✅ Accept':'❌ Reject';return;}
+  loadSubmissions();
+});
+
+// ── POST NEWS TAB ───────────────────────────────────────────────
+$('btnPostNews').onclick=async()=>{
+  const title=$('brTitle').value.trim();const details=$('brDetails').value.trim();
+  if(!title||!details){showMsg('newsErr','Title and body required.');return;}
+  const fd=new FormData();fd.append('title',title);fd.append('details',details);fd.append('relatedTasks',$('brRelated').value.trim());
+  const f=$('brImg').files[0];if(f)fd.append('image',f);
+  const res=await admFetch('/api/admin/be-relevant',{method:'POST',body:fd});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok||!d.success){showMsg('newsErr',d.error||'Failed.');return;}
+  showMsg('newsOk','Post published!','ok');
+  $('brTitle').value='';$('brDetails').value='';$('brRelated').value='';$('brImg').value='';
+};
+
+// ── Bootstrap ────────────────────────────────────────────────────
+(async function bootstrap(){
+  const res=await admFetch('/api/admin/session');
+  if(res.ok){showPanel();loadUsers();}else{showGate();}
 })();
-
-$('admPass').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') $('admLoginBtn').click();
-});
 </script>
 </body>
 </html>
+

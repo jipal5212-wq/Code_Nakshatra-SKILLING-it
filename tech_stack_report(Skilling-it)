@@ -1,0 +1,370 @@
+# S-KILLING IT — Technical Stack Report
+
+> **Project:** S-KILLING IT  
+> **Version:** 1.0.0 (MVP)  
+> **Report Date:** May 2026  
+> **Status:** Active Development
+
+---
+
+## 1. Project Overview
+
+**S-KILLING IT** is a focused execution platform built to close the skill gap in college education. Students typically understand concepts but struggle to apply them consistently. The platform enforces a habit of daily, structured, proof-based execution.
+
+### Core Concept
+
+> *"Learning is incomplete without consistent execution."*
+
+The platform converts passive learning into active building through:
+
+- **Daily task-driven workflow** — Users receive practical, focused tasks each day
+- **Time-bound execution** — A fixed cycle window reduces procrastination
+- **Mandatory proof-based submission** — Code, images, videos, or links as evidence of work
+- **Streak & consistency tracking** — Daily completion is measured and displayed
+- **AI-powered mentorship** — Gemini AI generates tasks and answers questions
+
+---
+
+## 2. Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        CLIENT (Browser)                      │
+│         Vanilla HTML + CSS + JavaScript                      │
+│   index.html / arena.html / explore.html / submit.html ...  │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ HTTP / REST API
+┌─────────────────────────▼───────────────────────────────────┐
+│                    BACKEND (Node.js)                         │
+│                   Express.js v5 Server                       │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  Routes: auth / user / admin / tasks / news / tfeed  │   │
+│  │  Middleware: requireUser / requireSiteAdmin           │   │
+│  │  Lib: supabase / resendMail / youtubeVideos /         │   │
+│  │       cycleBounds / seedTasks / skills                │   │
+│  │  Services: cycleService                               │   │
+│  └───────────┬──────────────────────────┬───────────────┘   │
+└──────────────┼──────────────────────────┼───────────────────┘
+               │                          │
+┌──────────────▼──────┐    ┌──────────────▼──────────────────┐
+│   Supabase          │    │   External APIs                   │
+│   (PostgreSQL DB)   │    │   • Google Gemini 2.0 Flash (AI) │
+│   Auth + Storage    │    │   • YouTube Data API v3           │
+│   Migrations        │    │   • Resend (Email)                │
+└─────────────────────┘    └──────────────────────────────────┘
+               │
+┌──────────────▼──────────────┐
+│   Vercel (Hosting/Deploy)   │
+│   @vercel/node runtime      │
+└─────────────────────────────┘
+```
+
+---
+
+## 3. Full Tech Stack
+
+### 3.1 Frontend
+
+| Technology | Version | Role |
+|---|---|---|
+| **HTML5** | — | Page structure & semantics |
+| **CSS3 (Vanilla)** | — | Styling, animations, responsive layout |
+| **JavaScript (ES6+)** | — | Client-side logic, DOM manipulation, API calls |
+
+> **No frontend framework is used.** All UI is raw HTML/CSS/JS — keeping the bundle lightweight and dependency-free.
+
+**Frontend Pages:**
+
+| Page | File | Purpose |
+|---|---|---|
+| Landing Page | `index.html` | Public homepage, auth gateway |
+| Login / Register | `login.html` | User authentication UI |
+| My Arena (Dashboard) | `arena.html` | Post-login hub — streaks, tasks, best videos |
+| Explore | `explore.html` | Browse content/tracks |
+| Submit | `submit.html` | Proof-of-work submission |
+| Analytics | `analytics.html` | User performance analytics |
+| Track | `track.html` | Skill track detail view |
+| Training Feed | `tfeed.html` | AI-curated training feed |
+| Admin Panel | `admin.html` | Admin review & management interface |
+| Dashboard (legacy) | `dashboard.html` | Redirect/legacy support |
+
+**Frontend JS Modules:**
+
+| File | Purpose |
+|---|---|
+| `skilling-auth.js` | Auth guard (`enforceAuth()`), token management, nav swapping |
+| `tfeed.js` | Training feed logic, Gemini-powered content rendering |
+| `track-data.js` | Skill track data, YouTube video integration |
+
+---
+
+### 3.2 Backend
+
+| Technology | Version | Role |
+|---|---|---|
+| **Node.js** | LTS | Server runtime |
+| **Express.js** | v5.2.1 | Web framework, routing, middleware |
+| **CommonJS (CJS)** | — | Module system (`require` / `module.exports`) |
+
+**API Route Structure:**
+
+| Route File | Prefix | Purpose |
+|---|---|---|
+| `authRoutes.js` | `/api/auth/` | Signup, login, logout, email verification |
+| `userRoutes.js` | `/api/user/` | Profile, task selection, submission, streaks |
+| `adminRoutes.js` | `/api/admin/` | Review submissions, manage users/tasks |
+| `taskRoutes.js` | `/api/tasks/` | Task CRUD operations |
+| `newsRoutes.js` | `/api/news/` | News feed (via Cheerio scraping) |
+| `tfeedRoutes.js` | `/api/tfeed/` | AI training feed, Gemini integration |
+| `publicRoutes.js` | `/api/` | Public endpoints (leaderboard, health) |
+
+**Middleware:**
+
+| File | Purpose |
+|---|---|
+| `requireUser.js` | JWT-based user auth guard for protected routes |
+| `requireSiteAdmin.js` | Admin password + JWT guard for admin panel |
+
+**Library Utilities:**
+
+| File | Purpose |
+|---|---|
+| `supabase.js` | Supabase admin & anon client factory |
+| `resendMail.js` | Email sending via Resend |
+| `youtubeVideos.js` | YouTube Data API v3 integration |
+| `cycleBounds.js` | Daily task cycle time-boundary calculation |
+| `seedTasks.js` | Auto-seeds task library on first boot |
+| `skills.js` | Skill domain/level definitions |
+
+---
+
+### 3.3 Database
+
+| Technology | Role |
+|---|---|
+| **Supabase** | Primary hosted database platform |
+| **PostgreSQL** | Underlying relational database (managed by Supabase) |
+| **`@supabase/supabase-js` v2** | Official JS client SDK |
+| **Supabase Migrations** | Schema version control (`/supabase/migrations/`) |
+
+**Key Data Models (inferred from routes):**
+
+| Table | Purpose |
+|---|---|
+| `profiles` | User profiles — name, domain, level, points, streak |
+| `tasks` | Task library — title, description, domain, level, effort, YT query |
+| `submissions` | Proof-of-work submissions per user per cycle |
+| `user_tasks` | User's selected/assigned task per cycle |
+
+---
+
+### 3.4 Authentication & Security
+
+| Technology | Version | Role |
+|---|---|---|
+| **JWT (`jsonwebtoken`)** | v9.0.3 | Stateless token auth for both users and admins |
+| **`bcryptjs`** | v3.0.3 | Secure password hashing before DB storage |
+| **`cookie-parser`** | v1.4.7 | Cookie-based token reading/writing |
+| **`cors`** | v2.8.6 | Cross-origin request handling (credentials: true) |
+
+**Auth Flow:**
+1. User registers → password hashed via bcrypt → stored in Supabase
+2. Login → JWT issued → stored in HttpOnly cookie
+3. Protected routes → `requireUser` middleware validates JWT
+4. Admin panel → separate password + `ADMIN_JWT_SECRET`
+
+---
+
+### 3.5 AI & External Services
+
+| Service | Library/SDK | Role |
+|---|---|---|
+| **Google Gemini 2.0 Flash** | `@google/generative-ai` v0.24.1 | Task generation, AI chat mentor (`/api/ai/generate-tasks`, `/api/ai/chat`) |
+| **YouTube Data API v3** | REST (via `youtubeVideos.js`) | Fetch relevant tutorial videos for tasks |
+| **Resend** | `resend` v6.12.2 | Transactional emails (verification, notifications) |
+| **Cheerio** | `cheerio` v1.2.0 | HTML parsing / scraping for the news feed |
+
+---
+
+### 3.6 File Uploads
+
+| Technology | Version | Role |
+|---|---|---|
+| **Multer** | v2.1.1 | Handles multipart form data (image/video uploads, up to 100 MB) |
+| **Local disk storage** | — | `/uploads/` directory in dev; `/tmp/uploads/` on Vercel |
+
+---
+
+### 3.7 Utilities & Helpers
+
+| Package | Version | Role |
+|---|---|---|
+| **`luxon`** | v3.7.2 | Date/time manipulation (cycle boundaries, timezone: `Asia/Kolkata`) |
+| **`uuid`** | v14.0.0 | Unique ID generation |
+| **`dotenv`** | v17.4.2 | Environment variable loading from `.env` |
+
+---
+
+### 3.8 DevOps & Deployment
+
+| Technology | Role |
+|---|---|
+| **Vercel** | Cloud hosting & CI/CD deployment |
+| **`@vercel/node`** | Serverless Node.js runtime on Vercel |
+| **`vercel.json`** | Deployment config — all routes proxied through `server.js` |
+| **GitHub** | Source control & version management |
+| **`.env` / `.env.example`** | Local secrets management |
+| **`start.bat`** | Windows convenience script for local dev startup |
+
+**Vercel Configuration:**
+```json
+{
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "server.js" }]
+}
+```
+> All traffic (including static files) is routed through `server.js`, which serves the `/public` directory via `express.static`.
+
+---
+
+## 4. Environment Variables
+
+| Variable | Purpose |
+|---|---|
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side admin DB access |
+| `SUPABASE_ANON_KEY` | Client-facing Supabase operations |
+| `YOUTUBE_API_KEY` | YouTube Data API v3 |
+| `RESEND_API_KEY` | Resend email service key |
+| `RESEND_FROM_EMAIL` | Verified sender email address |
+| `ADMIN_SITE_PASSWORD` | Shared admin panel password |
+| `ADMIN_JWT_SECRET` | Secret for signing admin JWTs |
+| `CYCLE_TIMEZONE` | Timezone for daily rollover (default: `Asia/Kolkata`) |
+| `GEMINI_API_KEY` | Google Gemini AI API key |
+| `NODE_ENV` | `development` or `production` |
+
+---
+
+## 5. Project Directory Structure
+
+```
+S-killing/
+│
+├── server.js                    # Entry point — boots Express on PORT 3000
+├── vercel.json                  # Vercel deployment config
+├── package.json                 # Node.js dependencies & scripts
+├── .env / .env.example          # Environment variable templates
+├── database.json                # Legacy/seed JSON data
+├── start.bat                    # Windows local dev launcher
+│
+├── server/
+│   ├── createApp.js             # Express app factory (middleware, routes, Gemini init)
+│   ├── routes/
+│   │   ├── authRoutes.js        # Auth: signup, login, logout, verification
+│   │   ├── userRoutes.js        # User: profile, tasks, submissions, streaks
+│   │   ├── adminRoutes.js       # Admin: review, manage users/tasks
+│   │   ├── taskRoutes.js        # Task CRUD
+│   │   ├── newsRoutes.js        # News feed (Cheerio scraping)
+│   │   ├── tfeedRoutes.js       # AI Training Feed (Gemini)
+│   │   ├── publicRoutes.js      # Public: leaderboard, health check
+│   │   └── mapTask.js           # Task row mapping helper
+│   ├── lib/
+│   │   ├── supabase.js          # Supabase client factory
+│   │   ├── resendMail.js        # Email utility
+│   │   ├── youtubeVideos.js     # YouTube API integration
+│   │   ├── cycleBounds.js       # Daily cycle time logic
+│   │   ├── seedTasks.js         # DB seeder on startup
+│   │   └── skills.js            # Skill domain/level definitions
+│   ├── middleware/
+│   │   ├── requireUser.js       # JWT auth guard (users)
+│   │   └── requireSiteAdmin.js  # Admin auth guard
+│   └── services/
+│       └── cycleService.js      # Cycle management business logic
+│
+├── public/                      # Static frontend (served by Express)
+│   ├── index.html               # Landing page
+│   ├── login.html               # Auth page
+│   ├── arena.html               # Authenticated hub (MY ARENA)
+│   ├── explore.html             # Explore content
+│   ├── submit.html              # Task submission
+│   ├── analytics.html           # Analytics dashboard
+│   ├── track.html               # Track detail
+│   ├── tfeed.html               # Training feed
+│   ├── admin.html               # Admin panel
+│   ├── dashboard.html           # Legacy redirect
+│   ├── css/                     # Stylesheet files
+│   └── js/
+│       ├── skilling-auth.js     # Auth guard & nav logic
+│       ├── tfeed.js             # Training feed JS
+│       └── track-data.js        # Track & YouTube data
+│
+├── supabase/
+│   └── migrations/              # DB schema version files
+│
+└── uploads/                     # User-submitted files (local dev)
+```
+
+---
+
+## 6. Key API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Public | User signup |
+| `POST` | `/api/auth/login` | Public | User login, returns JWT cookie |
+| `POST` | `/api/auth/logout` | User | Clear session |
+| `GET` | `/api/user/profile` | User | Fetch profile |
+| `GET` | `/api/tasks` | Public | List available tasks |
+| `POST` | `/api/user/select-task` | User | Select daily task |
+| `POST` | `/api/user/submit` | User | Submit proof of work |
+| `GET` | `/api/leaderboard` | Public | Top 30 users by points |
+| `POST` | `/api/ai/generate-tasks` | Admin | Gemini generates new tasks |
+| `POST` | `/api/ai/chat` | User | AI mentor chat |
+| `GET` | `/api/tfeed` | User | AI training feed |
+| `GET` | `/api/news` | Public | Scraped news articles |
+| `GET` | `/api/health` | Public | Server health check |
+| `GET/POST` | `/api/admin/*` | Admin | Full admin CRUD |
+
+---
+
+## 7. Summary Table
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
+| **Backend Runtime** | Node.js |
+| **Backend Framework** | Express.js v5 |
+| **Database** | Supabase (PostgreSQL) |
+| **AI / ML** | Google Gemini 2.0 Flash |
+| **Video Integration** | YouTube Data API v3 |
+| **Email** | Resend |
+| **Web Scraping** | Cheerio |
+| **Authentication** | JWT + bcryptjs + cookie-parser |
+| **File Uploads** | Multer |
+| **Date/Time** | Luxon |
+| **Deployment** | Vercel (`@vercel/node`) |
+| **Version Control** | Git / GitHub |
+| **Env Management** | dotenv |
+
+---
+
+## 8. Current Status
+
+> The platform is in **MVP / Active Development** stage.
+
+**Implemented:**
+- ✅ Full user auth flow (register, login, JWT, email verification)
+- ✅ Daily task cycle system with time-bound selection
+- ✅ Proof-of-work submission (file upload)
+- ✅ Streak & points tracking
+- ✅ Leaderboard
+- ✅ Admin review panel
+- ✅ Gemini AI task generation & mentor chat
+- ✅ YouTube tutorial video integration
+- ✅ AI training feed (`tfeed`)
+- ✅ Vercel deployment pipeline
+
+**In Progress / Planned:**
+- 🔄 Analytics dashboard (detailed stats)
+- 🔄 Explore page (content discovery)
+- 🔄 Track-specific onboarding
