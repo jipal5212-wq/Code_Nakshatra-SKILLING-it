@@ -360,27 +360,30 @@ async function selectDomain(key){
     renderVideos(d.videos || []);
     renderDomainCards();
   } catch(e){
-    document.getElementById('detailTasks').innerHTML = '<div class="loader">Could not load tasks.</div>';
-    document.getElementById('detailVideos').innerHTML = '';
+    console.warn('[explore] API error, using static fallback:', e.message);
+    renderExploreStaticFallback(key);
   }
 }
 
 function renderTasks(tasks){
   const el = document.getElementById('detailTasks');
   if (!tasks.length){
-    el.innerHTML = '<div class="loader">No beginner tasks yet in this domain.</div>';
+    el.innerHTML = '<div class="loader">No tasks yet in this domain.</div>';
     return;
   }
   window._exploreTasks = tasks;
   el.innerHTML = tasks.map((t,i) => `
     <div class="task-strip">
       <div>
-        <span class="task-strip-domain"></span>
-        <div class="task-strip-title"></div>
-        <div class="task-strip-desc"></div>
-        <div class="task-strip-effort">&#x23f1; </div>
+        <span class="task-strip-domain">${escHtml(t.domain||activeKey||'')}</span>
+        <div class="task-strip-title" style="color:#22c55e;font-weight:800;">
+          <span style="color:rgba(34,197,94,.6);font-size:11px;letter-spacing:1px;font-weight:700;">BUILD THIS → </span>
+          ${escHtml(t.title||'Untitled Task')}
+        </div>
+        <div class="task-strip-desc">${escHtml(t.desc||t.description||'')}</div>
+        <div class="task-strip-effort">⏱ ${escHtml(t.effort||'~1 hr')}</div>
       </div>
-      <button class="btn-try" onclick="tryTask()">Try Task &#x2192;</button>
+      <button class="btn-try" onclick="tryTask(${i})">Try Task →</button>
     </div>`).join('');
 }
 
@@ -417,6 +420,89 @@ function renderVideos(videos){
       </div>
     </div>`;
   }).join('');
+}
+
+
+// ── Static fallback for explore when API is down ─────────────────────────────
+const EXPLORE_STATIC = {
+  aiml:[
+    {title:"Train a Digit Classifier on MNIST",desc:"Build and train a neural network using TensorFlow/Keras on the MNIST dataset.",effort:"~1.5 hr",domain:"AI / ML",ytQuery:"train MNIST neural network keras python from scratch"},
+    {title:"Build a Spam Email Detector",desc:"Create a text classifier using Naive Bayes and scikit-learn on email data.",effort:"~1 hr",domain:"AI / ML",ytQuery:"build spam email classifier python scikit-learn project"},
+    {title:"Create a Movie Recommendation System",desc:"Implement collaborative filtering using Pandas and cosine similarity.",effort:"~2 hr",domain:"AI / ML",ytQuery:"movie recommendation system python project tutorial"},
+    {title:"Train an Image Classifier with Transfer Learning",desc:"Fine-tune MobileNet to classify your own images.",effort:"~2 hr",domain:"AI / ML",ytQuery:"transfer learning image classifier python keras project"},
+    {title:"Build a Sentiment Analysis Flask API",desc:"Train a sentiment model and expose it via Flask REST endpoint.",effort:"~2 hr",domain:"AI / ML",ytQuery:"sentiment analysis python flask api project tutorial"},
+    {title:"Implement K-Means Clustering on Customer Data",desc:"Segment customer data into clusters and visualize with Matplotlib.",effort:"~1 hr",domain:"AI / ML",ytQuery:"kmeans clustering python project tutorial pandas"},
+    {title:"Deploy an ML Model as a Streamlit App",desc:"Train a model, pickle it, and serve predictions via Streamlit.",effort:"~2 hr",domain:"AI / ML",ytQuery:"deploy machine learning model streamlit python project"}
+  ],
+  datascience:[
+    {title:"Analyze Netflix Dataset with Pandas",desc:"Load, clean and visualize trends in the Netflix titles dataset.",effort:"~1.5 hr",domain:"Data Science",ytQuery:"netflix data analysis pandas python project tutorial"},
+    {title:"Build a Sales Dashboard with Plotly",desc:"Create an interactive analytics dashboard using Plotly Express.",effort:"~1.5 hr",domain:"Data Science",ytQuery:"plotly express sales dashboard python project tutorial"},
+    {title:"Scrape and Analyze Job Postings",desc:"Web-scrape job listings and find the most in-demand tech skills.",effort:"~2 hr",domain:"Data Science",ytQuery:"web scraping job postings python data analysis project"},
+    {title:"Predict House Prices with Linear Regression",desc:"Build a regression model on housing data and evaluate with RMSE.",effort:"~1 hr",domain:"Data Science",ytQuery:"house price prediction linear regression python project"},
+    {title:"Build an SQL Analytics Report",desc:"Write SQL queries to analyze a real e-commerce database.",effort:"~1.5 hr",domain:"Data Science",ytQuery:"sql project data analysis tutorial from scratch"},
+    {title:"Create a COVID-19 Data Visualization",desc:"Pull open COVID data and build animated time-series charts.",effort:"~1.5 hr",domain:"Data Science",ytQuery:"covid data visualization python plotly project tutorial"},
+    {title:"Automate Excel Reports with Python",desc:"Use openpyxl and Pandas to auto-generate formatted Excel reports.",effort:"~1 hr",domain:"Data Science",ytQuery:"automate excel report python openpyxl pandas project"}
+  ],
+  robotics:[
+    {title:"Build a Line Follower Robot",desc:"Wire IR sensors to Arduino and program a PID line-following algorithm.",effort:"~2 hr",domain:"Robotics",ytQuery:"line follower robot arduino project build from scratch"},
+    {title:"Create an Obstacle Avoidance Bot",desc:"Use ultrasonic sensor to detect and avoid obstacles automatically.",effort:"~1.5 hr",domain:"Robotics",ytQuery:"obstacle avoiding robot arduino ultrasonic project build"},
+    {title:"Build a Bluetooth Controlled Car",desc:"Control a 4-wheel robot from your phone via HC-05 Bluetooth.",effort:"~2 hr",domain:"Robotics",ytQuery:"bluetooth controlled car arduino project build tutorial"},
+    {title:"Control a Servo Arm with Joystick",desc:"Map joystick analog values to a 3-axis servo arm using PWM signals.",effort:"~1.5 hr",domain:"Robotics",ytQuery:"servo arm joystick control arduino project tutorial"},
+    {title:"Build a Self-Balancing Robot",desc:"Use MPU-6050 and PID control to balance a 2-wheel bot.",effort:"~3 hr",domain:"Robotics",ytQuery:"self balancing robot arduino MPU6050 project build"},
+    {title:"Write a ROS Navigation Node",desc:"Create a ROS publisher/subscriber to control robot movement.",effort:"~2 hr",domain:"Robotics",ytQuery:"ROS robot navigation tutorial project from scratch"},
+    {title:"Build a Voice-Controlled Robot",desc:"Integrate speech recognition with Arduino for voice commands.",effort:"~2 hr",domain:"Robotics",ytQuery:"voice controlled robot arduino python project build"}
+  ],
+  iot:[
+    {title:"Build a Temperature Monitoring Dashboard",desc:"Read DHT11 from ESP32 and display live readings on Node-RED.",effort:"~1.5 hr",domain:"IoT",ytQuery:"ESP32 DHT11 temperature dashboard node-red project tutorial"},
+    {title:"Create a Smart Door Lock System",desc:"Use keypad and servo with ESP32 for a PIN-protected lock.",effort:"~2 hr",domain:"IoT",ytQuery:"smart door lock ESP32 keypad servo project build"},
+    {title:"Build an MQTT Smart Home Hub",desc:"Publish sensor data via MQTT and subscribe on Raspberry Pi.",effort:"~2 hr",domain:"IoT",ytQuery:"MQTT smart home ESP32 raspberry pi project tutorial"},
+    {title:"Implement Plant Watering Automation",desc:"Read soil moisture sensor and auto-trigger water pump via relay.",effort:"~1.5 hr",domain:"IoT",ytQuery:"automatic plant watering system ESP32 project build tutorial"},
+    {title:"Create a Real-Time GPS Tracker",desc:"Connect GPS module to ESP32 and send location to a web map.",effort:"~2 hr",domain:"IoT",ytQuery:"GPS tracker ESP32 real time project tutorial"},
+    {title:"Build an Air Quality Monitor",desc:"Use MQ-135 with ESP32 to log and alert on CO2 levels.",effort:"~1.5 hr",domain:"IoT",ytQuery:"air quality monitor ESP32 MQ135 project tutorial"},
+    {title:"Setup OTA Firmware Updates on ESP32",desc:"Implement Over-The-Air updates without USB.",effort:"~1 hr",domain:"IoT",ytQuery:"ESP32 OTA update project tutorial from scratch"}
+  ],
+  cybersec:[
+    {title:"Build a Network Port Scanner in Python",desc:"Create a multithreaded TCP port scanner from scratch using sockets.",effort:"~1 hr",domain:"Cybersecurity",ytQuery:"python port scanner from scratch project tutorial"},
+    {title:"Write a Password Strength Analyser",desc:"Build a tool checking entropy, patterns and breach lists via API.",effort:"~1 hr",domain:"Cybersecurity",ytQuery:"password strength checker python project build tutorial"},
+    {title:"Solve a Beginner CTF on TryHackMe",desc:"Complete a TryHackMe beginner box and document your methodology.",effort:"~2 hr",domain:"Cybersecurity",ytQuery:"TryHackMe beginner CTF walkthrough tutorial hacking"},
+    {title:"Build a Packet Sniffer with Scapy",desc:"Capture and parse HTTP/DNS packets on your local network.",effort:"~1.5 hr",domain:"Cybersecurity",ytQuery:"python packet sniffer scapy project build tutorial"},
+    {title:"Implement a Caesar Cipher and Cracker",desc:"Code cipher encryption and brute-force frequency analysis.",effort:"~1 hr",domain:"Cybersecurity",ytQuery:"caesar cipher python project build from scratch"},
+    {title:"Exploit SQL Injection on DVWA",desc:"Set up DVWA locally and exploit SQL injection step by step.",effort:"~1.5 hr",domain:"Cybersecurity",ytQuery:"SQL injection DVWA tutorial ethical hacking practice"},
+    {title:"Build a Log Analyser for Intrusion Detection",desc:"Parse Apache logs with Python to detect suspicious IPs.",effort:"~1.5 hr",domain:"Cybersecurity",ytQuery:"python log analyzer intrusion detection project tutorial"}
+  ],
+  webdev:[
+    {title:"Build a REST API with Node.js and Express",desc:"Create a full CRUD API with Express, MongoDB and authentication.",effort:"~2 hr",domain:"Web Dev",ytQuery:"build REST API node express mongodb project tutorial"},
+    {title:"Create a Real-Time Chat App with Socket.io",desc:"Build a multi-room chat app using WebSockets via Socket.io.",effort:"~2 hr",domain:"Web Dev",ytQuery:"real time chat app socket.io node.js project build tutorial"},
+    {title:"Build a Full-Stack Todo App",desc:"Create a todo app with React frontend, Express API, and MongoDB.",effort:"~3 hr",domain:"Web Dev",ytQuery:"full stack todo app react node mongodb project tutorial"},
+    {title:"Deploy a Next.js Blog to Vercel",desc:"Build a blog with Next.js App Router and deploy it live.",effort:"~2 hr",domain:"Web Dev",ytQuery:"nextjs blog app router deploy vercel project tutorial"},
+    {title:"Implement JWT Authentication from Scratch",desc:"Build login/register with bcrypt hashing and JWT token issuance.",effort:"~2 hr",domain:"Web Dev",ytQuery:"JWT authentication node express from scratch project tutorial"},
+    {title:"Create a Weather Dashboard with an API",desc:"Fetch OpenWeatherMap data and display a responsive dashboard.",effort:"~1.5 hr",domain:"Web Dev",ytQuery:"weather app javascript API project build tutorial"},
+    {title:"Build a Stripe Payment Integration",desc:"Integrate Stripe checkout into a React/Node app with webhooks.",effort:"~2 hr",domain:"Web Dev",ytQuery:"stripe payment integration react node project tutorial"}
+  ]
+};
+const EXPLORE_VIDS = {
+  aiml:['i_LwzRVP7bg','tPYj3fFJGjk','GwIo3gDZCVQ','bte6n7Bz_p4','Fg2QH0QBKQM','7eh4d9ejO0','Q58MD5f7lBw'],
+  datascience:['vmEHCJofslg','p_tg5SlbY8E','ZyhVh-qRZPA','GBr8GCNKOiA','Q1sojFGMxqc','yZvFH7B6gKI','r-uOLxNrNk8'],
+  robotics:['fJEoYhTRuxs','kUHmYKWwuWs','BFdMrDe_oqY','mH7cQejntKw','e_4N5qKVV6A','RxpTScg9LX8','dMBZsjLZGhk'],
+  iot:['pKFBcB6V9Vk','hFwvHsBhIQA','LywjCVpM3V4','nkD8QZpLBsY','jZEHDMRKNBk','7h7s9FSPWRY','auPX1BKQVLI'],
+  cybersec:['qiQR5rTSshw','pQSqMr0XFHI','WnN6dbos5u8','EcE_KQd4PkA','mvzXZxYldaM','nzZkKoREEGo','U9J2GRcSqxk'],
+  webdev:['nu_pCVPKzTk','f2EqECiTBL8','4sosXZsdy-s','1aXZoefZkhQ','mrHNSanmqQ4','bMknfKXIFA8','Oe421EPjeBE']
+};
+function renderExploreStaticFallback(key){
+  const sk = (key||'aiml').toLowerCase().replace(/[\s\-_\/]/g,'');
+  const normalKey = sk.includes('data')?'datascience':sk.includes('robot')?'robotics':sk.includes('iot')?'iot':sk.includes('cyber')||sk.includes('sec')?'cybersec':sk.includes('web')?'webdev':'aiml';
+  const taskList = EXPLORE_STATIC[normalKey] || EXPLORE_STATIC.aiml;
+  const vidIds = EXPLORE_VIDS[normalKey] || EXPLORE_VIDS.aiml;
+  const videos = taskList.map((t,i)=>({
+    id: vidIds[i%vidIds.length],
+    title: t.title + ' — Tutorial',
+    channel: 'freeCodeCamp / Various',
+    thumbnail: 'https://img.youtube.com/vi/'+vidIds[i%vidIds.length]+'/hqdefault.jpg',
+    embedUrl: 'https://www.youtube.com/embed/'+vidIds[i%vidIds.length],
+    watchUrl: 'https://www.youtube.com/watch?v='+vidIds[i%vidIds.length]
+  }));
+  renderTasks(taskList);
+  renderVideos(videos.slice(0,4));
 }
 
 // ── Switch primary domain ─────────────────────────────────────────────────────
