@@ -73,12 +73,12 @@ module.exports = function cycleRoutes(admin) {
 
       await admin
         .from('user_cycle_state')
-        .update({
+        .upsert({
+          user_id: uid,
           locked_task_id: taskId,
           auto_assigned: false,
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', uid);
+        }, { onConflict: 'user_id' });
 
       const freshCycle = await ensureUserCycle(admin, uid, profile);
       res.json({ success: true, message: 'Task confirmed!', task: mapTaskRow(t), cycle: freshCycle });
@@ -96,18 +96,21 @@ module.exports = function cycleRoutes(admin) {
       const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).single();
       const p = mapProfileRow(profile);
 
+      // Ensure cycle row exists before updating it
+      await ensureUserCycle(admin, uid, profile);
+
       const pool = await loadMatchingTasks(admin, p.skill_domain, p.level);
       const picked = pickWeightedRandom(pool);
-      if (!picked) return res.status(404).json({ error: 'No tasks available for your domain' });
+      if (!picked) return res.status(404).json({ error: 'No tasks available for your domain. Use the pool to pick one.' });
 
       await admin
         .from('user_cycle_state')
-        .update({
+        .upsert({
+          user_id: uid,
           locked_task_id: picked.id,
           auto_assigned: true,
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', uid);
+        }, { onConflict: 'user_id' });
 
       const freshCycle = await ensureUserCycle(admin, uid, profile);
       res.json({ success: true, task: mapTaskRow(picked), cycle: freshCycle });

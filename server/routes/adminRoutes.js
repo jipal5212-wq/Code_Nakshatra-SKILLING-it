@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { requireSiteAdmin } = require('../middleware/requireSiteAdmin');
 const { mapTaskRow } = require('./mapTask');
+const { getCycleBounds } = require('../lib/cycleBounds');
 
 function mapNewsRow(row) {
   if (!row) return null;
@@ -99,15 +100,40 @@ module.exports = function adminRoutes(admin, upload) {
     }
   });
 
-  r.get('/api/admin/all-submissions', requireSiteAdmin, async (_req, res) => {
+  r.get('/api/admin/all-submissions', requireSiteAdmin, async (req, res) => {
     try {
-      const { data, error } = await admin
+      const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      const statusFilter = req.query.status;
+      let query = admin
         .from('submission_bundles')
         .select('*')
+        .gte('updated_at', twoDaysAgo)
         .order('updated_at', { ascending: false })
         .limit(200);
+      if (statusFilter && ['pending_review', 'accepted', 'rejected'].includes(statusFilter)) {
+        query = query.eq('status', statusFilter);
+      }
+      const { data: bundles, error } = await query;
       if (error) return res.status(500).json({ error: error.message });
-      res.json({ submissions: data || [] });
+
+      const userIds = [...new Set((bundles || []).map(b => b.user_id))];
+      let profMap = {};
+      if (userIds.length) {
+        const { data: profiles } = await admin.from('profiles').select('*').in('id', userIds);
+        (profiles || []).forEach(p => { profMap[p.id] = p; });
+      }
+      const taskIds = [...new Set((bundles || []).map(b => b.task_id).filter(Boolean))];
+      let taskMap = {};
+      if (taskIds.length) {
+        const { data: tasks } = await admin.from('tasks').select('*').in('id', taskIds);
+        (tasks || []).forEach(t => { taskMap[t.id] = mapTaskRow(t); });
+      }
+      const submissions = (bundles || []).map(b => ({
+        ...b,
+        user: profMap[b.user_id] || { id: b.user_id },
+        task: b.task_id ? (taskMap[b.task_id] || null) : null
+      }));
+      res.json({ submissions });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
@@ -173,6 +199,122 @@ module.exports = function adminRoutes(admin, upload) {
       const { data, error } = await admin.from('tasks').insert(row).select('*').single();
       if (error) return res.status(500).json({ error: error.message });
       res.json({ success: true, task: mapTaskRow(data) });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── GET /api/admin/all-users ─────────────────────────────────────────────
+  r.get('/api/admin/all-users', requireSiteAdmin, async (_req, res) => {
+    try {
+      const { data: profiles, error } = await admin
+        .from('profiles')
+        .select('*')
+        .order('display_name', { ascending: true });
+      if (error) return res.status(500).json({ error: error.message });
+
+      const userIds = (profiles || []).map(p => p.id);
+      let submCounts = {}, accCounts = {};
+      if (userIds.length) {
+        const { data: subs } = await admin
+          .from('submission_bundles')
+          .select('user_id, status')
+          .in('user_id', userIds);
+        (subs || []).forEach(s => {
+          submCounts[s.user_id] = (submCounts[s.user_id] || 0) + 1;
+          if (s.status === 'accepted') accCounts[s.user_id] = (accCounts[s.user_id] || 0) + 1;
+        });
+      }
+      const users = (profiles || []).map(p => ({
+        id: p.id,
+        displayName: p.display_name || 'Unnamed',
+        email: p.email || '',
+        skillDomain: p.skill_domain || 'aiml',
+        level: p.level || 'Beginner',
+        points: p.points || 0,
+        totalSubmissions: submCounts[p.id] || 0,
+        acceptedSubmissions: accCounts[p.id] || 0,
+        loopStartedAt: p.loop_started_at,
+        updatedAt: p.updated_at
+      }));
+      res.json({ users });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── GET /api/admin/user/:id/history ─────────────────────────────────────
+  r.get('/api/admin/user/:id/history', requireSiteAdmin, async (req, res) => {
+    try {
+      const uid = req.params.id;
+      const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).maybeSingle();
+      const { data: bundles } = await admin
+        .from('submission_bundles')
+        .select('*')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      const taskIds = [...new Set((bundles || []).map(b => b.task_id).filter(Boolean))];
+      let taskMap = {};
+      if (taskIds.length) {
+        const { data: tasks } = await admin.from('tasks').select('*').in('id', taskIds);
+        (tasks || []).forEach(t => { taskMap[t.id] = mapTaskRow(t); });
+      }
+      const history = (bundles || []).map(b => ({ ...b, task: b.task_id ? (taskMap[b.task_id] || null) : null }));
+      res.json({ profile, history });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── POST /api/admin/assign-task ──────────────────────────────────────────
+  r.post('/api/admin/assign-task', requireSiteAdmin, async (req, res) => {
+    try {
+      const { userId, taskId } = req.body || {};
+      if (!userId || !taskId) return res.status(400).json({ error: 'userId and taskId required' });
+      const { data: task } = await admin.from('tasks').select('*').eq('id', taskId).maybeSingle();
+      if (!task) return res.status(404).json({ error: 'Task not found' });
+      const b = getCycleBounds(Date.now());
+      await admin.from('user_cycle_state').upsert({
+        user_id: userId,
+        cycle_start_iso: b.cycleStartISO,
+        cycle_end_iso: b.cycleEndISO,
+        selection_deadline_iso: b.selectionDeadlineISO,
+        locked_task_id: taskId,
+        auto_assigned: false,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      res.json({ success: true, task: mapTaskRow(task) });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── POST /api/admin/tfeed-post ───────────────────────────────────────────
+  r.post('/api/admin/tfeed-post', requireSiteAdmin, async (req, res) => {
+    try {
+      const { title, summary, domain, projectIdea, projectStack, projectEffort, tags, articleUrl, imageUrl } = req.body || {};
+      if (!title || !summary) return res.status(400).json({ error: 'Title and summary required' });
+      const tagList = Array.isArray(tags)
+        ? tags
+        : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : ['admin', 'featured']);
+      const { data, error } = await admin.from('tfeed_posts').insert({
+        title: String(title).slice(0, 200),
+        summary: String(summary).slice(0, 1000),
+        domain: domain || 'General',
+        tags: tagList,
+        source_hint: 'Admin',
+        article_url: articleUrl || '',
+        image_url: imageUrl || '',
+        pub_date: new Date().toISOString(),
+        project_idea: projectIdea || '',
+        project_stack: projectStack || '',
+        project_effort: projectEffort || '~2 hrs',
+        like_count: 0,
+        comment_count: 0
+      }).select().single();
+      if (error) return res.status(500).json({ error: error.message });
+      res.json({ success: true, post: data });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
