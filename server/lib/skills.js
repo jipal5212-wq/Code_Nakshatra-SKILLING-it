@@ -1,11 +1,11 @@
 /** Map URL/query skill keys → DB-style domain substring & YouTube query boosters */
 exports.SKILL_MAP = {
-  aiml: { label: 'AI / ML', query: 'AI machine learning beginner project tutorial' },
-  datascience: { label: 'Data Science', query: 'data science pandas python beginner project tutorial' },
-  robotics: { label: 'Robotics', query: 'robotics arduino robotics project tutorial' },
-  iot: { label: 'IoT', query: 'IoT ESP32 sensors MQTT beginner project tutorial' },
-  cybersec: { label: 'Cybersecurity', query: 'cybersecurity ethical hacking beginner lab tutorial' },
-  webdev: { label: 'Web Dev', query: 'web development react node beginner project tutorial' }
+  aiml:        { label: 'AI / ML',        query: 'build machine learning model from scratch python project' },
+  datascience: { label: 'Data Science',   query: 'data science project pandas python build analyze' },
+  robotics:    { label: 'Robotics',       query: 'arduino robot project build from scratch tutorial' },
+  iot:         { label: 'IoT',            query: 'ESP32 IoT project build sensor dashboard MQTT' },
+  cybersec:    { label: 'Cybersecurity',  query: 'ethical hacking python project build network scanner CTF' },
+  webdev:      { label: 'Web Dev',        query: 'build full stack web app react node project tutorial' }
 };
 
 exports.normalizeSkillKey = (raw) => {

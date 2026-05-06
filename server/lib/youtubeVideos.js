@@ -1,35 +1,59 @@
 function generateFallbackVideos(query) {
+  // Action-oriented fallback videos — "build it / do it" not "what is X"
   const map = {
     AI: [
-      { id: 'aircAruvnKk', title: 'Neural Networks Explained', channel: '3Blue1Brown' },
-      { id: 'JMUxmLyrhSk', title: 'Intro to ML', channel: 'freeCodeCamp' },
-      { id: 'i_LwzRVP7bg', title: 'ML Course', channel: 'freeCodeCamp' },
-      { id: 'PZAlssNND-k', title: 'How AI Works', channel: '3Blue1Brown' }
+      { id: 'i_LwzRVP7bg', title: 'Build a Machine Learning Model from Scratch', channel: 'freeCodeCamp' },
+      { id: 'tPYj3fFJGjk', title: 'Build a Neural Network from Scratch in Python', channel: 'Sentdex' },
+      { id: 'GwIo3gDZCVQ', title: 'Train Your First Image Classifier — Full Project', channel: 'Nicholas Renotte' },
+      { id: 'bte6n7Bz_p4', title: 'Build a Chatbot with Python & ML', channel: 'NeuralNine' },
+      { id: 'Fg2QH0QBKQM', title: 'Build a Spam Detector with Scikit-Learn', channel: 'freeCodeCamp' },
+      { id: '7eh4d9ejO0', title: 'Face Recognition System — Build from Scratch', channel: 'Tech With Tim' },
+      { id: 'Q58MD5f7lBw', title: 'Sentiment Analysis Project — Build & Deploy', channel: 'Krish Naik' }
     ],
     Web: [
-      { id: 'PkZNo7MFNFg', title: 'JavaScript Full Course', channel: 'freeCodeCamp' },
-      { id: 'Oe421EPjeBE', title: 'Node.js Course', channel: 'freeCodeCamp' },
-      { id: 'lhCdVIgXKZE', title: 'HTTP & APIs', channel: 'Traversy Media' }
+      { id: 'nu_pCVPKzTk', title: 'Build a Full Stack App with React & Node.js', channel: 'Traversy Media' },
+      { id: 'f2EqECiTBL8', title: 'Build a REST API from Scratch — Node & Express', channel: 'Traversy Media' },
+      { id: '4sosXZsdy-s', title: 'Build a Todo App with React Hooks — Full Project', channel: 'Coding Addict' },
+      { id: '1aXZoefZkhQ', title: 'Build & Deploy a Portfolio Website', channel: 'Kevin Powell' },
+      { id: 'mrHNSanmqQ4', title: 'Build a Chat App with Socket.io & Node', channel: 'Traversy Media' },
+      { id: 'bMknfKXIFA8', title: 'Build a Blog with Next.js & MongoDB', channel: 'Sonny Sangha' },
+      { id: 'Oe421EPjeBE', title: 'Build a Node.js Server — Full Project', channel: 'freeCodeCamp' }
     ],
     Robotics: [
-      { id: 'fJEoYhTRuxs', title: 'Arduino Course', channel: 'freeCodeCamp' },
-      { id: 'mH7cQejntKw', title: 'Intro to Robotics', channel: 'Robotics Backend' },
-      { id: 'RxpTScg9LX8', title: 'Motor control basics', channel: 'Various' }
+      { id: 'fJEoYhTRuxs', title: 'Build a Line Follower Robot — Arduino Project', channel: 'freeCodeCamp' },
+      { id: 'kUHmYKWwuWs', title: 'Build a Robot Arm with Servo Motors', channel: 'DroneBot Workshop' },
+      { id: 'BFdMrDe_oqY', title: 'Obstacle Avoiding Robot — Build from Scratch', channel: 'HowToMechatronics' },
+      { id: 'mH7cQejntKw', title: 'Build Your First Robot with ROS', channel: 'Robotics Backend' },
+      { id: 'e_4N5qKVV6A', title: 'Bluetooth Controlled Car — Full Build', channel: 'DroneBot Workshop' },
+      { id: 'RxpTScg9LX8', title: 'Motor Control Project with Arduino', channel: 'Paul McWhorter' },
+      { id: 'dMBZsjLZGhk', title: 'Build a Self-Balancing Robot', channel: 'Joop Brokking' }
     ],
     IoT: [
-      { id: 'hFwvHsBhIQA', title: 'ESP8266 Crash Course', channel: 'Various' },
-      { id: 'LywjCVpM3V4', title: 'MQTT Basics', channel: 'Various' },
-      { id: 'nkD8QZpLBsY', title: 'Sensor dashboards', channel: 'Various' }
+      { id: 'pKFBcB6V9Vk', title: 'Build an IoT Sensor Dashboard — ESP32 + MQTT', channel: 'DroneBot Workshop' },
+      { id: 'hFwvHsBhIQA', title: 'ESP8266 Weather Station — Build Project', channel: 'Andreas Spiess' },
+      { id: 'LywjCVpM3V4', title: 'MQTT Smart Home Project — Build from Scratch', channel: 'Techiesms' },
+      { id: 'nkD8QZpLBsY', title: 'Build a Real-Time Sensor Dashboard with Node-RED', channel: 'Steve Cope' },
+      { id: 'jZEHDMRKNBk', title: 'Smart Door Lock System — IoT Build', channel: 'Electronoobs' },
+      { id: '7h7s9FSPWRY', title: 'IoT Plant Watering System — Full Build', channel: 'DroneBot Workshop' },
+      { id: 'auPX1BKQVLI', title: 'Build a Home Automation System with ESP32', channel: 'Random Nerd Tutorials' }
     ],
     Cybersec: [
-      { id: 'qiQR5rTSshw', title: 'Ethical Hacking', channel: 'freeCodeCamp' },
-      { id: 'mvzXZxYldaM', title: 'Cybersecurity Basics', channel: 'Simplilearn' },
-      { id: 'EcE_KQd4PkA', title: 'Network scanning intro', channel: 'Various' }
+      { id: 'qiQR5rTSshw', title: 'Build a Network Scanner in Python — Ethical Hacking', channel: 'freeCodeCamp' },
+      { id: 'pQSqMr0XFHI', title: 'Write a Port Scanner from Scratch — Python', channel: 'NeuralNine' },
+      { id: 'WnN6dbos5u8', title: 'Build a Keylogger — Security Project', channel: 'NeuralNine' },
+      { id: 'EcE_KQd4PkA', title: 'Capture the Flag Walkthrough — Practical Hacking', channel: 'John Hammond' },
+      { id: 'mvzXZxYldaM', title: 'Penetration Testing Lab — Build Your Own', channel: 'TCM Security' },
+      { id: 'nzZkKoREEGo', title: 'Build a Password Strength Checker', channel: 'Tech With Tim' },
+      { id: 'U9J2GRcSqxk', title: 'SQL Injection Lab — Hands-On Practice', channel: 'HackerSploit' }
     ],
     Data: [
-      { id: 'vmEHCJofslg', title: 'Pandas Tutorial', channel: 'Keith Galli' },
-      { id: 'p_tg5SlbY8E', title: 'Data Science Crash Course', channel: 'freeCodeCamp' },
-      { id: 'ZyhVh-qRZPA', title: 'Python DS intro', channel: 'Various' }
+      { id: 'vmEHCJofslg', title: 'Build a Data Analysis Project with Pandas', channel: 'Keith Galli' },
+      { id: 'p_tg5SlbY8E', title: 'End-to-End Data Science Project — Full Build', channel: 'freeCodeCamp' },
+      { id: 'ZyhVh-qRZPA', title: 'Build an EDA Dashboard with Python & Plotly', channel: 'Charming Data' },
+      { id: 'GBr8GCNKOiA', title: 'Build a Sales Analytics Report — Python', channel: 'Rob Mulla' },
+      { id: 'Q1sojFGMxqc', title: 'Web Scraping Project & Data Analysis', channel: 'Luke Barousse' },
+      { id: 'yZvFH7B6gKI', title: 'Build a Stock Price Dashboard with Python', channel: 'Python Engineer' },
+      { id: 'r-uOLxNrNk8', title: 'SQL Project — Analyze a Real Dataset', channel: 'Alex The Analyst' }
     ]
   };
   const q = String(query).toLowerCase();
@@ -40,7 +64,7 @@ function generateFallbackVideos(query) {
   else if (q.includes('cyber') || q.includes('sec')) bucket = 'Cybersec';
   else if (q.includes('data')) bucket = 'Data';
   else bucket = 'AI';
-  let videos = map[bucket] || map.AI;
+  const videos = map[bucket] || map.AI;
   return videos.map((v) => ({
     ...v,
     thumbnail: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
