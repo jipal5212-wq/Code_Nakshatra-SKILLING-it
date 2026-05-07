@@ -47,19 +47,19 @@ const INTRO_TASKS = {
 const INTRO_VIDS = {
   aiml:        ['rfscVS0vtbw', 'Gv9_4yMHFhI', 'ZyhVh-qRZPA', 'ukzFI9rgwfU'],
   webdev:      ['UB1O30fR-EE', 'yfoY53QXEnI', 'hdI2bqOjy3c', 'W6NZfCO5SIk'],
-  datascience: ['LHBE0uhFjkM', 'ua-CiDNNj30', 'RBSUwFGa6Fk', 'HXV3zeQKqGY'],
-  robotics:    ['fJWR7dBuc18', 'kUHmYKWwuWs', 'zJ8yDPCuMeQ', 'BFdMrDe_oqY'],
-  iot:         ['h0gWfVCSGQQ', 'LlhmzVL5bm8', 'pKFBcB6V9Vk', 'jZEHDMRKNBk'],
-  cybersec:    ['pQSqMr0XFHI', 'WnN6dbos5u8', 'nzZkKoREEGo', 'EcE_KQd4PkA'],
+  datascience: ['vmEHCJofslg', 'ua-CiDNNj30', 'RBSUwFGa6Fk', 'HXV3zeQKqGY'],
+  robotics:    ['fJWR7dBuc18', 'kUHmYKWwuWs', 'rfscVS0vtbw', 'Gv9_4yMHFhI'],
+  iot:         ['t_ispmWmdjY', 'fJWR7dBuc18', 'kUHmYKWwuWs', 'rfscVS0vtbw'],
+  cybersec:    ['qiQR5rTSshw', 'WnN6dbos5u8', 'nzZkKoREEGo', 'inWWhr5tnEA'],
 };
 
 const INTRO_CHANNELS = {
-  aiml:        ['Fireship', 'StatQuest', 'IBM Technology', 'Simplilearn'],
-  webdev:      ['Traversy Media', 'Traversy Media', 'Traversy Media', 'Programming w/ Mosh'],
-  datascience: ['IBM Technology', 'Simplilearn', 'freeCodeCamp', 'freeCodeCamp'],
-  robotics:    ['Paul McWhorter', 'Fireship', 'MIT OCW', 'DroneBot Workshop'],
-  iot:         ['IBM Technology', 'IBM Technology', 'Random Nerd Tutorials', 'Random Nerd Tutorials'],
-  cybersec:    ['Fireship', 'NetworkChuck', 'NetworkChuck', 'HackerSploit'],
+  aiml:        ['CS Dojo', 'Simplilearn', 'Charming Data', 'Programming w/ Mosh'],
+  webdev:      ['freeCodeCamp', 'Traversy Media', 'Traversy Media', 'Dave Gray'],
+  datascience: ['Keith Galli', 'Simplilearn', 'freeCodeCamp', 'freeCodeCamp'],
+  robotics:    ['DroneBot Workshop', 'DroneBot Workshop', 'CS Dojo', 'Simplilearn'],
+  iot:         ['Andreas Spiess', 'DroneBot Workshop', 'DroneBot Workshop', 'CS Dojo'],
+  cybersec:    ['freeCodeCamp', 'NeuralNine', 'Tech With Tim', 'NetworkChuck'],
 };
 
 /**
