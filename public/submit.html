@@ -199,15 +199,30 @@ function lockFormAndReset(){
 }
 
 /* ── VERDICT / SUBMISSION ──────────────────────────────────────────────── */
+function escV(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 async function loadVerdict(){
   try{
     var r=await fetch("/api/me/summary",{headers:{"Authorization":"Bearer "+session.access_token}});
     var d=await r.json();var sub=d.submission||d;
     if(sub&&sub.status){
-      var b=document.getElementById("verdictBanner");
-      if(sub.status==="pending_review"){b.style.display="block";b.className="verdict-banner success-banner";b.innerHTML="<div class=\"success-banner-title\">Submission Received \u2713</div><div class=\"success-banner-body\">Under admin review. Results within 2\u20134 hours.</div>";}
-      else if(sub.status==="accepted"){b.style.display="block";b.innerHTML="<div style=\"color:#22c55e;font-family:var(--display-font);font-weight:700;font-size:16px;text-transform:uppercase;margin-bottom:6px;\">Accepted \u2705</div><div style=\"font-size:14px;color:rgba(255,255,255,.5);\">Streak continued. Points added.</div>";}
-      else if(sub.status==="rejected"){b.style.display="block";b.innerHTML="<div style=\"color:var(--red);font-family:var(--display-font);font-weight:700;font-size:16px;text-transform:uppercase;margin-bottom:6px;\">Rejected \u2717</div><div style=\"font-size:14px;color:rgba(255,255,255,.5);\">Resubmit ASAP to preserve your streak.</div>";}
+      var b=document.getElementById("verdictBanner");b.style.display="block";b.style.borderRadius="8px";b.style.padding="20px";
+      if(sub.status==="pending_review"){
+        b.style.background="rgba(255,200,0,.08)";b.style.border="1px solid rgba(255,200,0,.3)";
+        b.innerHTML="<div style=\"font-family:var(--display-font);font-weight:700;font-size:16px;text-transform:uppercase;color:#ffc800;margin-bottom:6px\">\u23f3 Submitted \u2014 Under Review</div><div style=\"font-size:14px;color:rgba(255,255,255,.5)\">Your work has been submitted! The admin will review and respond within 2\u20134 hours.</div>";
+      }else if(sub.status==="accepted"){
+        var pts=sub.points_awarded||0;var fb=sub.admin_feedback||"";
+        b.style.background="rgba(34,197,94,.1)";b.style.border="1px solid rgba(34,197,94,.35)";
+        b.innerHTML="<div style=\"font-family:var(--display-font);font-weight:800;font-size:20px;text-transform:uppercase;color:#22c55e;margin-bottom:8px\">\ud83c\udf89 APPROVED BY ADMIN!</div>"
+          +"<div style=\"font-size:14px;color:rgba(255,255,255,.7);margin-bottom:10px\">Your task has been accepted. Great work!</div>"
+          +(pts?"<div style=\"font-family:var(--display-font);font-weight:800;font-size:36px;color:var(--red);margin-bottom:6px\">+"+pts+" <span style='font-size:14px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase'>points earned</span></div>":"")
+          +(fb?"<div style=\"font-size:13px;color:rgba(255,255,255,.5);border-left:3px solid #22c55e;padding-left:12px;margin-top:8px\">\ud83d\udcac "+escV(fb)+"</div>":"");
+      }else if(sub.status==="rejected"){
+        var fb2=sub.admin_feedback||"";
+        b.style.background="rgba(230,0,0,.1)";b.style.border="1px solid rgba(230,0,0,.35)";
+        b.innerHTML="<div style=\"font-family:var(--display-font);font-weight:800;font-size:20px;text-transform:uppercase;color:var(--red);margin-bottom:8px\">\u2717 Task Rejected</div>"
+          +"<div style=\"font-size:14px;color:rgba(255,255,255,.6);margin-bottom:10px\">Please improve your work and resubmit before your streak resets.</div>"
+          +(fb2?"<div style=\"font-size:13px;color:rgba(255,255,255,.5);border-left:3px solid var(--red);padding-left:12px;margin-top:8px\">\ud83d\udcac Feedback: "+escV(fb2)+"</div>":"");
+      }
     }
   }catch(e){}
 }
