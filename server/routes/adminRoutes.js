@@ -70,25 +70,25 @@ module.exports = function adminRoutes(admin, upload) {
       const tagList = relatedTasks
         ? relatedTasks.split(/[,·\s]+/).map(t => t.trim()).filter(Boolean)
         : ['admin', 'news'];
+      const tfeedFull = {
+        title, summary: details, tags: tagList,
+        domain: 'General', source_hint: 'Admin',
+        article_url: '', image_url: imageUrl || '',
+        pub_date: new Date().toISOString(),
+        project_idea: '', project_stack: '', project_effort: '',
+        like_count: 0, comment_count: 0
+      };
       try {
-        await admin.from('tfeed_posts').insert({
-          title,
-          summary: details,
-          tags: tagList,
-          domain: 'General',
-          source_hint: 'Admin',
-          article_url: '',
-          image_url: imageUrl || '',
-          pub_date: new Date().toISOString(),
-          project_idea: '',
-          project_stack: '',
-          project_effort: '',
-          like_count: 0,
-          comment_count: 0
-        });
+        const { error: e1 } = await admin.from('tfeed_posts').insert(tfeedFull);
+        if (e1 && (e1.code === '42703' || (e1.message||'').includes('article_url') || (e1.message||'').includes('pub_date'))) {
+          // Columns not migrated yet — insert without new columns
+          const { image_url, article_url, pub_date, ...legacy } = tfeedFull;
+          await admin.from('tfeed_posts').insert(legacy);
+        } else if (e1) {
+          throw e1;
+        }
       } catch (tfeedErr) {
-        // Non-fatal: be_relevant_posts insert succeeded; log and continue
-        console.warn('[be-relevant] Could not dual-write to tfeed_posts:', tfeedErr.message);
+        console.warn('[be-relevant] tfeed dual-write failed:', tfeedErr.message || tfeedErr);
       }
 
       res.json({ success: true, news: mapNewsRow(data) });
@@ -326,7 +326,7 @@ module.exports = function adminRoutes(admin, upload) {
       const tagList = Array.isArray(tags)
         ? tags
         : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : ['admin', 'featured']);
-      const { data, error } = await admin.from('tfeed_posts').insert({
+      const row = {
         title: String(title).slice(0, 200),
         summary: String(summary).slice(0, 1000),
         domain: domain || 'General',
@@ -340,7 +340,14 @@ module.exports = function adminRoutes(admin, upload) {
         project_effort: projectEffort || '~2 hrs',
         like_count: 0,
         comment_count: 0
-      }).select().single();
+      };
+      let data, error;
+      ({ data, error } = await admin.from('tfeed_posts').insert(row).select().single());
+      if (error && (error.code === '42703' || (error.message||'').includes('article_url') || (error.message||'').includes('pub_date'))) {
+        // Legacy schema fallback
+        const { image_url, article_url, pub_date, ...legacyRow } = row;
+        ({ data, error } = await admin.from('tfeed_posts').insert(legacyRow).select().single());
+      }
       if (error) return res.status(500).json({ error: error.message });
       res.json({ success: true, post: data });
     } catch (e) {

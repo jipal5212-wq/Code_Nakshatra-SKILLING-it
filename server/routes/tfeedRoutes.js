@@ -82,7 +82,15 @@ module.exports = function tfeedRoutes(admin, geminiModel) {
       }
 
       res.json({
-        posts: (posts || []).map(p => mapPost(p, likesMap[p.id] || 0, p.comment_count, userLikesSet.has(p.id)))
+        posts: (posts || [])
+          // Admin posts always first, then newest first
+          .sort((a, b) => {
+            const aA = (a.source_hint||'').toLowerCase() === 'admin' ? 1 : 0;
+            const bA = (b.source_hint||'').toLowerCase() === 'admin' ? 1 : 0;
+            if (bA !== aA) return bA - aA;
+            return new Date(b.created_at) - new Date(a.created_at);
+          })
+          .map(p => mapPost(p, likesMap[p.id] || 0, p.comment_count, userLikesSet.has(p.id)))
       });
     } catch (e) {
       console.error('[tfeed]', e);
@@ -171,9 +179,21 @@ module.exports = function tfeedRoutes(admin, geminiModel) {
         });
       }
 
-      // 3. Insert — try full schema; fall back silently if new columns aren't migrated yet
+      // 3. Deduplicate — skip titles already in the feed
+      let toInsert = enriched;
+      try {
+        const { data: existing } = await admin.from('tfeed_posts').select('title').limit(200);
+        const existingTitles = new Set((existing || []).map(r => r.title));
+        toInsert = enriched.filter(e => !existingTitles.has(e.title));
+      } catch { /* non-fatal */ }
+
+      if (!toInsert.length) {
+        return res.json({ ok: true, count: 0, geminiUsed: false, posts: [], message: 'All articles already in feed.' });
+      }
+
+      // 4. Insert — try full schema; fall back silently if new columns aren't migrated yet
       let inserted, insErr;
-      ({ data: inserted, error: insErr } = await admin.from('tfeed_posts').insert(enriched).select());
+      ({ data: inserted, error: insErr } = await admin.from('tfeed_posts').insert(toInsert).select());
 
       if (insErr) {
         const colErr = insErr.message && (
@@ -183,8 +203,8 @@ module.exports = function tfeedRoutes(admin, geminiModel) {
           insErr.code === '42703'
         );
         if (colErr) {
-          console.warn('[tfeed/refresh] New columns not found — falling back to legacy schema. Run the ALTER TABLE migration.');
-          const legacy = enriched.map(({ article_url, image_url, pub_date, ...rest }) => rest);
+          console.warn('[tfeed/refresh] New columns not found — falling back to legacy schema.');
+          const legacy = toInsert.map(({ article_url, image_url, pub_date, ...rest }) => rest);
           ({ data: inserted, error: insErr } = await admin.from('tfeed_posts').insert(legacy).select());
         }
       }
@@ -257,8 +277,9 @@ module.exports = function tfeedRoutes(admin, geminiModel) {
       }).select().single();
       if (error) return res.status(500).json({ error: error.message });
 
-      // bump comment_count
-      await admin.from('tfeed_posts').update({ comment_count: admin.raw?.('comment_count + 1') }).eq('id', req.params.id).catch(() => {});
+      // bump comment_count safely
+      const { data: cur } = await admin.from('tfeed_posts').select('comment_count').eq('id', req.params.id).single().catch(() => ({ data: null }));
+      await admin.from('tfeed_posts').update({ comment_count: (cur?.comment_count || 0) + 1 }).eq('id', req.params.id).catch(() => {});
 
       res.json({ comment });
     } catch (e) {

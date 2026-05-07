@@ -210,26 +210,46 @@ function renderBuildIdeas(postsArr){
 /* ── Refresh (Gemini) ───────────────────────────────────────── */
 window.refreshFeed=async function(){
   const btn=document.getElementById('refreshBtn');
+  const el=document.getElementById('feedCol');
   if(btn){btn.disabled=true;btn.textContent='⏳ Generating…';}
   try{
     const res=await fetch('/api/tfeed/refresh',{method:'POST',headers:SkillingAuth.bearerHeaders()});
     const d=await res.json().catch(()=>({}));
     if(d.setup){showSetupBox();return;}
-    if(d.ok){await loadFeed();}
-    else{alert(d.error||'Failed to generate feed.');}
-  }catch(e){alert('Network error.');}
+    if(d.ok){
+      if(d.count===0&&d.message){
+        // Already up to date — show banner, still reload
+        if(el){const b=document.createElement('div');b.style.cssText='background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;padding:10px 16px;border-radius:8px;margin-bottom:16px;font-size:.85rem;';b.textContent='Feed is up to date — '+d.message;el.prepend(b);setTimeout(()=>b.remove(),4000);}
+      }
+      await loadFeed();
+    } else {
+      if(el){const b=document.createElement('div');b.style.cssText='background:rgba(230,0,0,.1);border:1px solid rgba(230,0,0,.25);color:#ff7070;padding:10px 16px;border-radius:8px;margin-bottom:16px;font-size:.85rem;';b.textContent='Refresh failed: '+(d.error||'Unknown error');el.prepend(b);setTimeout(()=>b.remove(),5000);}
+    }
+  }catch(e){
+    if(el){const b=document.createElement('div');b.style.cssText='background:rgba(230,0,0,.1);border:1px solid rgba(230,0,0,.25);color:#ff7070;padding:10px 16px;border-radius:8px;margin-bottom:16px;font-size:.85rem;';b.textContent='Network error — check your connection.';el.prepend(b);setTimeout(()=>b.remove(),5000);}
+  }
   finally{if(btn){btn.disabled=false;btn.textContent='⚡ Refresh Feed';}}
 };
 
 async function loadFeed(){
   const el=document.getElementById('feedCol');
   if(el)el.innerHTML='<div class="empty-state">Loading…</div>';
-  const res=await fetch('/api/tfeed',{headers:session?.access_token?SkillingAuth.bearerHeaders():{'Content-Type':'application/json'}});
-  const d=await res.json().catch(()=>({posts:[]}));
-  if(d.setup){showSetupBox();return;}
-  posts=d.posts||[];
-  renderFeed(posts);
-  renderBuildIdeas(posts);
+  try{
+    const res=await fetch('/api/tfeed',{headers:session?.access_token?SkillingAuth.bearerHeaders():{'Content-Type':'application/json'}});
+    const d=await res.json().catch(()=>({posts:[]}));
+    if(d.setup){showSetupBox();return;}
+    // Admin posts always first, then newest
+    posts=(d.posts||[]).sort((a,b)=>{
+      const aA=(a.sourceHint||'').toLowerCase()==='admin'?1:0;
+      const bA=(b.sourceHint||'').toLowerCase()==='admin'?1:0;
+      if(bA!==aA)return bA-aA;
+      return new Date(b.createdAt)-new Date(a.createdAt);
+    });
+    renderFeed(posts);
+    renderBuildIdeas(posts);
+  }catch(e){
+    if(el)el.innerHTML='<div class="empty-state" style="color:#ff7070">Failed to load feed. Please try again.</div>';
+  }
 }
 
 function showSetupBox(){

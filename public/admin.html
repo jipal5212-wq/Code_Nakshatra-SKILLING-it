@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -200,7 +200,10 @@ label.lbl{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing
           </div>
           <div id="assignTaskList" class="task-list" style="margin-top:8px"></div>
           <div id="selectedTaskInfo" style="display:none;margin:10px 0;font-size:.85rem;color:var(--muted)"></div>
-          <button id="forceAssignBtn" class="btn btn-red" style="margin-top:14px;width:100%" disabled>Force Assign Task</button>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button id="forceAssignBtn" class="btn btn-red" style="flex:1" disabled>Force Assign Task</button>
+            <button class="btn btn-ghost btn-sm" onclick="reloadTaskList()" title="Reload tasks from DB">&#8635;</button>
+          </div>
         </div>
         <!-- COL 2: Push training feed post -->
         <div>
@@ -384,10 +387,23 @@ $('userSearch').addEventListener('input',function(){
 
 // ── ASSIGN TAB ──────────────────────────────────────────────────
 async function loadAssignTab(){
-  if(!allUsers.length){const res=await admFetch('/api/admin/all-users');const d=await res.json().catch(()=>({}));allUsers=d.users||[];}
+  // Always reload fresh so new tasks show up immediately
+  const [uRes, tRes] = await Promise.all([
+    admFetch('/api/admin/all-users'),
+    admFetch('/api/tasks')
+  ]);
+  const uData = await uRes.json().catch(()=>({}));
+  const tData = await tRes.json().catch(()=>({}));
+  allUsers = uData.users || allUsers;
+  allTasks = tData.tasks || [];
   renderAssignUserList(allUsers);
-  if(!allTasks.length){const res=await admFetch('/api/tasks');const d=await res.json().catch(()=>({}));allTasks=d.tasks||[];}
   renderAssignTaskList(allTasks);
+}
+async function reloadTaskList(){
+  const tRes = await admFetch('/api/tasks');
+  const tData = await tRes.json().catch(()=>({}));
+  allTasks = tData.tasks || [];
+  filterAssignTasks();
 }
 function renderAssignUserList(users){
   $('assignUserList').innerHTML=users.slice(0,30).map(u=>`<div class="user-pick-item${u.id===assignUserId?' selected':''}" onclick="selectAssignUser('${esc(u.id)}','${esc(u.displayName)}','${esc(u.skillDomain)}','${esc(u.level)}')">${esc(u.displayName)} <span style="color:var(--muted);font-size:.78rem">${esc(u.email)}</span></div>`).join('')||'<div style="padding:10px;color:var(--muted)">No users</div>';
@@ -415,7 +431,11 @@ function filterAssignTasks(){
 $('taskFilterDomain').addEventListener('change',filterAssignTasks);
 $('taskFilterLevel').addEventListener('change',filterAssignTasks);
 function renderAssignTaskList(tasks){
-  $('assignTaskList').innerHTML=tasks.slice(0,40).map(t=>`<div class="task-item${t.id===assignTaskId?' selected':''}" onclick="selectAssignTask('${esc(t.id)}','${esc(t.title||'')}','${esc(t.domain||'')}','${esc(t.level||'')}')"><div class="task-item-title">${esc(t.title)}</div><div class="task-item-meta">${esc(t.domain)} · ${esc(t.level)} · ${esc(t.effort||'')}</div></div>`).join('')||'<div style="padding:10px;color:var(--muted)">No tasks match filter.</div>';
+  if(!tasks.length){
+    $('assignTaskList').innerHTML='<div style="padding:14px;color:var(--muted);font-size:.85rem;text-align:center;">No tasks in DB yet.<br><span style="font-size:.78rem">Add tasks via the API or use the reload button &#8635;</span></div>';
+    return;
+  }
+  $('assignTaskList').innerHTML=tasks.slice(0,40).map(t=>`<div class="task-item${t.id===assignTaskId?' selected':''}" onclick="selectAssignTask('${esc(t.id)}','${esc(t.title||'')}','${esc(t.domain||'')}','${esc(t.level||'')}')"><div class="task-item-title">${esc(t.title)}</div><div class="task-item-meta">${esc(t.domain)} · ${esc(t.level)} · ${esc(t.effort||'')}</div></div>`).join('');
 }
 function selectAssignTask(id,title,domain,level){
   assignTaskId=id;
