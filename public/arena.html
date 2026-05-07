@@ -89,6 +89,11 @@ async function loadSubmissionStatus(){
   try{
     var r=await fetch("/api/me/summary",{headers:{"Authorization":"Bearer "+session.access_token}});
     var d=await r.json();var sub=d.submission;
+    // Update points display from latest profile
+    if(d.profile&&typeof d.profile.points==='number'){
+      session.points=d.profile.points;
+      var pts_el=document.getElementById("avPts");if(pts_el)pts_el.textContent=d.profile.points;
+    }
     if(!sub||!sub.status)return;
     var g=document.getElementById("poolGrid");if(!g)return;
     var existing=document.getElementById("submissionStatusBanner");if(existing)existing.remove();
@@ -101,7 +106,7 @@ async function loadSubmissionStatus(){
       var pts=sub.points_awarded||0;var fb=sub.admin_feedback||"";
       banner.style.background="rgba(34,197,94,.1)";banner.style.border="2px solid rgba(34,197,94,.4)";
       banner.innerHTML="<div style='font-family:var(--display-font);font-weight:800;font-size:18px;text-transform:uppercase;color:#22c55e;margin-bottom:6px'>\ud83c\udf89 TASK COMPLETED \u2014 APPROVED!</div>"
-        +"<div style='font-size:13px;color:rgba(255,255,255,.6);margin-bottom:8px'>Admin approved your submission."+(pts?" You earned <strong style='color:var(--red);font-family:var(--display-font);font-size:18px'>+"+pts+"</strong> points!":"")+"</div>"
+        +"<div style='font-size:13px;color:rgba(255,255,255,.6);margin-bottom:8px'>Admin approved your submission."+(pts?" You earned <strong style='color:var(--red);font-family:var(--display-font);font-size:18px'>+"+pts+"</strong> points!":"")+"\u003c/div>"
         +(fb?"<div style='font-size:12px;color:rgba(255,255,255,.4);border-left:3px solid #22c55e;padding-left:10px'>\ud83d\udcac "+esc(fb)+"</div>":"")
         +"<a href='/submit.html' style='display:inline-block;margin-top:12px;font-family:var(--display-font);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#22c55e;border:1px solid rgba(34,197,94,.4);padding:6px 16px;border-radius:4px;text-decoration:none'>View Submission \u2192</a>";
     }else if(sub.status==="rejected"){

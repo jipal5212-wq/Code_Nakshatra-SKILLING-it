@@ -238,12 +238,23 @@ module.exports = function userRoutes(admin, upload) {
       const uid = req.user.id;
       const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).single();
       const cycle = await ensureUserCycle(admin, uid, profile);
-      const { data: bundle } = await admin
+
+      // Bundles use domain-scoped keys: "<cycleStartISO>:<domain>"
+      // Use LIKE to find the current cycle's daily bundle regardless of domain
+      const { data: bundles } = await admin
         .from('submission_bundles')
         .select('*')
         .eq('user_id', uid)
-        .eq('cycle_start_iso', cycle.bounds.cycleStartISO)
-        .maybeSingle();
+        .like('cycle_start_iso', `${cycle.bounds.cycleStartISO}%`)
+        .not('cycle_start_iso', 'like', 'additional:%')
+        .order('updated_at', { ascending: false })
+        .limit(5);
+
+      // Prefer accepted > pending > rejected > none
+      const order = ['accepted', 'pending_review', 'rejected'];
+      const bundle = (bundles || []).sort((a, b) =>
+        order.indexOf(a.status) - order.indexOf(b.status)
+      )[0] || null;
 
       res.json({
         profile,
