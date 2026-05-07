@@ -2253,7 +2253,7 @@
       </p>
       <div class="hero-actions">
         <a href="/login.html" class="btn-pill">Login to Start →</a>
-        <a href="/arena.html?tab=how" class="btn-ghost">See How It Works</a>
+        <a href="#how" class="btn-ghost">See How It Works</a>
       </div>
       <div class="hero-stats">
         <div>
@@ -3364,6 +3364,8 @@
 
         const heroCta2 = document.querySelector('.hero-actions .btn-pill');
         if (heroCta2) { heroCta2.textContent='Open My Arena →'; heroCta2.href='/arena.html'; heroCta2.onclick=null; }
+        const heroCta2Ghost = document.querySelector('.hero-actions .btn-ghost');
+        if (heroCta2Ghost) { heroCta2Ghost.href='/arena.html?tab=how'; }
 
         // Also show AI chat widget for logged in users
         startCycleTicker();
