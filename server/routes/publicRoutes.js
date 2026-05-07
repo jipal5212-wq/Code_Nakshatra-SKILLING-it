@@ -48,7 +48,7 @@ module.exports = function publicRoutes(admin, geminiModel) {
         } else {
           // Quota exceeded or fallback — use the pre-bucketed fallback list
           // and rotate: task[0]→video[0], task[1]→video[1], etc.
-          const fallbackVideos = generateFallbackVideos(sm.query);
+          const fallbackVideos = generateFallbackVideos(sm.query, level);
           items = tasks.map((task, i) => ({
             video: fallbackVideos[i % fallbackVideos.length],
             task
@@ -56,7 +56,7 @@ module.exports = function publicRoutes(admin, geminiModel) {
         }
       } catch {
         // Last-resort: rotate fallback
-        const fallbackVideos = generateFallbackVideos(sm.query);
+        const fallbackVideos = generateFallbackVideos(sm.query, level);
         items = tasks.map((task, i) => ({
           video: fallbackVideos[i % fallbackVideos.length],
           task

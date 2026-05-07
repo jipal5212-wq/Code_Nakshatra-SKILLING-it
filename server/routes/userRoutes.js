@@ -250,7 +250,7 @@ module.exports = function userRoutes(admin, upload) {
       const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).single();
       const { data: bundles } = await admin
         .from('submission_bundles')
-        .select('*')
+        .select('*, tasks(domain)')
         .eq('user_id', uid)
         .order('cycle_start_iso', { ascending: true });
 
@@ -261,6 +261,20 @@ module.exports = function userRoutes(admin, upload) {
       const rejectedRows = rows.filter(b => b.status === 'rejected');
       const pendingRows  = rows.filter(b => b.status === 'pending_review');
       const totalPoints  = acceptedRows.reduce((s, b) => s + (b.points_awarded || 0), 0);
+
+      // Domain-specific accepted count (for track progress reset on domain change)
+      const currentDomain = (profile?.skill_domain || '').toLowerCase();
+      const domainAcceptedRows = currentDomain ? acceptedRows.filter(b => {
+        const td = String(b.tasks?.domain || '').toLowerCase();
+        if (!td) return true; // no domain info — include
+        if (currentDomain === 'aiml')        return td.includes('ai') || td.includes('ml');
+        if (currentDomain === 'datascience') return td.includes('data');
+        if (currentDomain === 'robotics')    return td.includes('robot');
+        if (currentDomain === 'iot')         return td.includes('iot');
+        if (currentDomain === 'cybersec')    return td.includes('cyber') || td.includes('sec');
+        if (currentDomain === 'webdev')      return td.includes('web');
+        return td.includes(currentDomain);
+      }) : acceptedRows;
 
       // streak: consecutive accepted days (from newest going back)
       const acceptedDays = new Set(
@@ -326,6 +340,7 @@ module.exports = function userRoutes(admin, upload) {
           totalPoints,
           tasksCompleted: rows.length,
           acceptedCount: acceptedRows.length,
+          domainAcceptedCount: domainAcceptedRows.length,
           rejectedCount: rejectedRows.length,
           bestStreak,
           level: profile?.level || 'Beginner',

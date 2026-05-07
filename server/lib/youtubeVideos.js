@@ -45,7 +45,8 @@ function setCache(key, data) {
 }
 
 // ─── Fallback curated videos (used when API quota is exceeded) ────────────────
-function generateFallbackVideos(query) {
+function generateFallbackVideos(query, level) {
+  const lv = (level || 'Beginner').toLowerCase();
   // Action-oriented fallback videos — "build it / do it" not "what is X"
   const map = {
     AI: [
@@ -112,7 +113,12 @@ function generateFallbackVideos(query) {
   else if (q.includes('data')) bucket = 'Data';
   else bucket = 'AI';
   const videos = map[bucket] || map.AI;
-  return videos.map((v) => ({
+  // Level-aware slice: beginner=first 5, intermediate=middle, advanced=last 5 reversed
+  let slice;
+  if (lv.startsWith('adv')) slice = videos.slice().reverse().slice(0, 7);
+  else if (lv.startsWith('int')) slice = [...videos.slice(2), ...videos.slice(0, 2)];
+  else slice = videos;
+  return slice.map((v) => ({
     ...v,
     thumbnail: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
     embedUrl: `https://www.youtube.com/embed/${v.id}`,

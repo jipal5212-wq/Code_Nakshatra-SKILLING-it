@@ -372,7 +372,7 @@ async function init(){
     fillAvatar(profile);
     const sk=profile.skill_domain||session?.skill_domain||'aiml';
     const level=profile.level||session?.level||'Beginner';
-    const accepted=analytics.kpis?.acceptedCount||0;
+    const accepted=analytics.kpis?.domainAcceptedCount??analytics.kpis?.acceptedCount??0;
     const pts=analytics.kpis?.totalPoints||0;
     const streak=analytics.kpis?.bestStreak||0;
     const total=analytics.kpis?.tasksCompleted||0;
