@@ -247,9 +247,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeTrackVi
   </div>
   <div id="trackVidTitle" style="font-family:var(--D);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.5);text-align:center;"></div>
 </div>
-</body>
-</html>
-
+<script>
 const session = SkillingAuth.toLegacy(SkillingAuth.read());
 if (!session?.access_token) location.href = '/login.html';
 
@@ -322,6 +320,11 @@ function buildTrack(sk,level,acceptedCount,pts,streak,rate){
       const skillPills=(node.skills||[]).slice(0,4).map(s=>`<span class="nc-skill">${esc(s)}</span>`).join('');
       const statusOverlay=state==='done'?`<div class="done-icon">✓</div>`:(state==='locked'?`<div class="lock-icon">🔒</div>`:'');
 
+      // Points pill + watch video button — defined BEFORE card template
+      var trackVid=(window.TRACK_VIDEOS&&window.TRACK_VIDEOS[sk]&&window.TRACK_VIDEOS[sk][pi]&&window.TRACK_VIDEOS[sk][pi][ni])||'';
+      var ptsTag=`<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(230,0,0,.15);border:1px solid rgba(230,0,0,.3);border-radius:60px;padding:3px 10px;font-family:var(--D);font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-bottom:8px">+${pts} pts on clear</div>`;
+      var watchBtn=trackVid&&state!=='locked'?`<button onclick="openTrackVideo('${trackVid}','${esc(node.title.replace(/'/g,''))}')" style="margin-top:10px;width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-family:var(--D);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(230,0,0,.2)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">▶ Watch Tutorial</button>`:'';
+
       const card=`<div class="node-card">
         ${badge}
         <div class="nc-tag">${esc(phase.name)} · Node ${ni+1}</div>
@@ -336,10 +339,6 @@ function buildTrack(sk,level,acceptedCount,pts,streak,rate){
       </div>`;
 
       const circle=`<div class="node-circle"><span class="node-icon">${node.icon}</span><span class="node-num">#${globalIdx+1}</span>${statusOverlay}</div>`;
-      // Points pill + watch video button
-      var trackVid=(window.TRACK_VIDEOS&&window.TRACK_VIDEOS[sk]&&window.TRACK_VIDEOS[sk][pi]&&window.TRACK_VIDEOS[sk][pi][ni])||'';
-      var ptsTag=`<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(230,0,0,.15);border:1px solid rgba(230,0,0,.3);border-radius:60px;padding:3px 10px;font-family:var(--D);font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-bottom:8px">+${pts} pts on clear</div>`;
-      var watchBtn=trackVid&&state!=='locked'?`<button onclick="openTrackVideo('${trackVid}','${esc(node.title.replace(/'/g,''))}')" style="margin-top:10px;width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-family:var(--D);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:8px;border-radius:4px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(230,0,0,.2)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">▶ Watch Tutorial</button>`:'';
 
       html+=`<div class="node-row ${side}"><div class="node ${state}">${side==='left'?circle+card:card+circle}</div></div>`;
       if(ni<phase.nodes.length-1){
