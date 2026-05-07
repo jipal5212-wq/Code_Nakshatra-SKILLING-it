@@ -374,24 +374,5 @@ module.exports = function userRoutes(admin, upload) {
     }
   });
 
-  /** Admin: get all additional task submissions (from Explore / T-Feed) */
-  r.get('/api/admin/additional-submissions', async (req, res) => {
-    const pass = process.env.ADMIN_SITE_PASSWORD || '';
-    const auth = req.headers['x-admin-password'] || '';
-    if (!pass || auth !== pass) return res.status(401).json({ error: 'Unauthorized.' });
-    try {
-      const { data: bundles } = await admin
-        .from('submission_bundles')
-        .select('*, profiles(display_name, email, skill_domain, level)')
-        .like('cycle_start_iso', 'additional:%')
-        .order('updated_at', { ascending: false })
-        .limit(100);
-      res.json({ bundles: bundles || [] });
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: e.message });
-    }
-  });
-
   return r;
 };

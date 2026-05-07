@@ -45,7 +45,7 @@ const INTRO_TASKS = {
 
 /** Curated YouTube video IDs for intro items (ordered to match tasks above) */
 const INTRO_VIDS = {
-  aiml:        ['rfscVS0vtbw', 'Gv9_4yMHFhI', 'a0_lo_GDcFo', 'ukzFI9rgwfU'],
+  aiml:        ['rfscVS0vtbw', 'Gv9_4yMHFhI', 'ZyhVh-qRZPA', 'ukzFI9rgwfU'],
   webdev:      ['UB1O30fR-EE', 'yfoY53QXEnI', 'hdI2bqOjy3c', 'W6NZfCO5SIk'],
   datascience: ['LHBE0uhFjkM', 'ua-CiDNNj30', 'RBSUwFGa6Fk', 'HXV3zeQKqGY'],
   robotics:    ['fJWR7dBuc18', 'kUHmYKWwuWs', 'zJ8yDPCuMeQ', 'BFdMrDe_oqY'],
