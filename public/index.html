@@ -3136,74 +3136,7 @@
       }).join('');
     }
 
-    function toggleAiChat() {
-      const win = document.getElementById('aiChatWindow');
-      win.style.display = win.style.display === 'none' ? 'flex' : 'none';
-      if (win.style.display === 'flex') document.getElementById('aiChatInput').focus();
-    }
 
-    async function sendAiMessage() {
-      const input = document.getElementById('aiChatInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      const msgsDiv = document.getElementById('aiChatMessages');
-
-      // Add user message
-      msgsDiv.innerHTML += `
-    <div style="background:var(--red);padding:12px 16px;border-radius:12px;border-bottom-right-radius:2px;color:#fff;font-size:14px;max-width:85%;align-self:flex-end;line-height:1.5;">
-      ${msg.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
-    </div>
-  `;
-      input.value = '';
-      msgsDiv.scrollTop = msgsDiv.scrollHeight;
-
-      // Add loading indicator
-      const loadingId = 'loading-' + Date.now();
-      msgsDiv.innerHTML += `
-    <div id="${loadingId}" style="background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:rgba(255,255,255,0.5);font-size:14px;max-width:85%;align-self:flex-start;">
-      Thinking...
-    </div>
-  `;
-      msgsDiv.scrollTop = msgsDiv.scrollHeight;
-
-      let taskContext = '';
-      if (selectedTask !== null && tasks[selectedTask]) {
-        taskContext = tasks[selectedTask].title;
-      }
-
-      try {
-        const res = await fetch('/api/ai/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg, taskContext })
-        });
-        const data = await res.json();
-        document.getElementById(loadingId).remove();
-
-        if (data.success) {
-          msgsDiv.innerHTML += `
-        <div style="background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:rgba(255,255,255,0.85);font-size:14px;max-width:85%;align-self:flex-start;line-height:1.5;">
-          ${data.reply.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}
-        </div>
-      `;
-        } else {
-          msgsDiv.innerHTML += `
-        <div style="background:rgba(230,0,0,0.1);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:#ff4444;font-size:14px;max-width:85%;align-self:flex-start;border:1px solid rgba(230,0,0,0.3);">
-          ⚠ API Error: ${data.error || 'Gemini API not configured.'}
-        </div>
-      `;
-        }
-      } catch (e) {
-        document.getElementById(loadingId).remove();
-        msgsDiv.innerHTML += `
-      <div style="background:rgba(230,0,0,0.1);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:#ff4444;font-size:14px;max-width:85%;align-self:flex-start;border:1px solid rgba(230,0,0,0.3);">
-        ⚠ Connection failed.
-      </div>
-    `;
-      }
-      msgsDiv.scrollTop = msgsDiv.scrollHeight;
-    }
 
     function logoutAndReload() {
       SkillingAuth.clear();
@@ -4255,44 +4188,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Escape key closes video modal
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoModal(); });
   </script>
-
-  <!-- AI MENTOR CHAT WIDGET -->
-  <div id="aiChatWidget" style="position:fixed;bottom:24px;right:24px;z-index:9999;font-family:var(--body-font);display:none;">
-    <!-- Chat Button -->
-    <button id="aiChatBtn" onclick="toggleAiChat()" style="width:60px;height:60px;border-radius:50%;background:var(--red);color:#fff;border:none;box-shadow:0 8px 24px rgba(230,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;">
-      🤖
-    </button>
-
-    <!-- Chat Window -->
-    <div id="aiChatWindow" style="display:none;position:absolute;bottom:80px;right:0;width:340px;height:460px;background:#1a1c1e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.5);flex-direction:column;overflow:hidden;">
-      <!-- Header -->
-      <div style="background:var(--charcoal);padding:16px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:10px;height:10px;background:#00ff88;border-radius:50%;box-shadow:0 0 10px #00ff88;"></div>
-          <div><div style="font-family:var(--display-font);font-weight:700;color:#fff;letter-spacing:1px;font-size:16px;">AI MENTOR</div><div style="font-size:10px;color:rgba(255,255,255,0.42);margin-top:4px;letter-spacing:0.04em;">Suggested tasks curated by admins (PRD §15)</div></div>
-        </div>
-        <button onclick="toggleAiChat()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;">✕</button>
-      </div>
-
-      <!-- Messages Area -->
-      <div id="aiChatMessages" style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
-        <div style="background:rgba(255,255,255,0.05);padding:12px 16px;border-radius:12px;border-bottom-left-radius:2px;color:rgba(255,255,255,0.85);font-size:14px;max-width:85%;align-self:flex-start;line-height:1.5;">
-          Initialization complete. I am your AI Mentor. Ask me anything about your current task or concepts you are
-          struggling with.
-        </div>
-      </div>
-
-      <!-- Input Area -->
-      <div style="padding:16px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:8px;">
-        <input type="text" id="aiChatInput" placeholder="Ask AI Mentor..." style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:10px 16px;color:#fff;font-family:var(--body-font);font-size:14px;outline:none;" onkeypress="if(event.key==='Enter') sendAiMessage()">
-        <button onclick="sendAiMessage()" style="background:var(--red);border:none;border-radius:50%;width:40px;height:40px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-          ➤
-        </button>
-      </div>
-    </div>
-  </div>
-
-
 
 
 </body></html>
