@@ -5,19 +5,18 @@
 <div class="section-tag"><div class="section-tag-bar"></div><span class="section-tag-text">Today's Cycle</span></div>
 <h2 class="section-title">YOUR <em>VIDEO + TASK</em> POOL</h2>
 
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:24px;padding:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;">
-  <span style="font-family:var(--display-font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-right:4px;">Field:</span>
-  <button onclick="filterPool('aiml')" id="f-aiml" class="f-btn f-btn-active">🤖 AI / ML</button>
-  <button onclick="filterPool('webdev')" id="f-webdev" class="f-btn">💻 Web Dev</button>
-  <button onclick="filterPool('datascience')" id="f-datascience" class="f-btn">📊 Data Science</button>
-  <button onclick="filterPool('robotics')" id="f-robotics" class="f-btn">⚙️ Robotics</button>
-  <button onclick="filterPool('iot')" id="f-iot" class="f-btn">📡 IoT</button>
-  <button onclick="filterPool('cybersec')" id="f-cybersec" class="f-btn">🔐 Cybersec</button>
-  <span style="width:1px;height:20px;background:rgba(255,255,255,.1);margin:0 4px;"></span>
-  <span style="font-family:var(--display-font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-right:4px;">Level:</span>
-  <button onclick="filterLevel('Beginner')" id="l-Beginner" class="f-btn f-btn-active">Beginner</button>
-  <button onclick="filterLevel('Intermediate')" id="l-Intermediate" class="f-btn">Intermediate</button>
-  <button onclick="filterLevel('Advanced')" id="l-Advanced" class="f-btn">Advanced</button>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding:14px 20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;">
+  <div style="display:flex;align-items:center;gap:10px;flex:1;">
+    <span style="font-family:var(--display-font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);">Your Domain:</span>
+    <span id="userDomainPill" style="font-family:var(--display-font);font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#fff;background:var(--red);padding:5px 16px;border-radius:60px;">—</span>
+    <a href="/explore.html" style="font-family:var(--display-font);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);text-decoration:none;border:1px solid rgba(255,255,255,.15);padding:4px 12px;border-radius:4px;transition:all .2s" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.color='rgba(255,255,255,.4)';this.style.borderColor='rgba(255,255,255,.15)'">Change in Explore →</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="font-family:var(--display-font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);">Level:</span>
+    <button onclick="filterLevel('Beginner')" id="l-Beginner" class="f-btn">Beginner</button>
+    <button onclick="filterLevel('Intermediate')" id="l-Intermediate" class="f-btn">Intermediate</button>
+    <button onclick="filterLevel('Advanced')" id="l-Advanced" class="f-btn">Advanced</button>
+  </div>
 </div>
 <div class="dashboard-timers">
   <div class="dashboard-timer-block red-block" id="chooseTimerBlock">
@@ -50,13 +49,17 @@ function init(){
   if(raw&&raw.user&&raw.access_token){session={id:raw.user.id,name:raw.user.displayName||raw.user.email.split("@")[0]||"Learner",email:raw.user.email||"",access_token:raw.access_token,skill_domain:raw.user.skill_domain||"",level:raw.user.level||"Beginner",points:raw.user.points||0};}
   if(!session){window.location.href="/login.html";return;}
   populateAvatar();
-  // Pre-select the user domain filter button
+  // Show user's locked domain
   var _sk=session.skill_domain||"aiml";
-  var _fBtn=document.getElementById("f-"+_sk);
-  if(_fBtn){document.querySelectorAll(".f-btn").forEach(function(b){b.className="f-btn";});_fBtn.className="f-btn f-btn-active";}
+  var domainLabels={aiml:"🤖 AI / ML",webdev:"💻 Web Dev",datascience:"📊 Data Science",robotics:"⚙️ Robotics",iot:"📡 IoT",cybersec:"🔐 Cybersec"};
+  var pill=document.getElementById("userDomainPill");
+  if(pill)pill.textContent=domainLabels[_sk]||_sk.toUpperCase();
+  // Pre-select the level button
   var _lv=session.level||"Beginner";
+  _activeLevel=_lv;
+  document.querySelectorAll("[id^='l-']").forEach(function(b){b.className="f-btn";});
   var _lBtn=document.getElementById("l-"+_lv);
-  if(_lBtn){document.querySelectorAll("[id^='l-']").forEach(function(b){b.className="f-btn";});_lBtn.className="f-btn f-btn-active";}
+  if(_lBtn)_lBtn.className="f-btn f-btn-active";
   fetchCycleThenPool();startCycleTicker();renderCalendar();
 }
 function populateAvatar(){
@@ -119,7 +122,7 @@ async function fetchContentPool(){
     // Remember current selection so re-fetch does not wipe it
     var _prevSelId=null;
     if(selectedTask!==null&&poolItems[selectedTask]&&poolItems[selectedTask].task){_prevSelId=poolItems[selectedTask].task.id;}
-    var skill=_activePoolDomain||session.skill_domain||"aiml";
+    var skill=session.skill_domain||"aiml";
     var level=_activeLevel||session.level||"Beginner";
     var _ctrl=new AbortController(),_tid=setTimeout(function(){_ctrl.abort();},6000);
     var r=await fetch("/api/public/content-pack?skill="+encodeURIComponent(skill)+"&level="+encodeURIComponent(level),{headers:{"Authorization":"Bearer "+session.access_token},signal:_ctrl.signal});
@@ -132,18 +135,11 @@ async function fetchContentPool(){
     // Or pick up server-locked task
     if(cycleData&&cycleData.locked_task_id){var li=poolItems.findIndex(function(it){return it.task&&it.task.id===cycleData.locked_task_id;});if(li>=0)selectedTask=li;}
     renderPool();_enablePoolBtns();
-  }catch(e){console.warn('[pool] API failed, using static fallback:', e&&e.message);renderStaticFallback(_activePoolDomain||session.skill_domain||'aiml', _activeLevel||session.level||'Beginner');_enablePoolBtns();}
+  }catch(e){console.warn('[pool] API failed, using static fallback:', e&&e.message);renderStaticFallback(session.skill_domain||'aiml', _activeLevel||session.level||'Beginner');_enablePoolBtns();}
 }
 function _enablePoolBtns(){var cb=document.getElementById('confirmBtn'),ab=document.querySelector('.btn-outline');if(cb){cb.disabled=false;cb.style.opacity='';}if(ab){ab.disabled=false;ab.style.opacity='';}}
-function filterPool(domain){
-  _activePoolDomain = domain;
-  // Update filter button styles
-  ['aiml','webdev','datascience','robotics','iot','cybersec'].forEach(function(k){
-    var btn=document.getElementById('f-'+k);
-    if(btn)btn.className='f-btn'+(k===domain?' f-btn-active':'');
-  });
-  fetchContentPool();
-}
+// Domain is locked to user's profile — use Explore to change it
+function filterPool(domain){ console.warn('Domain switching disabled in Execute. Change domain in Explore.'); }
 
 function filterLevel(level){
   _activeLevel = level;
