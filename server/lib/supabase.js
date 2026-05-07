@@ -20,11 +20,22 @@ exports.getAnonAuthClient = () => {
 };
 
 exports.verifyBearerUser = async (accessToken) => {
-  const client = exports.getAnonAuthClient();
-  if (!client || !accessToken) return { user: null, error: 'no_client_or_token' };
-  const {
-    data: { user },
-    error
-  } = await client.auth.getUser(accessToken);
-  return { user, error };
+  if (!accessToken) return { user: null, error: 'no_token' };
+
+  // Try anon client first (preferred for user-scoped operations)
+  const anonClient = exports.getAnonAuthClient();
+  if (anonClient) {
+    const { data: { user }, error } = await anonClient.auth.getUser(accessToken);
+    if (user && !error) return { user, error: null };
+  }
+
+  // Fall back to admin (service-role) client — also able to verify JWTs.
+  // This handles the common case where SUPABASE_ANON_KEY is not configured.
+  const adminClient = exports.getAdminClient();
+  if (adminClient) {
+    const { data: { user }, error } = await adminClient.auth.getUser(accessToken);
+    return { user, error };
+  }
+
+  return { user: null, error: 'no_supabase_client' };
 };

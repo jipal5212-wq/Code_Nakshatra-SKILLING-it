@@ -538,9 +538,14 @@ async function switchPrimary(){
   const btn = document.getElementById('switchBtn');
   btn.disabled = true; btn.textContent = 'Updating...';
   try {
+    // Ensure we have a fresh (non-expired) token before the PATCH
+    const freshToken = await SkillingAuth.refreshIfNeeded().catch(() => null)
+                       || SkillingAuth.read()?.access_token;
+    if (!freshToken) { window.location.href = '/login.html'; return; }
+
     const res = await fetch('/api/me/profile', {
       method: 'PATCH',
-      headers: { ...SkillingAuth.bearerHeaders(), 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + freshToken },
       body: JSON.stringify({ skillDomain: activeSwitchKey })
     });
     if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error||'HTTP '+res.status); }
