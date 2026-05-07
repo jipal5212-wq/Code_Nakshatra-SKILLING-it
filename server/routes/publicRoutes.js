@@ -2,6 +2,7 @@ const express = require('express');
 const { SKILL_MAP, normalizeSkillKey } = require('../lib/skills');
 const { searchYouTube, generateFallbackVideos } = require('../lib/youtubeVideos');
 const { generateTasks } = require('../lib/geminiTasks');
+const { getTrackTopics } = require('../lib/trackTopics');
 
 module.exports = function publicRoutes(admin, geminiModel) {
   const r = express.Router();
@@ -19,8 +20,11 @@ module.exports = function publicRoutes(admin, geminiModel) {
       const level    = req.query.level || 'Beginner';
       const sm       = SKILL_MAP[skillKey] || SKILL_MAP.aiml;
 
-      // 1. Generate tasks (Gemini or static)
-      const tasks = await generateTasks(geminiModel, skillKey, level);
+      // Get track curriculum topics for this domain+level
+      const topics = getTrackTopics(skillKey, level);
+
+      // 1. Generate topic-aligned tasks (Gemini or static)
+      const tasks = await generateTasks(geminiModel, skillKey, level, topics);
 
       // 2. Try to get one specific video per task via YouTube API.
       //    If quota exceeded / error, get the full fallback bucket for this
@@ -33,7 +37,7 @@ module.exports = function publicRoutes(admin, geminiModel) {
 
         if (probe.source === 'youtube-api') {
           // Quota OK — fetch each task's matched video in parallel
-          const videoPromises = tasks.map(async (task, idx) => {
+          const videoPromises = tasks.map(async (task) => {
             const q = task.ytQuery || `${task.title} tutorial project`;
             try {
               const { videos } = await searchYouTube(q, 2);
@@ -46,19 +50,20 @@ module.exports = function publicRoutes(admin, geminiModel) {
           items = tasks.map((task, i) => ({ video: videos[i] || null, task }));
 
         } else {
-          // Quota exceeded or fallback — use the pre-bucketed fallback list
-          // and rotate: task[0]→video[0], task[1]→video[1], etc.
-          const fallbackVideos = generateFallbackVideos(sm.query, level);
+          // Quota exceeded — use topic-specific fallback videos
+          // Each task's ytQuery drives its own fallback lookup
+          const fallbackVideos = topics
+            ? tasks.map((task) => generateFallbackVideos(task.ytQuery || sm.query, level)[0])
+            : generateFallbackVideos(sm.query, level);
           items = tasks.map((task, i) => ({
-            video: fallbackVideos[i % fallbackVideos.length],
+            video: Array.isArray(fallbackVideos) ? (fallbackVideos[i] || fallbackVideos[i % fallbackVideos.length] || null) : fallbackVideos,
             task
           }));
         }
       } catch {
-        // Last-resort: rotate fallback
-        const fallbackVideos = generateFallbackVideos(sm.query, level);
-        items = tasks.map((task, i) => ({
-          video: fallbackVideos[i % fallbackVideos.length],
+        // Last-resort: rotate fallback by topic query
+        items = tasks.map((task) => ({
+          video: generateFallbackVideos(task.ytQuery || sm.query, level)[0] || null,
           task
         }));
       }

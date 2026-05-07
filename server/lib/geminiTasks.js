@@ -24,16 +24,25 @@ const LEVEL_CONTEXT = {
 
 /**
  * Build the Gemini prompt for a given domain + level.
+ * @param {string} skillKey
+ * @param {string} level
+ * @param {Array|null} topics  — track node topics [{title, skills, desc}]
  */
-function buildPrompt(skillKey, level) {
+function buildPrompt(skillKey, level, topics) {
   const ctx = DOMAIN_CONTEXT[skillKey] || DOMAIN_CONTEXT.aiml;
   const lvlCtx = LEVEL_CONTEXT[level] || LEVEL_CONTEXT.Beginner;
+
+  const topicBlock = topics && topics.length
+    ? `\n\nCURRICULUM TOPICS — generate tasks that DIRECTLY cover these track topics:\n` +
+      topics.map((t, i) => `${i + 1}. ${t.title}${t.skills?.length ? ' [' + t.skills.slice(0,3).join(', ') + ']' : ''}`).join('\n')
+    : '';
+
   return `You are a technical curriculum designer for the S-KILLING IT platform.
 
 Generate exactly 7 PRACTICAL, ACTION-ORIENTED tasks for ${ctx.name} at ${level} level.
 
 The learner is ${lvlCtx}
-Technologies involved: ${ctx.tech}
+Technologies involved: ${ctx.tech}${topicBlock}
 
 STRICT RULES:
 - Every task must start with a VERB: Build, Create, Train, Implement, Deploy, Analyze, Scrape, Automate, Write, Develop, Design, Configure, Setup
@@ -69,25 +78,25 @@ function parseGeminiJSON(text) {
 
 /**
  * Generate 7 tasks for a domain+level using Gemini.
- * Falls back to static tasks if Gemini is unavailable or errors.
- * @param {object|null} geminiModel  — the initialized Gemini model
- * @param {string} skillKey          — aiml | datascience | robotics | iot | cybersec | webdev
- * @param {string} level             — Beginner | Intermediate | Advanced
+ * @param {object|null} geminiModel
+ * @param {string} skillKey
+ * @param {string} level
+ * @param {Array|null} topics  — track topics to align content with
  * @returns {Promise<Array>}
  */
-async function generateTasks(geminiModel, skillKey, level) {
-  const cacheKey = `${skillKey}:${level}`;
+async function generateTasks(geminiModel, skillKey, level, topics) {
+  const cacheKey = topics ? `${skillKey}:${level}:track` : `${skillKey}:${level}`;
   const cached = CACHE.get(cacheKey);
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
     return cached.tasks;
   }
 
   if (!geminiModel) {
-    return getStaticTasks(skillKey, level);
+    return getStaticTasks(skillKey, level, topics);
   }
 
   try {
-    const prompt = buildPrompt(skillKey, level);
+    const prompt = buildPrompt(skillKey, level, topics);
     // 3-second timeout so Gemini never blocks the pool from loading
     const result = await Promise.race([
       geminiModel.generateContent(prompt),
@@ -116,18 +125,34 @@ async function generateTasks(geminiModel, skillKey, level) {
     return tasks;
   } catch (err) {
     console.error('[geminiTasks] Error:', err.message);
-    const staticTasks = getStaticTasks(skillKey, level);
-    // Cache static so next call within TTL is instant
+    const staticTasks = getStaticTasks(skillKey, level, topics);
     CACHE.set(cacheKey, { ts: Date.now(), tasks: staticTasks });
     return staticTasks;
   }
 }
 
 /**
- * Static fallback tasks when Gemini is unavailable.
- * These are action-oriented and level-appropriate.
+ * Static fallback tasks.
+ * If track topics are supplied, generate directly from them (topic-aligned).
+ * Otherwise fall back to the hardcoded generic list.
  */
-function getStaticTasks(skillKey, level) {
+function getStaticTasks(skillKey, level, topics) {
+  // Topic-aligned path: build tasks straight from track nodes
+  if (topics && topics.length) {
+    const ctx = DOMAIN_CONTEXT[skillKey] || DOMAIN_CONTEXT.aiml;
+    const verbs = ['Build','Create','Implement','Develop','Write','Design','Configure'];
+    return topics.slice(0, 7).map((t, i) => ({
+      id:      `track-${skillKey}-${level}-${i}`,
+      title:   `${verbs[i % verbs.length]} a ${t.title} Project`,
+      desc:    t.desc || `Apply ${t.title} concepts with ${(t.skills || []).slice(0,2).join(' and ')}.`,
+      effort:  t.effort || '~1 hr',
+      domain:  ctx.name,
+      level,
+      ytQuery: t.ytQuery || `${t.title} project tutorial from scratch`,
+      source:  'track-static'
+    }));
+  }
+
   const isInter = level === 'Intermediate';
   const isAdv = level === 'Advanced';
 
