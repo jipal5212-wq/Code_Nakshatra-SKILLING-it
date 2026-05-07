@@ -80,7 +80,8 @@ label.lbl{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing
 .status-accepted{background:rgba(34,197,94,.15);color:var(--green)}
 .status-rejected{background:rgba(230,0,0,.15);color:#ff6b6b}
 /* ASSIGN TAB */
-.assign-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.assign-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+@media(max-width:1200px){.assign-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.assign-grid{grid-template-columns:1fr}}
 .col-title{font-size:1.1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .user-pick-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-top:6px}
@@ -205,15 +206,15 @@ label.lbl{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing
             <button class="btn btn-ghost btn-sm" onclick="reloadTaskList()" title="Reload tasks from DB">&#8635;</button>
           </div>
         </div>
-        <!-- COL 2: Push training feed post -->
+        <!-- COL 2: Push to Build Spark -->
         <div>
-          <h3 class="col-title">&#128640; Push Training Feed Post</h3>
+          <h3 class="col-title">&#128293; Push to Build Spark</h3>
           <div id="tfeedErr" class="msg msg-err"></div>
           <div id="tfeedOk" class="msg msg-ok"></div>
           <label class="lbl">Title *</label>
           <input id="tfTitle" type="text" class="fld" placeholder="e.g. Build a CLI Todo App">
           <label class="lbl">Summary *</label>
-          <textarea id="tfSummary" class="fld" placeholder="Brief description of the topic or news…"></textarea>
+          <textarea id="tfSummary" class="fld" placeholder="Brief description of the topic or project idea&hellip;"></textarea>
           <label class="lbl">Domain</label>
           <select id="tfDomain" class="fld">
             <option value="General">General</option>
@@ -225,7 +226,7 @@ label.lbl{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing
             <option value="Cybersecurity">Cybersecurity</option>
           </select>
           <label class="lbl">Project Idea</label>
-          <textarea id="tfIdea" class="fld" placeholder="Hands-on project students can build…" style="min-height:70px"></textarea>
+          <textarea id="tfIdea" class="fld" placeholder="Hands-on project students can build&hellip;" style="min-height:70px"></textarea>
           <label class="lbl">Tech Stack</label>
           <input id="tfStack" type="text" class="fld" placeholder="e.g. Python, Flask, SQLite">
           <label class="lbl">Effort</label>
@@ -233,8 +234,46 @@ label.lbl{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing
           <label class="lbl">Tags (comma-separated)</label>
           <input id="tfTags" type="text" class="fld" placeholder="python, backend, beginner">
           <label class="lbl">Article URL (optional)</label>
-          <input id="tfUrl" type="text" class="fld" placeholder="https://…">
-          <button id="pushTfeedBtn" class="btn btn-red" style="margin-top:16px;width:100%">Push to Training Feed</button>
+          <input id="tfUrl" type="text" class="fld" placeholder="https://&hellip;">
+          <button id="pushTfeedBtn" class="btn btn-red" style="margin-top:16px;width:100%">&#128293; Push to Build Spark</button>
+        </div>
+        <!-- COL 3: Create New Task -->
+        <div>
+          <h3 class="col-title">&#9999;&#65039; Create New Task</h3>
+          <div id="ctaskErr" class="msg msg-err"></div>
+          <div id="ctaskOk" class="msg msg-ok"></div>
+          <label class="lbl">Title *</label>
+          <input id="ctTitle" type="text" class="fld" placeholder="e.g. Build a Portfolio Website">
+          <label class="lbl">Domain *</label>
+          <select id="ctDomain" class="fld">
+            <option value="AI/ML">AI / ML</option>
+            <option value="Web Dev">Web Dev</option>
+            <option value="Data Science">Data Science</option>
+            <option value="Robotics">Robotics</option>
+            <option value="IoT">IoT</option>
+            <option value="Cybersecurity">Cybersecurity</option>
+          </select>
+          <label class="lbl">Level</label>
+          <select id="ctLevel" class="fld">
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+          <label class="lbl">Description *</label>
+          <textarea id="ctDesc" class="fld" placeholder="What will the learner build/do?"></textarea>
+          <label class="lbl">Objective</label>
+          <input id="ctObjective" type="text" class="fld" placeholder="e.g. Implement a REST API with auth">
+          <label class="lbl">Effort</label>
+          <input id="ctEffort" type="text" class="fld" placeholder="~1 hr" value="~1 hr">
+          <label class="lbl">Expected Output</label>
+          <input id="ctOutput" type="text" class="fld" placeholder="e.g. GitHub repo link">
+          <label class="lbl">YT Search Query (for video matching)</label>
+          <input id="ctYtQuery" type="text" class="fld" placeholder="e.g. build portfolio website tutorial">
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button id="ctCreateBtn" class="btn btn-ghost" style="flex:1">&#43; Create Task</button>
+            <button id="ctCreateAssignBtn" class="btn btn-red" style="flex:1" title="Create task and force-assign it to the selected learner">&#9889; Create &amp; Assign</button>
+          </div>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:8px">&ldquo;Create &amp; Assign&rdquo; requires a learner selected in column 1.</p>
         </div>
       </div>
     </section>
@@ -465,11 +504,54 @@ $('pushTfeedBtn').onclick=async()=>{
   const body={title,summary,domain:$('tfDomain').value,projectIdea:$('tfIdea').value.trim(),projectStack:$('tfStack').value.trim(),projectEffort:$('tfEffort').value.trim()||'~2 hrs',tags:$('tfTags').value.split(',').map(t=>t.trim()).filter(Boolean),articleUrl:$('tfUrl').value.trim()};
   const res=await admFetch('/api/admin/tfeed-post',{method:'POST',body:JSON.stringify(body)});
   const d=await res.json().catch(()=>({}));
-  $('pushTfeedBtn').disabled=false;$('pushTfeedBtn').textContent='Push to Training Feed';
+  $('pushTfeedBtn').disabled=false;$('pushTfeedBtn').textContent='&#128293; Push to Build Spark';
   if(!res.ok){showMsg('tfeedErr',d.error||'Failed.');return;}
-  showMsg('tfeedOk','Post pushed to training feed!','ok');
+  showMsg('tfeedOk','Post pushed to Build Spark!','ok');
   ['tfTitle','tfSummary','tfIdea','tfStack','tfUrl','tfTags'].forEach(id=>{const el=$(id);if(el)el.value='';});
   $('tfEffort').value='~2 hrs';
+};
+
+// ── CREATE TASK ─────────────────────────────────────────────────
+async function createTask(){
+  const title=$('ctTitle').value.trim();
+  const desc=$('ctDesc').value.trim();
+  if(!title||!desc){showMsg('ctaskErr','Title and description are required.');return null;}
+  const body={
+    title, domain:$('ctDomain').value, level:$('ctLevel').value,
+    desc, objective:$('ctObjective').value.trim(),
+    effort:$('ctEffort').value.trim()||'~1 hr',
+    expectedOutput:$('ctOutput').value.trim(),
+    ytQuery:$('ctYtQuery').value.trim()||title+' tutorial'
+  };
+  const res=await admFetch('/api/admin/tasks',{method:'POST',body:JSON.stringify(body)});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok){showMsg('ctaskErr',d.error||'Failed to create task.');return null;}
+  return d.task;
+}
+$('ctCreateBtn').onclick=async()=>{
+  $('ctCreateBtn').disabled=true;$('ctCreateBtn').textContent='Creating…';
+  const task=await createTask();
+  $('ctCreateBtn').disabled=false;$('ctCreateBtn').textContent='+ Create Task';
+  if(!task)return;
+  showMsg('ctaskOk','Task created: '+task.title,'ok');
+  allTasks.push(task);filterAssignTasks();
+  ['ctTitle','ctDesc','ctObjective','ctOutput','ctYtQuery'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('ctEffort').value='~1 hr';
+};
+$('ctCreateAssignBtn').onclick=async()=>{
+  if(!assignUserId){showMsg('ctaskErr','Select a learner in column 1 first.');return;}
+  $('ctCreateAssignBtn').disabled=true;$('ctCreateAssignBtn').textContent='Working…';
+  const task=await createTask();
+  if(!task){$('ctCreateAssignBtn').disabled=false;$('ctCreateAssignBtn').textContent='&#9889; Create & Assign';return;}
+  // Now assign the newly created task
+  const res2=await admFetch('/api/admin/assign-task',{method:'POST',body:JSON.stringify({userId:assignUserId,taskId:task.id})});
+  const d2=await res2.json().catch(()=>({}));
+  $('ctCreateAssignBtn').disabled=false;$('ctCreateAssignBtn').textContent='&#9889; Create & Assign';
+  if(!res2.ok){showMsg('ctaskErr','Task created but assign failed: '+(d2.error||'Unknown error'));return;}
+  allTasks.push(task);filterAssignTasks();
+  showMsg('ctaskOk','Task created & assigned to learner!','ok');
+  ['ctTitle','ctDesc','ctObjective','ctOutput','ctYtQuery'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('ctEffort').value='~1 hr';
 };
 
 // ── SUBMISSIONS TAB ─────────────────────────────────────────────
