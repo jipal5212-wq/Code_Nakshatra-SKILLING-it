@@ -51,15 +51,13 @@ module.exports = function publicRoutes(admin, geminiModel) {
           items = tasks.map((task, i) => ({ video: videos[i] || null, task }));
 
         } else {
-          // Quota exceeded — use topic-specific fallback videos
-          // Each task's ytQuery drives its own fallback lookup
-          const fallbackVideos = topics
-            ? tasks.map((task) => generateFallbackVideos(task.ytQuery || sm.query, level)[0])
-            : generateFallbackVideos(sm.query, level);
-          items = tasks.map((task, i) => ({
-            video: Array.isArray(fallbackVideos) ? (fallbackVideos[i] || fallbackVideos[i % fallbackVideos.length] || null) : fallbackVideos,
-            task
-          }));
+          // Quota exceeded — rotate through topic-specific fallback videos
+          // Use task index to pick different video from same bucket per card
+          items = tasks.map((task, i) => {
+            const bucket = generateFallbackVideos(task.ytQuery || sm.query, level);
+            const vid = bucket[i % bucket.length] || bucket[0];
+            return { video: vid, task };
+          });
         }
       } catch {
         // Last-resort: rotate fallback by topic query
