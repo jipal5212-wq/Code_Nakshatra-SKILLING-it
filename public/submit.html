@@ -75,10 +75,13 @@ function fmt6AM(){var d=new Date(nextSixAM());var h=d.getDate();return "6:00 AM"
 function pad(n){return String(n).padStart(2,"0");}
 function fmtMs(ms){if(ms<=0)return"00:00:00";var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);return pad(h)+":"+pad(m)+":"+pad(s);}
 
-function init(){
+async function init(){
   var raw=window.SkillingAuth?window.SkillingAuth.read():null;
   if(raw&&raw.user&&raw.access_token)session={id:raw.user.id,name:raw.user.displayName||raw.user.email.split("@")[0]||"Learner",email:raw.user.email||"",access_token:raw.access_token,skill_domain:raw.user.skill_domain||"",level:raw.user.level||"Beginner",points:raw.user.points||0};
   if(!session){window.location.href="/login.html";return;}
+  // Refresh token on page load so all subsequent calls have a valid token
+  var freshToken=await window.SkillingAuth.refreshIfNeeded();
+  if(freshToken){session.access_token=freshToken;}else{window.location.href="/login.html";return;}
   populateAvatar();loadCurrentTask();loadVerdict();loadExtraTasks();startSixAMTimer();
 }
 function populateAvatar(){
@@ -208,21 +211,27 @@ async function loadVerdict(){
     }
   }catch(e){}
 }
-function handleFile(e){
+async function handleFile(e){
   var f=e.target.files[0];if(!f)return;
   var s=document.getElementById("fileStatus");s.style.display="block";s.textContent="Uploading: "+f.name+"...";
+  var token=await window.SkillingAuth.refreshIfNeeded();
+  if(!token){s.textContent="Session expired. Please log in again.";setTimeout(function(){window.location.href="/login.html";},1500);return;}
+  session.access_token=token;
   var fd=new FormData();fd.append("file",f);
-  fetch("/api/me/submission/file",{method:"POST",headers:{"Authorization":"Bearer "+session.access_token},body:fd})
+  fetch("/api/me/submission/file",{method:"POST",headers:{"Authorization":"Bearer "+token},body:fd})
     .then(function(r){return r.json();}).then(function(d){s.textContent=d.ok?"File uploaded: "+f.name+" \u2713":"Upload failed: "+(d.error||"error");}).catch(function(){s.textContent="Upload failed. Check connection.";});
 }
 async function submitField(field,value){
   if(!value){alert("Please enter a "+field+" URL.");return;}
   try{
+    var token=await window.SkillingAuth.refreshIfNeeded();
+    if(!token){alert("Session expired. Please log in again.");window.location.href="/login.html";return;}
+    session.access_token=token;
     var fieldMap={"github":"github_url","liveUrl":"live_url","demoVideo":"demo_video_url","screenshotUrls":"screenshot_urls"};
     var b={};var apiField=fieldMap[field]||field;
     if(field==="screenshotUrls"){b[apiField]=value.split(",").map(function(u){return u.trim();}).filter(Boolean);}
     else{b[apiField]=value;}
-    var r=await fetch("/api/me/submission",{method:"PATCH",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},body:JSON.stringify(b)});
+    var r=await fetch("/api/me/submission",{method:"PATCH",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify(b)});
     var d=await r.json();
     if(d.ok||d.bundle){var banner=document.getElementById("verdictBanner");banner.style.display="block";banner.className="verdict-banner success-banner";banner.innerHTML="<div class=\"success-banner-title\">Submission Received \u2713</div><div class=\"success-banner-body\">Your work is under admin review.</div>";}
     else alert("Error: "+(d.error||"Could not submit."));

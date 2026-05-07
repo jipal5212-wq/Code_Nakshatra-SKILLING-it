@@ -75,6 +75,45 @@
     };
   }
 
+  /** Refreshes the access_token if it has expired or is expiring within 5 min.
+   *  Returns the valid access_token string, or null if refresh failed (force re-login).
+   */
+  async function refreshIfNeeded() {
+    const s = readRaw();
+    if (!s || !s.access_token) return null;
+
+    // expires_at from Supabase is a Unix timestamp in seconds
+    const expiresAtMs = s.expires_at ? s.expires_at * 1000 : 0;
+    const fiveMin = 5 * 60 * 1000;
+
+    // Token still valid with headroom — return it immediately
+    if (expiresAtMs && Date.now() < expiresAtMs - fiveMin) {
+      return s.access_token;
+    }
+
+    // Token expired or about to — try refresh
+    if (!s.refresh_token) return null;
+    try {
+      const r = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: s.refresh_token })
+      });
+      const d = await r.json();
+      if (d.ok && d.session) {
+        const updated = {
+          ...s,
+          access_token: d.session.access_token,
+          refresh_token: d.session.refresh_token,
+          expires_at: d.session.expires_at
+        };
+        write(updated);
+        return d.session.access_token;
+      }
+    } catch (_) {}
+    return null; // refresh failed — caller should redirect to login
+  }
+
   window.SkillingAuth = {
     STORAGE_KEY,
     read,
@@ -83,6 +122,7 @@
     clear,
     bearerHeaders,
     toLegacy,
+    refreshIfNeeded,
     migrateFromLegacy: () => {
       read();
     }

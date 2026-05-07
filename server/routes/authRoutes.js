@@ -261,5 +261,25 @@ module.exports = function authRoutes(admin) {
     }
   });
 
+  /** Refresh an expired access_token using the stored refresh_token */
+  r.post('/api/auth/refresh', async (req, res) => {
+    const anon = getAnonAuthClient();
+    if (!anon) return res.status(503).json({ error: 'Auth not configured.' });
+    const refreshToken = String(req.body?.refresh_token || '');
+    if (!refreshToken) return res.status(400).json({ error: 'refresh_token required.' });
+    const { data, error } = await anon.auth.refreshSession({ refresh_token: refreshToken });
+    if (error || !data?.session) {
+      return res.status(401).json({ error: 'Session expired. Please log in again.' });
+    }
+    res.json({
+      ok: true,
+      session: {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at
+      }
+    });
+  });
+
   return r;
 };
