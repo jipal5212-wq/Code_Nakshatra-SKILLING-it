@@ -232,9 +232,17 @@ async function handleFile(e){
   var token=await window.SkillingAuth.refreshIfNeeded();
   if(!token){s.textContent="Session expired. Please log in again.";setTimeout(function(){window.location.href="/login.html";},1500);return;}
   session.access_token=token;
-  var fd=new FormData();fd.append("file",f);
-  fetch("/api/me/submission/file",{method:"POST",headers:{"Authorization":"Bearer "+token},body:fd})
-    .then(function(r){return r.json();}).then(function(d){s.textContent=d.ok?"File uploaded: "+f.name+" \u2713":"Upload failed: "+(d.error||"error");}).catch(function(){s.textContent="Upload failed. Check connection.";});
+  var taskMeta={};
+  try{var _sm=sessionStorage.getItem('skilling_chosen_task');if(_sm)taskMeta=JSON.parse(_sm);}catch(_){}
+  var fd=new FormData();fd.append('file',f);
+  var bk=sessionStorage.getItem('_sk_bundle_key')||'';
+  if(bk)fd.append('bundleKey',bk);
+  if(taskMeta.skill_domain)fd.append('skill_domain',taskMeta.skill_domain);
+  fetch('/api/me/submission/file',{method:'POST',headers:{'Authorization':'Bearer '+token},body:fd})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok&&d.bundleKey){try{sessionStorage.setItem('_sk_bundle_key',d.bundleKey);}catch(_){}}
+      s.textContent=d.ok?'File uploaded: '+f.name+' \u2713':'Upload failed: '+(d.error||'error');
+    }).catch(function(){s.textContent='Upload failed. Check connection.';});
 }
 async function submitField(field,value){
   if(!value){alert("Please enter a "+field+" URL.");return;}
@@ -242,12 +250,20 @@ async function submitField(field,value){
     var token=await window.SkillingAuth.refreshIfNeeded();
     if(!token){alert("Session expired. Please log in again.");window.location.href="/login.html";return;}
     session.access_token=token;
+    var taskMeta2={};
+    try{var _sm2=sessionStorage.getItem('skilling_chosen_task');if(_sm2)taskMeta2=JSON.parse(_sm2);}catch(_){}
+    var subType=taskMeta2.submission_type||'daily';
+    var skDomain=taskMeta2.skill_domain||'';
+    var bk2=sessionStorage.getItem('_sk_bundle_key')||'';
     var fieldMap={"github":"github_url","liveUrl":"live_url","demoVideo":"demo_video_url","screenshotUrls":"screenshot_urls"};
     var b={};var apiField=fieldMap[field]||field;
     if(field==="screenshotUrls"){b[apiField]=value.split(",").map(function(u){return u.trim();}).filter(Boolean);}
     else{b[apiField]=value;}
+    b.submission_type=subType;
+    if(skDomain)b.skill_domain=skDomain;
     var r=await fetch("/api/me/submission",{method:"PATCH",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify(b)});
     var d=await r.json();
+    if(d.ok&&d.bundleKey){try{sessionStorage.setItem('_sk_bundle_key',d.bundleKey);}catch(_){}}
     if(d.ok||d.bundle){var banner=document.getElementById("verdictBanner");banner.style.display="block";banner.className="verdict-banner success-banner";banner.innerHTML="<div class=\"success-banner-title\">Submission Received \u2713</div><div class=\"success-banner-body\">Your work is under admin review.</div>";}
     else alert("Error: "+(d.error||"Could not submit."));
   }catch(e){alert("Network error. Try again.");}
@@ -295,7 +311,7 @@ async function submitExtraTask(i){
   try{
     var r=await fetch("/api/me/submission",{method:"PATCH",
       headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-      body:JSON.stringify({github_url:url.trim(),taskId:t.id})});
+      body:JSON.stringify({github_url:url.trim(),taskId:t.id,submission_type:'additional',skill_domain:t.domain||''})});
     var d=await r.json();
     if(d.ok||d.bundle){
       if(statusEl)statusEl.textContent="Bonus submitted! Under review.";

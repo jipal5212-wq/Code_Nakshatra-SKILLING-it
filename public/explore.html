@@ -418,7 +418,8 @@ function tryTask(idx){
   try{sessionStorage.setItem('skilling_chosen_task',JSON.stringify({
     title:t.title,domain:t.domain||'',id:t.id||t._id||'',
     desc:t.desc||t.description||'',effort:t.effort||'~1 hr',confirmed:false,lock_until:nxt6(),
-    pairedVideo:v?{title:v.title||'',embedUrl:v.embedUrl||'',thumbnail:v.thumbnail||'',channel:v.channel||''}:null
+    pairedVideo:v?{title:v.title||'',embedUrl:v.embedUrl||'',thumbnail:v.thumbnail||'',channel:v.channel||''}:null,
+    source:'explore',submission_type:'additional',skill_domain:t.domain||''
   }));}catch(_){}
   window.location.href='/submit.html';
 }

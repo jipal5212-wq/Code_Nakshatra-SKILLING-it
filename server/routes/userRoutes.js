@@ -91,7 +91,17 @@ module.exports = function userRoutes(admin, upload) {
       const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).single();
       const cycleWrap = await ensureUserCycle(admin, uid, profile);
       const bounds = cycleWrap.bounds;
-      const cStart = bounds.cycleStartISO;
+      const baseCycleStart = bounds.cycleStartISO;
+
+      // Determine submission type + domain-scoped key
+      const submissionType = req.body?.submission_type || 'daily'; // 'daily' | 'additional'
+      const domain = req.body?.skill_domain || profile?.skill_domain || 'default';
+      const taskId = req.body?.taskId || req.body?.task_id || '';
+
+      // Each domain gets its own daily bundle; additional tasks get unique keys
+      const cStart = submissionType === 'additional'
+        ? `additional:${baseCycleStart}:${domain}:${taskId || Date.now()}`
+        : `${baseCycleStart}:${domain}`;
 
       let { data: bundle } = await admin
         .from('submission_bundles')
@@ -100,8 +110,9 @@ module.exports = function userRoutes(admin, upload) {
         .eq('cycle_start_iso', cStart)
         .maybeSingle();
 
+      // Only block re-submission if THIS exact bundle (same domain) is already approved
       if (bundle?.status === 'accepted')
-        return res.status(400).json({ error: 'This cycle is already approved.' });
+        return res.status(400).json({ error: 'This task is already approved for today.' });
 
       function pick(next, fallback) {
         return typeof next === 'string' && next.trim()
@@ -112,8 +123,7 @@ module.exports = function userRoutes(admin, upload) {
       if (Array.isArray(req.body?.screenshot_urls)) shots = req.body.screenshot_urls.filter(Boolean).slice(0, 10);
       if (typeof req.body?.screenshot_url === 'string' && req.body.screenshot_url) shots.push(req.body.screenshot_url);
 
-      const nextTask =
-        req.body?.taskId || bundle?.task_id || cycleWrap.lockedTaskId || null;
+      const nextTask = taskId || bundle?.task_id || cycleWrap.lockedTaskId || null;
 
       const nextShots =
         shots.length && bundle?.screenshot_urls?.length
@@ -134,7 +144,7 @@ module.exports = function userRoutes(admin, upload) {
         screenshot_urls: nextShots,
         file_paths: bundle?.file_paths || [],
         status: 'pending_review',
-        admin_feedback: '',
+        admin_feedback: bundle?.admin_feedback || '',
         points_awarded: 0,
         reviewed_at: null,
         updated_at: new Date().toISOString()
@@ -149,7 +159,7 @@ module.exports = function userRoutes(admin, upload) {
         .eq('cycle_start_iso', cStart)
         .maybeSingle();
 
-      res.json({ ok: true, bundle: refreshed });
+      res.json({ ok: true, bundle: refreshed, bundleKey: cStart });
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: e.message });
@@ -162,7 +172,13 @@ module.exports = function userRoutes(admin, upload) {
       const uid = req.user.id;
       const { data: profile } = await admin.from('profiles').select('*').eq('id', uid).single();
       const cycleWrap = await ensureUserCycle(admin, uid, profile);
-      const cStart = cycleWrap.bounds.cycleStartISO;
+      const baseCycleStart = cycleWrap.bounds.cycleStartISO;
+
+      // Use the bundleKey sent by the client (set during PATCH /api/me/submission)
+      // Falls back to domain-scoped daily key if not provided
+      const domain = req.body?.skill_domain || profile?.skill_domain || 'default';
+      const cStart = req.body?.bundleKey || `${baseCycleStart}:${domain}`;
+
       let { data: bundle } = await admin
         .from('submission_bundles')
         .select('*')
@@ -171,7 +187,7 @@ module.exports = function userRoutes(admin, upload) {
         .maybeSingle();
 
       if (bundle?.status === 'accepted')
-        return res.status(400).json({ error: 'This cycle is already approved.' });
+        return res.status(400).json({ error: 'This task is already approved for today.' });
 
       const rel = `/uploads/${req.file.filename}`;
       const files = [...(bundle?.file_paths || []).filter(Boolean), rel];
@@ -186,14 +202,14 @@ module.exports = function userRoutes(admin, upload) {
         screenshot_urls: bundle?.screenshot_urls || [],
         file_paths: files,
         status: 'pending_review',
-        admin_feedback: '',
+        admin_feedback: bundle?.admin_feedback || '',
         points_awarded: 0,
         reviewed_at: null,
         updated_at: new Date().toISOString()
       };
 
       await admin.from('submission_bundles').upsert(upsertPayload, { onConflict: 'user_id,cycle_start_iso' });
-      res.json({ ok: true, path: rel, file_paths: files });
+      res.json({ ok: true, path: rel, file_paths: files, bundleKey: cStart });
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: e.message });
@@ -352,6 +368,25 @@ module.exports = function userRoutes(admin, upload) {
         statusBreakdown,
         weeklyActivity
       });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** Admin: get all additional task submissions (from Explore / T-Feed) */
+  r.get('/api/admin/additional-submissions', async (req, res) => {
+    const pass = process.env.ADMIN_SITE_PASSWORD || '';
+    const auth = req.headers['x-admin-password'] || '';
+    if (!pass || auth !== pass) return res.status(401).json({ error: 'Unauthorized.' });
+    try {
+      const { data: bundles } = await admin
+        .from('submission_bundles')
+        .select('*, profiles(display_name, email, skill_domain, level)')
+        .like('cycle_start_iso', 'additional:%')
+        .order('updated_at', { ascending: false })
+        .limit(100);
+      res.json({ bundles: bundles || [] });
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: e.message });
