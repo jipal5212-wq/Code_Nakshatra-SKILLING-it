@@ -3,6 +3,7 @@ const { SKILL_MAP, normalizeSkillKey } = require('../lib/skills');
 const { searchYouTube, generateFallbackVideos } = require('../lib/youtubeVideos');
 const { generateTasks } = require('../lib/geminiTasks');
 const { getTrackTopics } = require('../lib/trackTopics');
+const { getIntroItems } = require('../lib/introContent');
 
 module.exports = function publicRoutes(admin, geminiModel) {
   const r = express.Router();
@@ -66,6 +67,12 @@ module.exports = function publicRoutes(admin, geminiModel) {
           video: generateFallbackVideos(task.ytQuery || sm.query, level)[0] || null,
           task
         }));
+      }
+
+      // Prepend beginner intro items (hardcoded curated videos, always present)
+      if (level === 'Beginner') {
+        const introItems = getIntroItems(skillKey);
+        items = [...introItems, ...items];
       }
 
       res.json({ skillKey, level, source: tasks[0]?.source || 'gemini', items });
