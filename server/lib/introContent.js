@@ -45,12 +45,12 @@ const INTRO_TASKS = {
 
 /** Curated YouTube video IDs for intro items (ordered to match tasks above) */
 const INTRO_VIDS = {
-  aiml:        ['PeMlggyqz6A', 'Gv9_4yMHFhI', 'a0_lo_GDcFo', 'ukzFI9rgwfU'],
+  aiml:        ['rfscVS0vtbw', 'Gv9_4yMHFhI', 'a0_lo_GDcFo', 'ukzFI9rgwfU'],
   webdev:      ['UB1O30fR-EE', 'yfoY53QXEnI', 'hdI2bqOjy3c', 'W6NZfCO5SIk'],
-  datascience: ['RBSUwFGa6Fk', 'ua-CiDNNj30', 'LHBE0uhFjkM', 'HXV3zeQKqGY'],
-  robotics:    ['fJWR7dBuc18', 'GK8E9NHKHIM', 'zJ8yDPCuMeQ', 'kUHmYKWwuWs'],
+  datascience: ['LHBE0uhFjkM', 'ua-CiDNNj30', 'RBSUwFGa6Fk', 'HXV3zeQKqGY'],
+  robotics:    ['fJWR7dBuc18', 'kUHmYKWwuWs', 'zJ8yDPCuMeQ', 'BFdMrDe_oqY'],
   iot:         ['h0gWfVCSGQQ', 'LlhmzVL5bm8', 'pKFBcB6V9Vk', 'jZEHDMRKNBk'],
-  cybersec:    ['inWWhr5tnEA', 'aO1LsFBBX3Q', 'pQSqMr0XFHI', 'WnN6dbos5u8'],
+  cybersec:    ['pQSqMr0XFHI', 'WnN6dbos5u8', 'nzZkKoREEGo', 'EcE_KQd4PkA'],
 };
 
 const INTRO_CHANNELS = {
