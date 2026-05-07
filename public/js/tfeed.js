@@ -87,14 +87,22 @@ function renderFeed(postsArr){
   if(!el)return;
   if(!postsArr.length){el.innerHTML='<div class="empty-state">No posts yet.<br>Click "Refresh Feed" to generate news.</div>';return;}
   el.innerHTML=postsArr.map(p=>{
-    const imgHtml=p.imageUrl?`<div class="post-img-wrap"><img class="post-img" src="${esc(p.imageUrl)}" alt="" loading="lazy" onerror="this.closest('.post-img-wrap').remove()"></div>`:'';
+    const isAdmin = (p.sourceHint||'').toLowerCase()==='admin';
+    const adminBadge = isAdmin
+      ? `<div class="admin-news-badge">📢 Admin Post</div>`
+      : '';
+    const cardStyle = isAdmin
+      ? ' style="border-top:3px solid #e60000;background:rgba(230,0,0,.04);"'
+      : '';
+    const imgHtml=p.imageUrl?`<div class="post-img-wrap"><img class="post-img" src="${esc(p.imageUrl)}" alt="${esc(p.title)}" loading="lazy" onerror="this.closest('.post-img-wrap').remove()"></div>`:'';
     const pubLabel=p.pubDate?`<span class="post-pubdate">${new Date(p.pubDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>`:`<span class="post-time">${timeAgo(p.createdAt)}</span>`;
     const readLink=p.articleUrl?`<a class="read-link" href="${esc(p.articleUrl)}" target="_blank" rel="noopener">Read Article ↗</a>`:'';
     return `
-    <div class="post-card" data-post-id="${esc(p.id)}">
+    <div class="post-card"${cardStyle} data-post-id="${esc(p.id)}">
+      ${adminBadge}
       ${imgHtml}
       <div class="post-meta">
-        <span class="post-source">${esc(p.sourceHint||'Tech News')}</span>
+        <span class="post-source"${isAdmin?' style="color:#e60000;font-weight:700"':''}>${esc(p.sourceHint||'Tech News')}</span>
         <span class="post-domain">${esc(DL[p.domain]||p.domain||'General')}</span>
         ${pubLabel}
       </div>

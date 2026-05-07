@@ -52,6 +52,8 @@ module.exports = function adminRoutes(admin, upload) {
       const relatedTasks = String(req.body?.relatedTasks || '').trim();
       if (!title || !details) return res.status(400).json({ error: 'Title and details required.' });
       const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+      // 1. Insert into be_relevant_posts (existing system)
       const { data, error } = await admin
         .from('be_relevant_posts')
         .insert({
@@ -63,6 +65,32 @@ module.exports = function adminRoutes(admin, upload) {
         .select('*')
         .single();
       if (error) return res.status(500).json({ error: error.message });
+
+      // 2. Also insert into tfeed_posts so it appears in T-Feed immediately
+      const tagList = relatedTasks
+        ? relatedTasks.split(/[,·\s]+/).map(t => t.trim()).filter(Boolean)
+        : ['admin', 'news'];
+      try {
+        await admin.from('tfeed_posts').insert({
+          title,
+          summary: details,
+          tags: tagList,
+          domain: 'General',
+          source_hint: 'Admin',
+          article_url: '',
+          image_url: imageUrl || '',
+          pub_date: new Date().toISOString(),
+          project_idea: '',
+          project_stack: '',
+          project_effort: '',
+          like_count: 0,
+          comment_count: 0
+        });
+      } catch (tfeedErr) {
+        // Non-fatal: be_relevant_posts insert succeeded; log and continue
+        console.warn('[be-relevant] Could not dual-write to tfeed_posts:', tfeedErr.message);
+      }
+
       res.json({ success: true, news: mapNewsRow(data) });
     } catch (e) {
       res.status(500).json({ error: e.message });
