@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -131,6 +131,12 @@ body{font-family:var(--body);background:var(--charcoal);color:var(--white);min-h
 .dropdown-logout-btn:hover{background:var(--red);color:#fff;}
 
 @media(max-width:1024px){.domains-grid{grid-template-columns:repeat(2,1fr);}}
+/* LEVEL TABS */
+.level-tabs{display:flex;gap:8px;margin-bottom:28px;}
+.level-tab{font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1px;padding:8px 20px;border-radius:4px;border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;}
+.level-tab:hover{border-color:rgba(255,255,255,.4);color:#fff;}
+.level-tab.active{background:var(--red);border-color:var(--red);color:#fff;}
+
 @media(max-width:768px){
   .nav{padding:0 24px;}
   .hero,.primary-badge,.domains-section{padding-left:24px;padding-right:24px;}
@@ -197,21 +203,25 @@ body{font-family:var(--body);background:var(--charcoal);color:var(--white);min-h
   <div class="domains-grid" id="domainsGrid">
     <div class="loader">Loading domains…</div>
   </div>
-  <!-- DETAIL PANEL (single, shared) -->
   <div class="detail-panel" id="detailPanel">
     <div class="detail-header">
       <div>
         <div class="detail-title" id="detailTitle">Domain</div>
-        <div class="detail-subtitle">Beginner Level · Explore Mode</div>
+        <div class="detail-subtitle" id="detailSubtitle">Explore Mode · All Levels Unlocked</div>
       </div>
       <div class="detail-actions">
-        <button class="btn-switch" id="switchBtn" onclick="switchPrimary()">Make My Primary Domain →</button>
+        <button class="btn-switch" id="switchBtn" onclick="switchPrimary()">Make My Primary Domain &rarr;</button>
       </div>
     </div>
-    <div class="detail-section-label">Sample Tasks (Beginner)</div>
-    <div class="task-strips" id="detailTasks"><div class="loader">Loading tasks…</div></div>
+    <div class="level-tabs">
+      <button class="level-tab active" id="ltab-Beginner"    onclick="selectLevel('Beginner')">&#127305; Beginner</button>
+      <button class="level-tab"        id="ltab-Intermediate" onclick="selectLevel('Intermediate')">&#9889; Intermediate</button>
+      <button class="level-tab"        id="ltab-Advanced"    onclick="selectLevel('Advanced')">&#128293; Advanced</button>
+    </div>
+    <div class="detail-section-label" id="taskSectionLabel">Sample Tasks — Beginner</div>
+    <div class="task-strips" id="detailTasks"><div class="loader">Loading tasks&hellip;</div></div>
     <div class="detail-section-label">Curated Videos</div>
-    <div class="video-clips" id="detailVideos"><div class="loader">Loading videos…</div></div>
+    <div class="video-clips" id="detailVideos"><div class="loader">Loading videos&hellip;</div></div>
   </div>
 </div>
 
@@ -240,6 +250,7 @@ const DOMAINS = [
 
 let activeKey = null;
 let activeSwitchKey = null;
+let activeLevel = 'Beginner';
 let counts = {};
 let userPrimaryKey = '';
 
@@ -330,8 +341,8 @@ function renderDomainCards(){
 }
 
 // ── Select a domain ───────────────────────────────────────────────────────────
-async function selectDomain(key){
-  if (activeKey === key) {
+async function selectDomain(key, fromLevelSwitch){
+  if (activeKey === key && !fromLevelSwitch) {
     activeKey = null;
     document.getElementById('detailPanel').classList.remove('open');
     renderDomainCards();
@@ -354,7 +365,7 @@ async function selectDomain(key){
   document.getElementById('switchBtn').style.display = isPrimary ? 'none' : 'inline-block';
 
   try {
-    const res = await fetch(`/api/public/explore?skill=${encodeURIComponent(key)}`);
+    const res = await fetch(`/api/public/explore?skill=${encodeURIComponent(key)}&level=${encodeURIComponent(activeLevel)}`);
     const d = await res.json().catch(()=>({}));
     counts = d.counts || counts;
     renderTasks(d.tasks || []);
@@ -362,8 +373,19 @@ async function selectDomain(key){
     renderDomainCards();
   } catch(e){
     console.warn('[explore] API error, using static fallback:', e.message);
-    renderExploreStaticFallback(key);
+    renderExploreStaticFallback(key, activeLevel);
   }
+}
+
+function selectLevel(level){
+  activeLevel = level;
+  ['Beginner','Intermediate','Advanced'].forEach(l=>{
+    const btn=document.getElementById('ltab-'+l);
+    if(btn) btn.className='level-tab'+(l===level?' active':'');
+  });
+  const lbl=document.getElementById('taskSectionLabel');
+  if(lbl) lbl.textContent='Sample Tasks — '+level;
+  if(activeKey) selectDomain(activeKey, true);
 }
 
 function renderTasks(tasks){
@@ -489,18 +511,21 @@ const EXPLORE_VIDS = {
   cybersec:['qiQR5rTSshw','pQSqMr0XFHI','WnN6dbos5u8','EcE_KQd4PkA','mvzXZxYldaM','nzZkKoREEGo','U9J2GRcSqxk'],
   webdev:['nu_pCVPKzTk','f2EqECiTBL8','4sosXZsdy-s','1aXZoefZkhQ','mrHNSanmqQ4','bMknfKXIFA8','Oe421EPjeBE']
 };
-function renderExploreStaticFallback(key){
+function renderExploreStaticFallback(key, level){
   const sk = (key||'aiml').toLowerCase().replace(/[\s\-_\/]/g,'');
   const normalKey = sk.includes('data')?'datascience':sk.includes('robot')?'robotics':sk.includes('iot')?'iot':sk.includes('cyber')||sk.includes('sec')?'cybersec':sk.includes('web')?'webdev':'aiml';
   const taskList = EXPLORE_STATIC[normalKey] || EXPLORE_STATIC.aiml;
   const vidIds = EXPLORE_VIDS[normalKey] || EXPLORE_VIDS.aiml;
-  const videos = taskList.map((t,i)=>({
-    id: vidIds[i%vidIds.length],
-    title: t.title + ' — Tutorial',
+  // Level-aware slice (same logic as backend fallback)
+  const lv = (level||'Beginner').toLowerCase();
+  const rotated = lv.startsWith('adv') ? [...vidIds].reverse() : lv.startsWith('int') ? [...vidIds.slice(2), ...vidIds.slice(0,2)] : vidIds;
+  const videos = rotated.map((id,i)=>({
+    id,
+    title: (lv.startsWith('adv')?'Advanced: ':lv.startsWith('int')?'Intermediate: ':'') + (taskList[i]?.title||'Tutorial') + ' — Watch',
     channel: 'freeCodeCamp / Various',
-    thumbnail: 'https://img.youtube.com/vi/'+vidIds[i%vidIds.length]+'/hqdefault.jpg',
-    embedUrl: 'https://www.youtube.com/embed/'+vidIds[i%vidIds.length],
-    watchUrl: 'https://www.youtube.com/watch?v='+vidIds[i%vidIds.length]
+    thumbnail: 'https://img.youtube.com/vi/'+id+'/hqdefault.jpg',
+    embedUrl: 'https://www.youtube.com/embed/'+id,
+    watchUrl: 'https://www.youtube.com/watch?v='+id
   }));
   renderTasks(taskList);
   renderVideos(videos.slice(0,4));

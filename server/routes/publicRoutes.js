@@ -91,9 +91,10 @@ module.exports = function publicRoutes(admin, geminiModel) {
   r.get('/api/public/explore', async (req, res) => {
     try {
       const skillKey = normalizeSkillKey(req.query.skill || 'aiml');
+      const level    = req.query.level || 'Beginner';
       const sm       = SKILL_MAP[skillKey] || SKILL_MAP.aiml;
 
-      const allTasks = await generateTasks(geminiModel, skillKey, 'Beginner');
+      const allTasks = await generateTasks(geminiModel, skillKey, level);
       const tasks    = allTasks.slice(0, 7);
 
       // Rotate fallback / API videos across explore cards
